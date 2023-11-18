@@ -1,0 +1,1602 @@
+Epoch 0:
+	train loss:113513.6981  val ap:0.000000  val mrr:0.000000
+	train time:52.3860s  val time:0.0000s
+	scope sample time:0.1565s  slice time:0.3735s  prop time:51.8561s
+Epoch 1:
+	train loss:92126.0154  val ap:0.000000  val mrr:0.000000
+	train time:54.4295s  val time:0.0000s
+	scope sample time:0.1720s  slice time:0.3768s  prop time:53.8807s
+Epoch 2:
+	train loss:85976.0246  val ap:0.000000  val mrr:0.000000
+	train time:52.5160s  val time:0.0000s
+	scope sample time:0.1545s  slice time:0.3726s  prop time:51.9889s
+Epoch 3:
+	train loss:79105.6062  val ap:0.000000  val mrr:0.000000
+	train time:52.2252s  val time:0.0000s
+	scope sample time:0.1501s  slice time:0.3725s  prop time:51.7026s
+Epoch 4:
+	train loss:74469.3123  val ap:0.000000  val mrr:0.000000
+	train time:50.2890s  val time:0.0000s
+	scope sample time:0.1271s  slice time:0.3713s  prop time:49.7905s
+Epoch 5:
+	train loss:69685.1462  val ap:0.000000  val mrr:0.000000
+	train time:52.1287s  val time:0.0000s
+	scope sample time:0.1347s  slice time:0.3709s  prop time:51.6231s
+Epoch 6:
+	train loss:64284.8417  val ap:0.000000  val mrr:0.000000
+	train time:52.0561s  val time:0.0000s
+	scope sample time:0.1377s  slice time:0.3711s  prop time:51.5472s
+Epoch 7:
+	train loss:60241.6933  val ap:0.000000  val mrr:0.000000
+	train time:50.4911s  val time:0.0000s
+	scope sample time:0.1345s  slice time:0.3726s  prop time:49.9840s
+Epoch 8:
+	train loss:57548.8677  val ap:0.000000  val mrr:0.000000
+	train time:51.4815s  val time:0.0000s
+	scope sample time:0.1310s  slice time:0.3716s  prop time:50.9789s
+Epoch 9:
+	train loss:54854.8646  val ap:0.000000  val mrr:0.000000
+	train time:51.9030s  val time:0.0000s
+	scope sample time:0.1394s  slice time:0.3735s  prop time:51.3902s
+Epoch 10:
+	train loss:52793.6627  val ap:0.000000  val mrr:0.000000
+	train time:50.5354s  val time:0.0000s
+	scope sample time:0.1413s  slice time:0.3727s  prop time:50.0214s
+Epoch 11:
+	train loss:51080.0453  val ap:0.000000  val mrr:0.000000
+	train time:51.8209s  val time:0.0000s
+	scope sample time:0.1428s  slice time:0.3728s  prop time:51.3053s
+Epoch 12:
+	train loss:49943.4313  val ap:0.000000  val mrr:0.000000
+	train time:51.7074s  val time:0.0000s
+	scope sample time:0.1291s  slice time:0.3704s  prop time:51.2080s
+Epoch 13:
+	train loss:49202.4130  val ap:0.000000  val mrr:0.000000
+	train time:51.8730s  val time:0.0000s
+	scope sample time:0.1413s  slice time:0.3731s  prop time:51.3586s
+Epoch 14:
+	train loss:48269.9801  val ap:0.000000  val mrr:0.000000
+	train time:50.3601s  val time:0.0000s
+	scope sample time:0.1393s  slice time:0.3703s  prop time:49.8505s
+Epoch 15:
+	train loss:47975.3577  val ap:0.000000  val mrr:0.000000
+	train time:51.9355s  val time:0.0000s
+	scope sample time:0.1486s  slice time:0.3731s  prop time:51.4139s
+Epoch 16:
+	train loss:47162.8354  val ap:0.000000  val mrr:0.000000
+	train time:51.7178s  val time:0.0000s
+	scope sample time:0.1429s  slice time:0.3729s  prop time:51.2020s
+Epoch 17:
+	train loss:46746.0737  val ap:0.000000  val mrr:0.000000
+	train time:50.4314s  val time:0.0000s
+	scope sample time:0.1327s  slice time:0.3707s  prop time:49.9280s
+Epoch 18:
+	train loss:45965.2983  val ap:0.000000  val mrr:0.000000
+	train time:51.8863s  val time:0.0000s
+	scope sample time:0.1409s  slice time:0.3726s  prop time:51.3728s
+Epoch 19:
+	train loss:45538.3120  val ap:0.000000  val mrr:0.000000
+	train time:51.9990s  val time:0.0000s
+	scope sample time:0.1467s  slice time:0.3712s  prop time:51.4811s
+Epoch 20:
+	train loss:45502.2322  val ap:0.000000  val mrr:0.000000
+	train time:51.7263s  val time:0.0000s
+	scope sample time:0.1350s  slice time:0.3712s  prop time:51.2201s
+Epoch 21:
+	train loss:44897.0657  val ap:0.000000  val mrr:0.000000
+	train time:50.5947s  val time:0.0000s
+	scope sample time:0.1526s  slice time:0.3713s  prop time:50.0708s
+Epoch 22:
+	train loss:44527.6987  val ap:0.000000  val mrr:0.000000
+	train time:51.8520s  val time:0.0000s
+	scope sample time:0.1487s  slice time:0.3733s  prop time:51.3300s
+Epoch 23:
+	train loss:44296.8675  val ap:0.000000  val mrr:0.000000
+	train time:51.7247s  val time:0.0000s
+	scope sample time:0.1471s  slice time:0.3720s  prop time:51.2057s
+Epoch 24:
+	train loss:43564.1954  val ap:0.000000  val mrr:0.000000
+	train time:50.1101s  val time:0.0000s
+	scope sample time:0.1386s  slice time:0.3718s  prop time:49.5997s
+Epoch 25:
+	train loss:43348.2622  val ap:0.000000  val mrr:0.000000
+	train time:51.4270s  val time:0.0000s
+	scope sample time:0.1382s  slice time:0.3702s  prop time:50.9186s
+Epoch 26:
+	train loss:42697.8971  val ap:0.000000  val mrr:0.000000
+	train time:51.4024s  val time:0.0000s
+	scope sample time:0.1414s  slice time:0.3708s  prop time:50.8902s
+Epoch 27:
+	train loss:42211.4663  val ap:0.000000  val mrr:0.000000
+	train time:50.1025s  val time:0.0000s
+	scope sample time:0.1427s  slice time:0.3739s  prop time:49.5859s
+Epoch 28:
+	train loss:41368.0214  val ap:0.000000  val mrr:0.000000
+	train time:51.4218s  val time:0.0000s
+	scope sample time:0.1409s  slice time:0.3709s  prop time:50.9100s
+Epoch 29:
+	train loss:41481.0725  val ap:0.000000  val mrr:0.000000
+	train time:51.4469s  val time:0.0000s
+	scope sample time:0.1456s  slice time:0.3731s  prop time:50.9282s
+Epoch 30:
+	train loss:40936.5386  val ap:0.000000  val mrr:0.000000
+	train time:51.4389s  val time:0.0000s
+	scope sample time:0.1480s  slice time:0.3715s  prop time:50.9194s
+Epoch 31:
+	train loss:40636.4592  val ap:0.000000  val mrr:0.000000
+	train time:50.0576s  val time:0.0000s
+	scope sample time:0.1478s  slice time:0.3709s  prop time:49.5389s
+Epoch 32:
+	train loss:40613.6626  val ap:0.000000  val mrr:0.000000
+	train time:51.4024s  val time:0.0000s
+	scope sample time:0.1435s  slice time:0.3715s  prop time:50.8875s
+Epoch 33:
+	train loss:40297.5942  val ap:0.000000  val mrr:0.000000
+	train time:51.4477s  val time:0.0000s
+	scope sample time:0.1455s  slice time:0.3736s  prop time:50.9286s
+Epoch 34:
+	train loss:40015.9092  val ap:0.000000  val mrr:0.000000
+	train time:50.1706s  val time:0.0000s
+	scope sample time:0.1477s  slice time:0.3725s  prop time:49.6505s
+Epoch 35:
+	train loss:40056.9536  val ap:0.000000  val mrr:0.000000
+	train time:51.6454s  val time:0.0000s
+	scope sample time:0.1468s  slice time:0.3701s  prop time:51.1285s
+Epoch 36:
+	train loss:39329.4470  val ap:0.000000  val mrr:0.000000
+	train time:51.6292s  val time:0.0000s
+	scope sample time:0.1431s  slice time:0.3728s  prop time:51.1133s
+Epoch 37:
+	train loss:39463.1447  val ap:0.000000  val mrr:0.000000
+	train time:50.1387s  val time:0.0000s
+	scope sample time:0.1418s  slice time:0.3697s  prop time:49.6272s
+Epoch 38:
+	train loss:39148.9498  val ap:0.000000  val mrr:0.000000
+	train time:52.6736s  val time:0.0000s
+	scope sample time:0.1457s  slice time:0.3699s  prop time:52.1580s
+Epoch 39:
+	train loss:38201.9357  val ap:0.000000  val mrr:0.000000
+	train time:51.5919s  val time:0.0000s
+	scope sample time:0.1486s  slice time:0.3710s  prop time:51.0723s
+Epoch 40:
+	train loss:38313.0680  val ap:0.000000  val mrr:0.000000
+	train time:51.5859s  val time:0.0000s
+	scope sample time:0.1516s  slice time:0.3719s  prop time:51.0623s
+Epoch 41:
+	train loss:37746.0163  val ap:0.000000  val mrr:0.000000
+	train time:50.1995s  val time:0.0000s
+	scope sample time:0.1423s  slice time:0.3704s  prop time:49.6868s
+Epoch 42:
+	train loss:38153.8278  val ap:0.000000  val mrr:0.000000
+	train time:51.5952s  val time:0.0000s
+	scope sample time:0.1422s  slice time:0.3703s  prop time:51.0826s
+Epoch 43:
+	train loss:37843.3915  val ap:0.000000  val mrr:0.000000
+	train time:51.6274s  val time:0.0000s
+	scope sample time:0.1456s  slice time:0.3708s  prop time:51.1110s
+Epoch 44:
+	train loss:37304.7531  val ap:0.000000  val mrr:0.000000
+	train time:50.1981s  val time:0.0000s
+	scope sample time:0.1465s  slice time:0.3694s  prop time:49.6822s
+Epoch 45:
+	train loss:36895.5512  val ap:0.000000  val mrr:0.000000
+	train time:51.5658s  val time:0.0000s
+	scope sample time:0.1467s  slice time:0.3706s  prop time:51.0485s
+Epoch 46:
+	train loss:36626.9672  val ap:0.000000  val mrr:0.000000
+	train time:51.5748s  val time:0.0000s
+	scope sample time:0.1509s  slice time:0.3724s  prop time:51.0514s
+Epoch 47:
+	train loss:36534.4943  val ap:0.000000  val mrr:0.000000
+	train time:50.2091s  val time:0.0000s
+	scope sample time:0.1489s  slice time:0.3717s  prop time:49.6885s
+Epoch 48:
+	train loss:36484.6384  val ap:0.000000  val mrr:0.000000
+	train time:51.5079s  val time:0.0000s
+	scope sample time:0.1483s  slice time:0.3718s  prop time:50.9879s
+Epoch 49:
+	train loss:36194.7912  val ap:0.000000  val mrr:0.000000
+	train time:51.6008s  val time:0.0000s
+	scope sample time:0.1486s  slice time:0.3693s  prop time:51.0829s
+Epoch 50:
+	train loss:36127.2156  val ap:0.000000  val mrr:0.000000
+	train time:51.5614s  val time:0.0000s
+	scope sample time:0.1455s  slice time:0.3718s  prop time:51.0441s
+Epoch 51:
+	train loss:35868.7700  val ap:0.000000  val mrr:0.000000
+	train time:50.1620s  val time:0.0000s
+	scope sample time:0.1451s  slice time:0.3731s  prop time:49.6439s
+Epoch 52:
+	train loss:35926.3132  val ap:0.000000  val mrr:0.000000
+	train time:51.6222s  val time:0.0000s
+	scope sample time:0.1469s  slice time:0.3724s  prop time:51.1030s
+Epoch 53:
+	train loss:35094.5398  val ap:0.000000  val mrr:0.000000
+	train time:51.6337s  val time:0.0000s
+	scope sample time:0.1476s  slice time:0.3716s  prop time:51.1145s
+Epoch 54:
+	train loss:35143.8439  val ap:0.000000  val mrr:0.000000
+	train time:50.1942s  val time:0.0000s
+	scope sample time:0.1480s  slice time:0.3712s  prop time:49.6751s
+Epoch 55:
+	train loss:35235.5834  val ap:0.000000  val mrr:0.000000
+	train time:51.6154s  val time:0.0000s
+	scope sample time:0.1487s  slice time:0.3705s  prop time:51.0962s
+Epoch 56:
+	train loss:35012.4470  val ap:0.000000  val mrr:0.000000
+	train time:51.5426s  val time:0.0000s
+	scope sample time:0.1525s  slice time:0.3726s  prop time:51.0175s
+Epoch 57:
+	train loss:34788.1889  val ap:0.000000  val mrr:0.000000
+	train time:51.5938s  val time:0.0000s
+	scope sample time:0.1544s  slice time:0.3715s  prop time:51.0679s
+Epoch 58:
+	train loss:34591.0983  val ap:0.000000  val mrr:0.000000
+	train time:50.2381s  val time:0.0000s
+	scope sample time:0.1513s  slice time:0.3725s  prop time:49.7143s
+Epoch 59:
+	train loss:34366.9684  val ap:0.000000  val mrr:0.000000
+	train time:51.6276s  val time:0.0000s
+	scope sample time:0.1520s  slice time:0.3725s  prop time:51.1031s
+Epoch 60:
+	train loss:33966.0907  val ap:0.000000  val mrr:0.000000
+	train time:51.6345s  val time:0.0000s
+	scope sample time:0.1536s  slice time:0.3714s  prop time:51.1096s
+Epoch 61:
+	train loss:34334.3636  val ap:0.000000  val mrr:0.000000
+	train time:50.2702s  val time:0.0000s
+	scope sample time:0.1539s  slice time:0.3723s  prop time:49.7439s
+Epoch 62:
+	train loss:34087.5631  val ap:0.000000  val mrr:0.000000
+	train time:51.6081s  val time:0.0000s
+	scope sample time:0.1513s  slice time:0.3728s  prop time:51.0841s
+Epoch 63:
+	train loss:33661.7836  val ap:0.000000  val mrr:0.000000
+	train time:51.6542s  val time:0.0000s
+	scope sample time:0.1466s  slice time:0.3706s  prop time:51.1370s
+Epoch 64:
+	train loss:33884.4739  val ap:0.000000  val mrr:0.000000
+	train time:50.2740s  val time:0.0000s
+	scope sample time:0.1543s  slice time:0.3717s  prop time:49.7481s
+Epoch 65:
+	train loss:33621.2241  val ap:0.000000  val mrr:0.000000
+	train time:51.5757s  val time:0.0000s
+	scope sample time:0.1469s  slice time:0.3706s  prop time:51.0582s
+Epoch 66:
+	train loss:33774.4883  val ap:0.000000  val mrr:0.000000
+	train time:51.6100s  val time:0.0000s
+	scope sample time:0.1480s  slice time:0.3711s  prop time:51.0909s
+Epoch 67:
+	train loss:33560.8026  val ap:0.000000  val mrr:0.000000
+	train time:51.6279s  val time:0.0000s
+	scope sample time:0.1498s  slice time:0.3710s  prop time:51.1071s
+Epoch 68:
+	train loss:33623.7576  val ap:0.000000  val mrr:0.000000
+	train time:50.2318s  val time:0.0000s
+	scope sample time:0.1496s  slice time:0.3716s  prop time:49.7105s
+Epoch 69:
+	train loss:33281.0071  val ap:0.000000  val mrr:0.000000
+	train time:51.7261s  val time:0.0000s
+	scope sample time:0.1507s  slice time:0.3707s  prop time:51.2047s
+Epoch 70:
+	train loss:32949.8096  val ap:0.000000  val mrr:0.000000
+	train time:51.7496s  val time:0.0000s
+	scope sample time:0.1489s  slice time:0.3707s  prop time:51.2300s
+Epoch 71:
+	train loss:32910.8537  val ap:0.000000  val mrr:0.000000
+	train time:50.3301s  val time:0.0000s
+	scope sample time:0.1489s  slice time:0.3716s  prop time:49.8096s
+Epoch 72:
+	train loss:32964.0167  val ap:0.000000  val mrr:0.000000
+	train time:51.7438s  val time:0.0000s
+	scope sample time:0.1464s  slice time:0.3709s  prop time:51.2266s
+Epoch 73:
+	train loss:32817.1964  val ap:0.000000  val mrr:0.000000
+	train time:51.6884s  val time:0.0000s
+	scope sample time:0.1500s  slice time:0.3720s  prop time:51.1664s
+Epoch 74:
+	train loss:32339.0290  val ap:0.000000  val mrr:0.000000
+	train time:50.3435s  val time:0.0000s
+	scope sample time:0.1497s  slice time:0.3713s  prop time:49.8224s
+Epoch 75:
+	train loss:32342.0711  val ap:0.000000  val mrr:0.000000
+	train time:51.6920s  val time:0.0000s
+	scope sample time:0.1525s  slice time:0.3706s  prop time:51.1689s
+Epoch 76:
+	train loss:32386.3268  val ap:0.000000  val mrr:0.000000
+	train time:51.6948s  val time:0.0000s
+	scope sample time:0.1502s  slice time:0.3710s  prop time:51.1737s
+Epoch 77:
+	train loss:32598.8275  val ap:0.000000  val mrr:0.000000
+	train time:51.6768s  val time:0.0000s
+	scope sample time:0.1521s  slice time:0.3712s  prop time:51.1535s
+Epoch 78:
+	train loss:32447.5743  val ap:0.000000  val mrr:0.000000
+	train time:50.3612s  val time:0.0000s
+	scope sample time:0.1566s  slice time:0.3731s  prop time:49.8314s
+Epoch 79:
+	train loss:32059.7790  val ap:0.000000  val mrr:0.000000
+	train time:51.6572s  val time:0.0000s
+	scope sample time:0.1476s  slice time:0.3715s  prop time:51.1381s
+Epoch 80:
+	train loss:31916.2931  val ap:0.000000  val mrr:0.000000
+	train time:51.7267s  val time:0.0000s
+	scope sample time:0.1538s  slice time:0.3729s  prop time:51.2000s
+Epoch 81:
+	train loss:31705.4761  val ap:0.000000  val mrr:0.000000
+	train time:50.3204s  val time:0.0000s
+	scope sample time:0.1539s  slice time:0.3729s  prop time:49.7937s
+Epoch 82:
+	train loss:31458.0156  val ap:0.000000  val mrr:0.000000
+	train time:51.6872s  val time:0.0000s
+	scope sample time:0.1544s  slice time:0.3716s  prop time:51.1613s
+Epoch 83:
+	train loss:31332.9216  val ap:0.000000  val mrr:0.000000
+	train time:51.6944s  val time:0.0000s
+	scope sample time:0.1546s  slice time:0.3722s  prop time:51.1677s
+Epoch 84:
+	train loss:31430.7653  val ap:0.000000  val mrr:0.000000
+	train time:51.7187s  val time:0.0000s
+	scope sample time:0.1505s  slice time:0.3704s  prop time:51.1978s
+Epoch 85:
+	train loss:31017.0905  val ap:0.000000  val mrr:0.000000
+	train time:50.2636s  val time:0.0000s
+	scope sample time:0.1564s  slice time:0.3710s  prop time:49.7362s
+Epoch 86:
+	train loss:31097.8244  val ap:0.000000  val mrr:0.000000
+	train time:51.7372s  val time:0.0000s
+	scope sample time:0.1549s  slice time:0.3725s  prop time:51.2098s
+Epoch 87:
+	train loss:31296.5699  val ap:0.000000  val mrr:0.000000
+	train time:51.6822s  val time:0.0000s
+	scope sample time:0.1529s  slice time:0.3728s  prop time:51.1565s
+Epoch 88:
+	train loss:31034.4542  val ap:0.000000  val mrr:0.000000
+	train time:50.3046s  val time:0.0000s
+	scope sample time:0.1570s  slice time:0.3722s  prop time:49.7754s
+Epoch 89:
+	train loss:30979.7582  val ap:0.000000  val mrr:0.000000
+	train time:51.7211s  val time:0.0000s
+	scope sample time:0.1557s  slice time:0.3704s  prop time:51.1950s
+Epoch 90:
+	train loss:30767.8363  val ap:0.000000  val mrr:0.000000
+	train time:51.7050s  val time:0.0000s
+	scope sample time:0.1528s  slice time:0.3693s  prop time:51.1830s
+Epoch 91:
+	train loss:30801.3879  val ap:0.000000  val mrr:0.000000
+	train time:50.4102s  val time:0.0000s
+	scope sample time:0.1575s  slice time:0.3711s  prop time:49.8816s
+Epoch 92:
+	train loss:30283.3202  val ap:0.000000  val mrr:0.000000
+	train time:51.7563s  val time:0.0000s
+	scope sample time:0.1544s  slice time:0.3716s  prop time:51.2303s
+Epoch 93:
+	train loss:30392.5707  val ap:0.000000  val mrr:0.000000
+	train time:51.6956s  val time:0.0000s
+	scope sample time:0.1565s  slice time:0.3715s  prop time:51.1676s
+Epoch 94:
+	train loss:30479.6153  val ap:0.000000  val mrr:0.000000
+	train time:51.7489s  val time:0.0000s
+	scope sample time:0.1484s  slice time:0.3694s  prop time:51.2311s
+Epoch 95:
+	train loss:30223.4141  val ap:0.000000  val mrr:0.000000
+	train time:50.3826s  val time:0.0000s
+	scope sample time:0.1581s  slice time:0.3715s  prop time:49.8530s
+Epoch 96:
+	train loss:30162.7892  val ap:0.000000  val mrr:0.000000
+	train time:51.7808s  val time:0.0000s
+	scope sample time:0.1484s  slice time:0.3696s  prop time:51.2628s
+Epoch 97:
+	train loss:29807.7636  val ap:0.000000  val mrr:0.000000
+	train time:51.7686s  val time:0.0000s
+	scope sample time:0.1540s  slice time:0.3711s  prop time:51.2435s
+Epoch 98:
+	train loss:30117.9809  val ap:0.000000  val mrr:0.000000
+	train time:50.3964s  val time:0.0000s
+	scope sample time:0.1497s  slice time:0.3703s  prop time:49.8764s
+Epoch 99:
+	train loss:30112.0534  val ap:0.000000  val mrr:0.000000
+	train time:51.7474s  val time:0.0000s
+	scope sample time:0.1540s  slice time:0.3722s  prop time:51.2213s
+Epoch 100:
+	train loss:29929.4700  val ap:0.851480  val mrr:0.889086
+	train time:51.7446s  val time:9.2931s
+	scope sample time:0.1504s  slice time:0.3711s  prop time:51.2232s
+Epoch 101:
+	train loss:30138.4180  val ap:0.851319  val mrr:0.888147
+	train time:50.3328s  val time:9.2960s
+	scope sample time:0.1422s  slice time:0.3712s  prop time:49.8194s
+Epoch 102:
+	train loss:30016.8410  val ap:0.854798  val mrr:0.892255
+	train time:51.7009s  val time:9.2966s
+	scope sample time:0.1526s  slice time:0.3727s  prop time:51.1756s
+Epoch 103:
+	train loss:29586.2280  val ap:0.853131  val mrr:0.890878
+	train time:51.8320s  val time:9.2802s
+	scope sample time:0.1511s  slice time:0.3752s  prop time:51.3057s
+Epoch 104:
+	train loss:29717.9765  val ap:0.850813  val mrr:0.889372
+	train time:51.8608s  val time:9.2746s
+	scope sample time:0.1479s  slice time:0.3726s  prop time:51.3403s
+Epoch 105:
+	train loss:29604.8081  val ap:0.854655  val mrr:0.890625
+	train time:50.3336s  val time:9.2627s
+	scope sample time:0.1526s  slice time:0.3716s  prop time:49.8094s
+Epoch 106:
+	train loss:29613.2234  val ap:0.851990  val mrr:0.890765
+	train time:51.7837s  val time:9.2704s
+	scope sample time:0.1504s  slice time:0.3732s  prop time:51.2602s
+Epoch 107:
+	train loss:30015.7599  val ap:0.853134  val mrr:0.891393
+	train time:51.7636s  val time:9.2725s
+	scope sample time:0.1521s  slice time:0.3716s  prop time:51.2400s
+Epoch 108:
+	train loss:29587.1139  val ap:0.854011  val mrr:0.889999
+	train time:50.3105s  val time:9.2768s
+	scope sample time:0.1567s  slice time:0.3733s  prop time:49.7805s
+Epoch 109:
+	train loss:29193.4828  val ap:0.849411  val mrr:0.889911
+	train time:51.6930s  val time:9.2677s
+	scope sample time:0.1489s  slice time:0.3721s  prop time:51.1719s
+Epoch 110:
+	train loss:28998.9534  val ap:0.853140  val mrr:0.890643
+	train time:51.7813s  val time:9.2656s
+	scope sample time:0.1533s  slice time:0.3725s  prop time:51.2555s
+Epoch 111:
+	train loss:29190.0925  val ap:0.854987  val mrr:0.891421
+	train time:50.3258s  val time:9.2712s
+	scope sample time:0.1543s  slice time:0.3731s  prop time:49.7984s
+Epoch 112:
+	train loss:29060.2022  val ap:0.854790  val mrr:0.890858
+	train time:51.7321s  val time:9.2746s
+	scope sample time:0.1486s  slice time:0.3723s  prop time:51.2112s
+Epoch 113:
+	train loss:29178.5914  val ap:0.856213  val mrr:0.891024
+	train time:51.7567s  val time:9.2643s
+	scope sample time:0.1546s  slice time:0.3713s  prop time:51.2308s
+Epoch 114:
+	train loss:28839.1643  val ap:0.853102  val mrr:0.890695
+	train time:51.6960s  val time:9.2773s
+	scope sample time:0.1538s  slice time:0.3722s  prop time:51.1700s
+Epoch 115:
+	train loss:28575.3376  val ap:0.856443  val mrr:0.891472
+	train time:50.3686s  val time:9.2662s
+	scope sample time:0.1558s  slice time:0.3722s  prop time:49.8406s
+Epoch 116:
+	train loss:28691.4933  val ap:0.857540  val mrr:0.891717
+	train time:51.7834s  val time:9.2700s
+	scope sample time:0.1527s  slice time:0.3732s  prop time:51.2575s
+Epoch 117:
+	train loss:28481.4204  val ap:0.855628  val mrr:0.892299
+	train time:51.7016s  val time:9.2712s
+	scope sample time:0.1564s  slice time:0.3708s  prop time:51.1744s
+Epoch 118:
+	train loss:28303.0724  val ap:0.855521  val mrr:0.892017
+	train time:50.4069s  val time:9.2660s
+	scope sample time:0.1571s  slice time:0.3721s  prop time:49.8777s
+Epoch 119:
+	train loss:28347.2825  val ap:0.856908  val mrr:0.893309
+	train time:51.8259s  val time:9.2693s
+	scope sample time:0.1521s  slice time:0.3713s  prop time:51.3025s
+Epoch 120:
+	train loss:28425.8340  val ap:0.855716  val mrr:0.889668
+	train time:51.7851s  val time:9.2662s
+	scope sample time:0.1533s  slice time:0.3709s  prop time:51.2608s
+Epoch 121:
+	train loss:27941.5150  val ap:0.857683  val mrr:0.892274
+	train time:50.3995s  val time:9.2906s
+	scope sample time:0.1506s  slice time:0.3716s  prop time:49.8772s
+Epoch 122:
+	train loss:28235.8009  val ap:0.855307  val mrr:0.893014
+	train time:51.8379s  val time:9.2637s
+	scope sample time:0.1584s  slice time:0.3731s  prop time:51.3064s
+Epoch 123:
+	train loss:27870.3595  val ap:0.854961  val mrr:0.891843
+	train time:51.9127s  val time:9.2918s
+	scope sample time:0.1571s  slice time:0.3720s  prop time:51.3837s
+Epoch 124:
+	train loss:28231.1246  val ap:0.854742  val mrr:0.890432
+	train time:51.9610s  val time:9.2686s
+	scope sample time:0.1539s  slice time:0.3726s  prop time:51.4345s
+Epoch 125:
+	train loss:28337.3054  val ap:0.858354  val mrr:0.893684
+	train time:50.5696s  val time:9.2797s
+	scope sample time:0.1590s  slice time:0.3733s  prop time:50.0373s
+Epoch 126:
+	train loss:27703.0925  val ap:0.855781  val mrr:0.892968
+	train time:51.8906s  val time:9.2631s
+	scope sample time:0.1642s  slice time:0.3733s  prop time:51.3531s
+Epoch 127:
+	train loss:27837.7067  val ap:0.855496  val mrr:0.891147
+	train time:51.7450s  val time:9.2716s
+	scope sample time:0.1539s  slice time:0.3727s  prop time:51.2183s
+Epoch 128:
+	train loss:27738.5597  val ap:0.857391  val mrr:0.894369
+	train time:50.3434s  val time:9.2747s
+	scope sample time:0.1621s  slice time:0.3736s  prop time:49.8077s
+Epoch 129:
+	train loss:27632.9208  val ap:0.857696  val mrr:0.893358
+	train time:51.9128s  val time:9.2789s
+	scope sample time:0.1540s  slice time:0.3721s  prop time:51.3867s
+Epoch 130:
+	train loss:27500.6181  val ap:0.852225  val mrr:0.890591
+	train time:51.9175s  val time:9.2902s
+	scope sample time:0.1568s  slice time:0.3722s  prop time:51.3885s
+Epoch 131:
+	train loss:27545.2746  val ap:0.857481  val mrr:0.891983
+	train time:50.3403s  val time:9.2764s
+	scope sample time:0.1572s  slice time:0.3725s  prop time:49.8106s
+Epoch 132:
+	train loss:27176.4881  val ap:0.856534  val mrr:0.892986
+	train time:51.7223s  val time:9.2611s
+	scope sample time:0.1523s  slice time:0.3718s  prop time:51.1981s
+Epoch 133:
+	train loss:27276.6495  val ap:0.859368  val mrr:0.894038
+	train time:51.7411s  val time:9.2756s
+	scope sample time:0.1555s  slice time:0.3727s  prop time:51.2129s
+Epoch 134:
+	train loss:27228.3613  val ap:0.857177  val mrr:0.893429
+	train time:51.7938s  val time:9.2703s
+	scope sample time:0.1567s  slice time:0.3711s  prop time:51.2660s
+Epoch 135:
+	train loss:27237.9260  val ap:0.857605  val mrr:0.892346
+	train time:50.4973s  val time:9.2784s
+	scope sample time:0.1572s  slice time:0.3725s  prop time:49.9677s
+Epoch 136:
+	train loss:27022.4056  val ap:0.859208  val mrr:0.893268
+	train time:51.9211s  val time:9.2803s
+	scope sample time:0.1520s  slice time:0.3710s  prop time:51.3981s
+Epoch 137:
+	train loss:27212.4113  val ap:0.854260  val mrr:0.890034
+	train time:51.8724s  val time:9.2919s
+	scope sample time:0.1523s  slice time:0.3726s  prop time:51.3475s
+Epoch 138:
+	train loss:27124.7244  val ap:0.855320  val mrr:0.890561
+	train time:50.5155s  val time:9.2712s
+	scope sample time:0.1510s  slice time:0.3694s  prop time:49.9951s
+Epoch 139:
+	train loss:27188.3400  val ap:0.854710  val mrr:0.890180
+	train time:51.8177s  val time:9.2679s
+	scope sample time:0.1571s  slice time:0.3727s  prop time:51.2879s
+Epoch 140:
+	train loss:26922.2134  val ap:0.856598  val mrr:0.892093
+	train time:51.8694s  val time:9.2673s
+	scope sample time:0.1517s  slice time:0.3729s  prop time:51.3448s
+Epoch 141:
+	train loss:26841.6376  val ap:0.859442  val mrr:0.892996
+	train time:50.4625s  val time:9.2877s
+	scope sample time:0.1635s  slice time:0.3729s  prop time:49.9262s
+Epoch 142:
+	train loss:26551.5240  val ap:0.857074  val mrr:0.892665
+	train time:51.7162s  val time:9.2683s
+	scope sample time:0.1572s  slice time:0.3727s  prop time:51.1863s
+Epoch 143:
+	train loss:26757.5050  val ap:0.857863  val mrr:0.892924
+	train time:51.8144s  val time:9.2755s
+	scope sample time:0.1596s  slice time:0.3727s  prop time:51.2821s
+Epoch 144:
+	train loss:26779.7618  val ap:0.857443  val mrr:0.892865
+	train time:51.7319s  val time:9.2717s
+	scope sample time:0.1568s  slice time:0.3712s  prop time:51.2039s
+Epoch 145:
+	train loss:26586.6405  val ap:0.856899  val mrr:0.892160
+	train time:50.3092s  val time:9.2696s
+	scope sample time:0.1506s  slice time:0.3710s  prop time:49.7875s
+Epoch 146:
+	train loss:26789.6470  val ap:0.860017  val mrr:0.893804
+	train time:51.7166s  val time:9.2799s
+	scope sample time:0.1539s  slice time:0.3704s  prop time:51.1923s
+Epoch 147:
+	train loss:26670.8838  val ap:0.855664  val mrr:0.890777
+	train time:51.7767s  val time:9.2639s
+	scope sample time:0.1539s  slice time:0.3731s  prop time:51.2497s
+Epoch 148:
+	train loss:26568.8343  val ap:0.857938  val mrr:0.891482
+	train time:50.3536s  val time:9.2979s
+	scope sample time:0.1578s  slice time:0.3740s  prop time:49.8218s
+Epoch 149:
+	train loss:26563.3511  val ap:0.857977  val mrr:0.891649
+	train time:51.7519s  val time:9.2762s
+	scope sample time:0.1585s  slice time:0.3735s  prop time:51.2199s
+Epoch 150:
+	train loss:26178.6693  val ap:0.858572  val mrr:0.892774
+	train time:51.8212s  val time:9.2738s
+	scope sample time:0.1605s  slice time:0.3728s  prop time:51.2879s
+Epoch 151:
+	train loss:26381.7133  val ap:0.857272  val mrr:0.892057
+	train time:50.4281s  val time:9.2763s
+	scope sample time:0.1629s  slice time:0.3736s  prop time:49.8915s
+Epoch 152:
+	train loss:26324.5046  val ap:0.857696  val mrr:0.893142
+	train time:51.8410s  val time:9.2690s
+	scope sample time:0.1592s  slice time:0.3719s  prop time:51.3099s
+Epoch 153:
+	train loss:26583.3025  val ap:0.856886  val mrr:0.893212
+	train time:51.7902s  val time:9.2706s
+	scope sample time:0.1543s  slice time:0.3729s  prop time:51.2630s
+Epoch 154:
+	train loss:26106.7136  val ap:0.856573  val mrr:0.893499
+	train time:51.8605s  val time:9.2797s
+	scope sample time:0.1612s  slice time:0.3727s  prop time:51.3266s
+Epoch 155:
+	train loss:25907.1894  val ap:0.860012  val mrr:0.894090
+	train time:50.4211s  val time:9.2669s
+	scope sample time:0.1591s  slice time:0.3731s  prop time:49.8889s
+Epoch 156:
+	train loss:25895.6189  val ap:0.861037  val mrr:0.893531
+	train time:51.7768s  val time:9.2797s
+	scope sample time:0.1602s  slice time:0.3719s  prop time:51.2447s
+Epoch 157:
+	train loss:25848.9628  val ap:0.859509  val mrr:0.893859
+	train time:51.8206s  val time:9.2777s
+	scope sample time:0.1588s  slice time:0.3716s  prop time:51.2902s
+Epoch 158:
+	train loss:25846.5742  val ap:0.858819  val mrr:0.892516
+	train time:50.4534s  val time:9.2777s
+	scope sample time:0.1589s  slice time:0.3725s  prop time:49.9220s
+Epoch 159:
+	train loss:25778.1967  val ap:0.860474  val mrr:0.891911
+	train time:51.8270s  val time:9.2760s
+	scope sample time:0.1604s  slice time:0.3714s  prop time:51.2951s
+Epoch 160:
+	train loss:25855.8300  val ap:0.859471  val mrr:0.893296
+	train time:51.7956s  val time:9.2799s
+	scope sample time:0.1568s  slice time:0.3716s  prop time:51.2673s
+Epoch 161:
+	train loss:25629.5501  val ap:0.860921  val mrr:0.894421
+	train time:50.4439s  val time:9.2782s
+	scope sample time:0.1596s  slice time:0.3698s  prop time:49.9145s
+Epoch 162:
+	train loss:25720.9907  val ap:0.858337  val mrr:0.892787
+	train time:51.8765s  val time:9.2793s
+	scope sample time:0.1594s  slice time:0.3707s  prop time:51.3464s
+Epoch 163:
+	train loss:25828.9218  val ap:0.855702  val mrr:0.892101
+	train time:51.7667s  val time:9.2670s
+	scope sample time:0.1559s  slice time:0.3719s  prop time:51.2390s
+Epoch 164:
+	train loss:25757.3734  val ap:0.858443  val mrr:0.891299
+	train time:51.7913s  val time:9.2483s
+	scope sample time:0.1582s  slice time:0.3718s  prop time:51.2613s
+Epoch 165:
+	train loss:25646.8709  val ap:0.861802  val mrr:0.893342
+	train time:50.1695s  val time:9.2559s
+	scope sample time:0.1582s  slice time:0.3724s  prop time:49.6389s
+Epoch 166:
+	train loss:25380.1950  val ap:0.859043  val mrr:0.892269
+	train time:51.4216s  val time:9.2614s
+	scope sample time:0.1583s  slice time:0.3721s  prop time:50.8912s
+Epoch 167:
+	train loss:25422.0806  val ap:0.858854  val mrr:0.892479
+	train time:51.4494s  val time:9.2506s
+	scope sample time:0.1515s  slice time:0.3723s  prop time:50.9255s
+Epoch 168:
+	train loss:25237.1834  val ap:0.860265  val mrr:0.893720
+	train time:50.0600s  val time:9.2730s
+	scope sample time:0.1540s  slice time:0.3721s  prop time:49.5339s
+Epoch 169:
+	train loss:24729.3998  val ap:0.859815  val mrr:0.892750
+	train time:51.4305s  val time:9.2567s
+	scope sample time:0.1574s  slice time:0.3724s  prop time:50.9006s
+Epoch 170:
+	train loss:25014.1939  val ap:0.860238  val mrr:0.894107
+	train time:51.4197s  val time:9.2502s
+	scope sample time:0.1599s  slice time:0.3713s  prop time:50.8885s
+Epoch 171:
+	train loss:25261.9996  val ap:0.861811  val mrr:0.893791
+	train time:50.1398s  val time:9.2684s
+	scope sample time:0.1560s  slice time:0.3716s  prop time:49.6122s
+Epoch 172:
+	train loss:24840.7134  val ap:0.861740  val mrr:0.893874
+	train time:51.5324s  val time:9.2512s
+	scope sample time:0.1596s  slice time:0.3734s  prop time:50.9994s
+Epoch 173:
+	train loss:24911.3687  val ap:0.864949  val mrr:0.895750
+	train time:51.4745s  val time:9.2675s
+	scope sample time:0.1570s  slice time:0.3732s  prop time:50.9443s
+Epoch 174:
+	train loss:24709.6824  val ap:0.860014  val mrr:0.894054
+	train time:51.4271s  val time:9.2517s
+	scope sample time:0.1605s  slice time:0.3736s  prop time:50.8929s
+Epoch 175:
+	train loss:24648.2364  val ap:0.862361  val mrr:0.893734
+	train time:50.0555s  val time:9.2514s
+	scope sample time:0.1466s  slice time:0.3702s  prop time:49.5386s
+Epoch 176:
+	train loss:24488.2300  val ap:0.862084  val mrr:0.894802
+	train time:51.4308s  val time:9.2747s
+	scope sample time:0.1608s  slice time:0.3709s  prop time:50.8991s
+Epoch 177:
+	train loss:24613.7741  val ap:0.862500  val mrr:0.893569
+	train time:51.4105s  val time:9.2580s
+	scope sample time:0.1608s  slice time:0.3723s  prop time:50.8774s
+Epoch 178:
+	train loss:24579.6114  val ap:0.864398  val mrr:0.895157
+	train time:50.1209s  val time:9.2459s
+	scope sample time:0.1552s  slice time:0.3720s  prop time:49.5938s
+Epoch 179:
+	train loss:24530.1513  val ap:0.863054  val mrr:0.894685
+	train time:51.4933s  val time:9.2701s
+	scope sample time:0.1539s  slice time:0.3706s  prop time:50.9688s
+Epoch 180:
+	train loss:24484.7536  val ap:0.865033  val mrr:0.896391
+	train time:51.4407s  val time:9.2656s
+	scope sample time:0.1553s  slice time:0.3710s  prop time:50.9144s
+Epoch 181:
+	train loss:24288.9361  val ap:0.864937  val mrr:0.896287
+	train time:50.1845s  val time:9.2725s
+	scope sample time:0.1491s  slice time:0.3698s  prop time:49.6656s
+Epoch 182:
+	train loss:24448.3744  val ap:0.862959  val mrr:0.895006
+	train time:51.6361s  val time:9.2549s
+	scope sample time:0.1514s  slice time:0.3705s  prop time:51.1142s
+Epoch 183:
+	train loss:24218.8470  val ap:0.865380  val mrr:0.895341
+	train time:51.6907s  val time:9.2564s
+	scope sample time:0.1509s  slice time:0.3705s  prop time:51.1693s
+Epoch 184:
+	train loss:24179.4990  val ap:0.864219  val mrr:0.895761
+	train time:51.5709s  val time:9.2633s
+	scope sample time:0.1506s  slice time:0.3712s  prop time:51.0491s
+Epoch 185:
+	train loss:24034.9838  val ap:0.866146  val mrr:0.896347
+	train time:50.2540s  val time:9.2580s
+	scope sample time:0.1510s  slice time:0.3724s  prop time:49.7306s
+Epoch 186:
+	train loss:24388.8375  val ap:0.864382  val mrr:0.895438
+	train time:51.6613s  val time:9.2700s
+	scope sample time:0.1598s  slice time:0.3728s  prop time:51.1287s
+Epoch 187:
+	train loss:23991.0300  val ap:0.865401  val mrr:0.895527
+	train time:51.4901s  val time:9.2708s
+	scope sample time:0.1531s  slice time:0.3710s  prop time:50.9660s
+Epoch 188:
+	train loss:23830.4657  val ap:0.864179  val mrr:0.895204
+	train time:50.2426s  val time:9.2815s
+	scope sample time:0.1531s  slice time:0.3698s  prop time:49.7198s
+Epoch 189:
+	train loss:23850.4554  val ap:0.863283  val mrr:0.894301
+	train time:51.7431s  val time:9.2782s
+	scope sample time:0.1552s  slice time:0.3691s  prop time:51.2188s
+Epoch 190:
+	train loss:24030.9582  val ap:0.863696  val mrr:0.894448
+	train time:51.7998s  val time:9.2667s
+	scope sample time:0.1558s  slice time:0.3711s  prop time:51.2729s
+Epoch 191:
+	train loss:24246.2727  val ap:0.865488  val mrr:0.895684
+	train time:51.7351s  val time:9.2674s
+	scope sample time:0.1551s  slice time:0.3726s  prop time:51.2074s
+Epoch 192:
+	train loss:23704.8578  val ap:0.863326  val mrr:0.894717
+	train time:50.3821s  val time:9.2659s
+	scope sample time:0.1590s  slice time:0.3718s  prop time:49.8513s
+Epoch 193:
+	train loss:24021.4930  val ap:0.863322  val mrr:0.894911
+	train time:51.8237s  val time:9.2601s
+	scope sample time:0.1551s  slice time:0.3704s  prop time:51.2982s
+Epoch 194:
+	train loss:23742.6858  val ap:0.863996  val mrr:0.894546
+	train time:51.8135s  val time:9.2731s
+	scope sample time:0.1533s  slice time:0.3696s  prop time:51.2905s
+Epoch 195:
+	train loss:23503.8775  val ap:0.865910  val mrr:0.896331
+	train time:50.3768s  val time:9.2714s
+	scope sample time:0.1536s  slice time:0.3706s  prop time:49.8526s
+Epoch 196:
+	train loss:23598.1607  val ap:0.864465  val mrr:0.895395
+	train time:51.8109s  val time:9.2787s
+	scope sample time:0.1546s  slice time:0.3700s  prop time:51.2863s
+Epoch 197:
+	train loss:23639.9598  val ap:0.865059  val mrr:0.896318
+	train time:51.8007s  val time:9.2766s
+	scope sample time:0.1572s  slice time:0.3717s  prop time:51.2718s
+Epoch 198:
+	train loss:23529.9953  val ap:0.861200  val mrr:0.894844
+	train time:50.3814s  val time:9.2888s
+	scope sample time:0.1582s  slice time:0.3717s  prop time:49.8516s
+Epoch 199:
+	train loss:23519.8706  val ap:0.865565  val mrr:0.896361
+	train time:51.7341s  val time:9.2741s
+	scope sample time:0.1552s  slice time:0.3705s  prop time:51.2085s
+Epoch 200:
+	train loss:23356.3478  val ap:0.865111  val mrr:0.897286
+	train time:51.8649s  val time:9.2722s
+	scope sample time:0.1612s  slice time:0.3713s  prop time:51.3324s
+Epoch 201:
+	train loss:23587.0336  val ap:0.864077  val mrr:0.895358
+	train time:51.7736s  val time:9.2686s
+	scope sample time:0.1599s  slice time:0.3724s  prop time:51.2413s
+Epoch 202:
+	train loss:23208.2759  val ap:0.865859  val mrr:0.896109
+	train time:50.3845s  val time:9.2677s
+	scope sample time:0.1551s  slice time:0.3708s  prop time:49.8586s
+Epoch 203:
+	train loss:23400.7059  val ap:0.865674  val mrr:0.895872
+	train time:51.8312s  val time:9.2731s
+	scope sample time:0.1527s  slice time:0.3720s  prop time:51.3065s
+Epoch 204:
+	train loss:23217.8267  val ap:0.864248  val mrr:0.896377
+	train time:51.8373s  val time:9.2610s
+	scope sample time:0.1540s  slice time:0.3709s  prop time:51.3124s
+Epoch 205:
+	train loss:23318.8654  val ap:0.865601  val mrr:0.896301
+	train time:50.4184s  val time:9.3008s
+	scope sample time:0.1531s  slice time:0.3707s  prop time:49.8946s
+Epoch 206:
+	train loss:22837.4285  val ap:0.864326  val mrr:0.894850
+	train time:51.8310s  val time:9.2905s
+	scope sample time:0.1569s  slice time:0.3717s  prop time:51.3024s
+Epoch 207:
+	train loss:23181.7157  val ap:0.864487  val mrr:0.896501
+	train time:51.8655s  val time:9.2748s
+	scope sample time:0.1512s  slice time:0.3704s  prop time:51.3439s
+Epoch 208:
+	train loss:23224.0258  val ap:0.862644  val mrr:0.894385
+	train time:50.4947s  val time:9.2675s
+	scope sample time:0.1544s  slice time:0.3722s  prop time:49.9682s
+Epoch 209:
+	train loss:23177.4018  val ap:0.862723  val mrr:0.893594
+	train time:51.8353s  val time:9.2835s
+	scope sample time:0.1568s  slice time:0.3714s  prop time:51.3071s
+Epoch 210:
+	train loss:23023.3848  val ap:0.866239  val mrr:0.896175
+	train time:51.8317s  val time:9.2789s
+	scope sample time:0.1579s  slice time:0.3703s  prop time:51.3034s
+Epoch 211:
+	train loss:23069.0780  val ap:0.865748  val mrr:0.896765
+	train time:51.8285s  val time:9.2811s
+	scope sample time:0.1593s  slice time:0.3712s  prop time:51.2980s
+Epoch 212:
+	train loss:23008.6205  val ap:0.863858  val mrr:0.895164
+	train time:50.4108s  val time:9.2719s
+	scope sample time:0.1579s  slice time:0.3706s  prop time:49.8822s
+Epoch 213:
+	train loss:23016.1051  val ap:0.866984  val mrr:0.896506
+	train time:51.7413s  val time:9.2729s
+	scope sample time:0.1576s  slice time:0.3734s  prop time:51.2103s
+Epoch 214:
+	train loss:23161.2796  val ap:0.866701  val mrr:0.897685
+	train time:51.8390s  val time:9.2722s
+	scope sample time:0.1542s  slice time:0.3713s  prop time:51.3135s
+Epoch 215:
+	train loss:22847.5013  val ap:0.864491  val mrr:0.895422
+	train time:50.5410s  val time:9.2830s
+	scope sample time:0.1580s  slice time:0.3723s  prop time:50.0107s
+Epoch 216:
+	train loss:22847.9063  val ap:0.865220  val mrr:0.897042
+	train time:51.7035s  val time:9.2870s
+	scope sample time:0.1522s  slice time:0.3726s  prop time:51.1787s
+Epoch 217:
+	train loss:22989.0323  val ap:0.864492  val mrr:0.895366
+	train time:51.8080s  val time:9.2758s
+	scope sample time:0.1575s  slice time:0.3711s  prop time:51.2793s
+Epoch 218:
+	train loss:22890.3931  val ap:0.867871  val mrr:0.897034
+	train time:50.4269s  val time:9.2666s
+	scope sample time:0.1593s  slice time:0.3723s  prop time:49.8952s
+Epoch 219:
+	train loss:22840.2237  val ap:0.864155  val mrr:0.895657
+	train time:51.8011s  val time:9.2728s
+	scope sample time:0.1594s  slice time:0.3712s  prop time:51.2705s
+Epoch 220:
+	train loss:22773.9900  val ap:0.864802  val mrr:0.894469
+	train time:51.8085s  val time:9.2764s
+	scope sample time:0.1588s  slice time:0.3705s  prop time:51.2792s
+Epoch 221:
+	train loss:22835.4163  val ap:0.862563  val mrr:0.894350
+	train time:51.9668s  val time:9.3394s
+	scope sample time:0.1553s  slice time:0.3714s  prop time:51.4401s
+Epoch 222:
+	train loss:22740.0242  val ap:0.862307  val mrr:0.894725
+	train time:50.5786s  val time:9.2711s
+	scope sample time:0.1548s  slice time:0.3696s  prop time:50.0541s
+Epoch 223:
+	train loss:22668.4813  val ap:0.866057  val mrr:0.896693
+	train time:51.8375s  val time:9.2878s
+	scope sample time:0.1549s  slice time:0.3707s  prop time:51.3119s
+Epoch 224:
+	train loss:22354.1990  val ap:0.867559  val mrr:0.897365
+	train time:51.9070s  val time:9.2741s
+	scope sample time:0.1578s  slice time:0.3724s  prop time:51.3768s
+Epoch 225:
+	train loss:22583.1905  val ap:0.864713  val mrr:0.893433
+	train time:50.5024s  val time:9.2958s
+	scope sample time:0.1520s  slice time:0.3710s  prop time:49.9794s
+Epoch 226:
+	train loss:22423.9660  val ap:0.866138  val mrr:0.895734
+	train time:51.8747s  val time:9.2799s
+	scope sample time:0.1648s  slice time:0.3723s  prop time:51.3376s
+Epoch 227:
+	train loss:22574.0658  val ap:0.867204  val mrr:0.896102
+	train time:51.8722s  val time:9.2964s
+	scope sample time:0.1631s  slice time:0.3712s  prop time:51.3378s
+Epoch 228:
+	train loss:22366.6440  val ap:0.866318  val mrr:0.895890
+	train time:50.4753s  val time:9.2763s
+	scope sample time:0.1557s  slice time:0.3713s  prop time:49.9483s
+Epoch 229:
+	train loss:22435.6941  val ap:0.866584  val mrr:0.896505
+	train time:51.9267s  val time:9.2732s
+	scope sample time:0.1558s  slice time:0.3689s  prop time:51.4020s
+Epoch 230:
+	train loss:22569.6410  val ap:0.867122  val mrr:0.896483
+	train time:51.8829s  val time:9.2762s
+	scope sample time:0.1609s  slice time:0.3715s  prop time:51.3505s
+Epoch 231:
+	train loss:22436.9154  val ap:0.867187  val mrr:0.896696
+	train time:51.9283s  val time:9.2730s
+	scope sample time:0.1607s  slice time:0.3717s  prop time:51.3958s
+Epoch 232:
+	train loss:22104.1553  val ap:0.866580  val mrr:0.896679
+	train time:50.4757s  val time:9.3105s
+	scope sample time:0.1652s  slice time:0.3718s  prop time:49.9386s
+Epoch 233:
+	train loss:22031.1318  val ap:0.866105  val mrr:0.896366
+	train time:51.8928s  val time:9.2844s
+	scope sample time:0.1565s  slice time:0.3722s  prop time:51.3641s
+Epoch 234:
+	train loss:22275.4986  val ap:0.863397  val mrr:0.894677
+	train time:51.9001s  val time:9.2788s
+	scope sample time:0.1599s  slice time:0.3710s  prop time:51.3692s
+Epoch 235:
+	train loss:22044.3901  val ap:0.865324  val mrr:0.896434
+	train time:50.5136s  val time:9.2902s
+	scope sample time:0.1582s  slice time:0.3704s  prop time:49.9850s
+Epoch 236:
+	train loss:21839.2750  val ap:0.867295  val mrr:0.896074
+	train time:51.9592s  val time:9.2681s
+	scope sample time:0.1572s  slice time:0.3721s  prop time:51.4299s
+Epoch 237:
+	train loss:21858.8684  val ap:0.868042  val mrr:0.897472
+	train time:51.9068s  val time:9.2928s
+	scope sample time:0.1550s  slice time:0.3693s  prop time:51.3825s
+Epoch 238:
+	train loss:21967.7224  val ap:0.866844  val mrr:0.895800
+	train time:50.5090s  val time:9.2706s
+	scope sample time:0.1566s  slice time:0.3703s  prop time:49.9821s
+Epoch 239:
+	train loss:21693.8717  val ap:0.863949  val mrr:0.895106
+	train time:51.9655s  val time:9.2830s
+	scope sample time:0.1513s  slice time:0.3700s  prop time:51.4443s
+Epoch 240:
+	train loss:22122.4386  val ap:0.866121  val mrr:0.895747
+	train time:51.8272s  val time:9.2686s
+	scope sample time:0.1584s  slice time:0.3715s  prop time:51.2973s
+Epoch 241:
+	train loss:21974.7023  val ap:0.866831  val mrr:0.895982
+	train time:51.8528s  val time:9.2995s
+	scope sample time:0.1623s  slice time:0.3732s  prop time:51.3173s
+Epoch 242:
+	train loss:21748.4026  val ap:0.863864  val mrr:0.895225
+	train time:50.5202s  val time:9.2834s
+	scope sample time:0.1606s  slice time:0.3717s  prop time:49.9878s
+Epoch 243:
+	train loss:21827.0830  val ap:0.867252  val mrr:0.897090
+	train time:51.9630s  val time:9.2774s
+	scope sample time:0.1549s  slice time:0.3713s  prop time:51.4367s
+Epoch 244:
+	train loss:21901.4515  val ap:0.865448  val mrr:0.895287
+	train time:51.8937s  val time:9.2779s
+	scope sample time:0.1607s  slice time:0.3700s  prop time:51.3629s
+Epoch 245:
+	train loss:21633.3675  val ap:0.869725  val mrr:0.897975
+	train time:50.4704s  val time:9.3009s
+	scope sample time:0.1667s  slice time:0.3739s  prop time:49.9298s
+Epoch 246:
+	train loss:21744.6563  val ap:0.865857  val mrr:0.895385
+	train time:51.8956s  val time:9.2933s
+	scope sample time:0.1576s  slice time:0.3714s  prop time:51.3666s
+Epoch 247:
+	train loss:21281.9300  val ap:0.864944  val mrr:0.895511
+	train time:51.9310s  val time:9.2829s
+	scope sample time:0.1669s  slice time:0.3716s  prop time:51.3925s
+Epoch 248:
+	train loss:21573.4457  val ap:0.865886  val mrr:0.897602
+	train time:50.5215s  val time:9.2882s
+	scope sample time:0.1593s  slice time:0.3717s  prop time:49.9905s
+Epoch 249:
+	train loss:21570.1837  val ap:0.865837  val mrr:0.896755
+	train time:51.9558s  val time:9.2778s
+	scope sample time:0.1632s  slice time:0.3717s  prop time:51.4209s
+Epoch 250:
+	train loss:22008.2305  val ap:0.864359  val mrr:0.895707
+	train time:51.9803s  val time:9.2978s
+	scope sample time:0.1648s  slice time:0.3725s  prop time:51.4431s
+Epoch 251:
+	train loss:21741.6943  val ap:0.866951  val mrr:0.895460
+	train time:51.9291s  val time:9.2984s
+	scope sample time:0.1632s  slice time:0.3724s  prop time:51.3936s
+Epoch 252:
+	train loss:21608.6111  val ap:0.866641  val mrr:0.895935
+	train time:50.6003s  val time:9.2872s
+	scope sample time:0.1566s  slice time:0.3686s  prop time:50.0751s
+Epoch 253:
+	train loss:21427.4346  val ap:0.867061  val mrr:0.897291
+	train time:51.9678s  val time:9.2840s
+	scope sample time:0.1651s  slice time:0.3726s  prop time:51.4302s
+Epoch 254:
+	train loss:21674.4884  val ap:0.866738  val mrr:0.896945
+	train time:51.9277s  val time:9.2695s
+	scope sample time:0.1663s  slice time:0.3746s  prop time:51.3868s
+Epoch 255:
+	train loss:21229.3104  val ap:0.864335  val mrr:0.894485
+	train time:50.5108s  val time:9.2988s
+	scope sample time:0.1620s  slice time:0.3728s  prop time:49.9759s
+Epoch 256:
+	train loss:21184.6690  val ap:0.865744  val mrr:0.897230
+	train time:51.9148s  val time:9.2927s
+	scope sample time:0.1655s  slice time:0.3726s  prop time:51.3767s
+Epoch 257:
+	train loss:21232.3956  val ap:0.864214  val mrr:0.896231
+	train time:52.0093s  val time:9.2833s
+	scope sample time:0.1632s  slice time:0.3722s  prop time:51.4739s
+Epoch 258:
+	train loss:21348.6965  val ap:0.870008  val mrr:0.899133
+	train time:51.9877s  val time:9.2843s
+	scope sample time:0.1663s  slice time:0.3708s  prop time:51.4506s
+Epoch 259:
+	train loss:21097.6962  val ap:0.865380  val mrr:0.895146
+	train time:50.6280s  val time:9.2795s
+	scope sample time:0.1618s  slice time:0.3713s  prop time:50.0949s
+Epoch 260:
+	train loss:21275.2386  val ap:0.863916  val mrr:0.896082
+	train time:51.9961s  val time:9.2803s
+	scope sample time:0.1667s  slice time:0.3710s  prop time:51.4583s
+Epoch 261:
+	train loss:20991.4023  val ap:0.864778  val mrr:0.896254
+	train time:51.8464s  val time:9.2889s
+	scope sample time:0.1699s  slice time:0.3716s  prop time:51.3048s
+Epoch 262:
+	train loss:21066.9627  val ap:0.868171  val mrr:0.897065
+	train time:50.4844s  val time:9.2795s
+	scope sample time:0.1630s  slice time:0.3728s  prop time:49.9486s
+Epoch 263:
+	train loss:21071.7493  val ap:0.866315  val mrr:0.896320
+	train time:52.2740s  val time:9.2929s
+	scope sample time:0.1673s  slice time:0.3714s  prop time:51.7353s
+Epoch 264:
+	train loss:21146.6179  val ap:0.865080  val mrr:0.896275
+	train time:52.1844s  val time:10.1256s
+	scope sample time:0.1693s  slice time:0.3729s  prop time:51.6422s
+Epoch 265:
+	train loss:21095.4235  val ap:0.865115  val mrr:0.895843
+	train time:56.0483s  val time:13.7794s
+	scope sample time:0.1841s  slice time:0.3952s  prop time:55.4689s
+Epoch 266:
+	train loss:21038.2852  val ap:0.864481  val mrr:0.896375
+	train time:66.2405s  val time:13.8796s
+	scope sample time:0.2184s  slice time:0.4055s  prop time:65.6165s
+Epoch 267:
+	train loss:20982.5316  val ap:0.865051  val mrr:0.894541
+	train time:66.2276s  val time:13.8551s
+	scope sample time:0.2247s  slice time:0.4174s  prop time:65.5855s
+Epoch 268:
+	train loss:20949.8901  val ap:0.865467  val mrr:0.896040
+	train time:66.0902s  val time:13.9204s
+	scope sample time:0.2072s  slice time:0.3949s  prop time:65.4881s
+Epoch 269:
+	train loss:20886.3661  val ap:0.865422  val mrr:0.895898
+	train time:53.0285s  val time:9.2909s
+	scope sample time:0.1762s  slice time:0.3713s  prop time:52.4810s
+Epoch 270:
+	train loss:21173.6966  val ap:0.866137  val mrr:0.895505
+	train time:51.9133s  val time:9.2881s
+	scope sample time:0.1643s  slice time:0.3709s  prop time:51.3781s
+Epoch 271:
+	train loss:21437.8810  val ap:0.866076  val mrr:0.897824
+	train time:51.9609s  val time:9.2733s
+	scope sample time:0.1643s  slice time:0.3723s  prop time:51.4242s
+Epoch 272:
+	train loss:20999.0659  val ap:0.863700  val mrr:0.894422
+	train time:50.8046s  val time:9.3017s
+	scope sample time:0.1590s  slice time:0.3713s  prop time:50.2742s
+Epoch 273:
+	train loss:21034.5921  val ap:0.865672  val mrr:0.895844
+	train time:51.9282s  val time:9.2721s
+	scope sample time:0.1565s  slice time:0.3727s  prop time:51.3990s
+Epoch 274:
+	train loss:21135.9520  val ap:0.868317  val mrr:0.896886
+	train time:51.6242s  val time:9.2752s
+	scope sample time:0.1602s  slice time:0.3721s  prop time:51.0919s
+Epoch 275:
+	train loss:20666.4549  val ap:0.864755  val mrr:0.896028
+	train time:50.2761s  val time:9.2667s
+	scope sample time:0.1613s  slice time:0.3741s  prop time:49.7407s
+Epoch 276:
+	train loss:20795.7371  val ap:0.865465  val mrr:0.896717
+	train time:51.5667s  val time:9.2711s
+	scope sample time:0.1587s  slice time:0.3723s  prop time:51.0357s
+Epoch 277:
+	train loss:20701.6029  val ap:0.868570  val mrr:0.898275
+	train time:52.0453s  val time:9.3071s
+	scope sample time:0.1646s  slice time:0.3716s  prop time:51.5092s
+Epoch 278:
+	train loss:20895.3322  val ap:0.867562  val mrr:0.896982
+	train time:52.1157s  val time:9.2769s
+	scope sample time:0.1623s  slice time:0.3711s  prop time:51.5823s
+Epoch 279:
+	train loss:20668.3439  val ap:0.868161  val mrr:0.896383
+	train time:50.6581s  val time:9.2933s
+	scope sample time:0.1676s  slice time:0.3730s  prop time:50.1176s
+Epoch 280:
+	train loss:20822.5403  val ap:0.867497  val mrr:0.896124
+	train time:52.0334s  val time:9.2785s
+	scope sample time:0.1665s  slice time:0.3725s  prop time:51.4944s
+Epoch 281:
+	train loss:20739.1518  val ap:0.865069  val mrr:0.895390
+	train time:51.8542s  val time:9.2774s
+	scope sample time:0.1604s  slice time:0.3722s  prop time:51.3215s
+Epoch 282:
+	train loss:20399.3821  val ap:0.867808  val mrr:0.896778
+	train time:50.3025s  val time:9.2602s
+	scope sample time:0.1667s  slice time:0.3733s  prop time:49.7625s
+Epoch 283:
+	train loss:20465.5547  val ap:0.867983  val mrr:0.896725
+	train time:51.8022s  val time:9.2655s
+	scope sample time:0.1661s  slice time:0.3742s  prop time:51.2618s
+Epoch 284:
+	train loss:20344.9782  val ap:0.869507  val mrr:0.897804
+	train time:51.7056s  val time:9.2702s
+	scope sample time:0.1744s  slice time:0.3733s  prop time:51.1578s
+Epoch 285:
+	train loss:20444.5338  val ap:0.866171  val mrr:0.895516
+	train time:50.3025s  val time:9.2594s
+	scope sample time:0.1694s  slice time:0.3725s  prop time:49.7607s
+Epoch 286:
+	train loss:20600.7765  val ap:0.869015  val mrr:0.897388
+	train time:51.6885s  val time:9.2782s
+	scope sample time:0.1701s  slice time:0.3728s  prop time:51.1455s
+Epoch 287:
+	train loss:20490.8609  val ap:0.865902  val mrr:0.896287
+	train time:52.0448s  val time:9.2632s
+	scope sample time:0.1739s  slice time:0.3722s  prop time:51.4987s
+Epoch 288:
+	train loss:20496.7015  val ap:0.866624  val mrr:0.896036
+	train time:52.2670s  val time:9.2987s
+	scope sample time:0.1690s  slice time:0.3726s  prop time:51.7255s
+Epoch 289:
+	train loss:20128.4819  val ap:0.867425  val mrr:0.896678
+	train time:50.8305s  val time:9.3084s
+	scope sample time:0.1709s  slice time:0.3742s  prop time:50.2853s
+Epoch 290:
+	train loss:20581.0857  val ap:0.866802  val mrr:0.895510
+	train time:51.9404s  val time:9.2671s
+	scope sample time:0.1605s  slice time:0.3721s  prop time:51.4078s
+Epoch 291:
+	train loss:20287.3947  val ap:0.864689  val mrr:0.894632
+	train time:51.8086s  val time:9.2721s
+	scope sample time:0.1592s  slice time:0.3722s  prop time:51.2772s
+Epoch 292:
+	train loss:20537.2802  val ap:0.865209  val mrr:0.895657
+	train time:50.4059s  val time:9.2787s
+	scope sample time:0.1517s  slice time:0.3703s  prop time:49.8840s
+Epoch 293:
+	train loss:20166.8257  val ap:0.864468  val mrr:0.895207
+	train time:51.7152s  val time:9.2735s
+	scope sample time:0.1606s  slice time:0.3739s  prop time:51.1808s
+Epoch 294:
+	train loss:20448.5722  val ap:0.867849  val mrr:0.897447
+	train time:51.7048s  val time:9.2606s
+	scope sample time:0.1569s  slice time:0.3710s  prop time:51.1769s
+Epoch 295:
+	train loss:20675.4994  val ap:0.866781  val mrr:0.896342
+	train time:50.3922s  val time:9.2655s
+	scope sample time:0.1691s  slice time:0.3721s  prop time:49.8510s
+Epoch 296:
+	train loss:20638.7406  val ap:0.866833  val mrr:0.895974
+	train time:51.7208s  val time:9.2664s
+	scope sample time:0.1569s  slice time:0.3716s  prop time:51.1923s
+Epoch 297:
+	train loss:20324.5584  val ap:0.868424  val mrr:0.896987
+	train time:51.6479s  val time:9.2701s
+	scope sample time:0.1610s  slice time:0.3737s  prop time:51.1132s
+Epoch 298:
+	train loss:20450.4586  val ap:0.867635  val mrr:0.896764
+	train time:51.6170s  val time:9.2637s
+	scope sample time:0.1535s  slice time:0.3711s  prop time:51.0924s
+Epoch 299:
+	train loss:20363.0101  val ap:0.866403  val mrr:0.897085
+	train time:50.5333s  val time:9.2971s
+	scope sample time:0.1567s  slice time:0.3712s  prop time:50.0054s
+Epoch 300:
+	train loss:20049.2848  val ap:0.867483  val mrr:0.896640
+	train time:52.2291s  val time:9.2879s
+	scope sample time:0.1597s  slice time:0.3715s  prop time:51.6979s
+Epoch 301:
+	train loss:20096.9500  val ap:0.867979  val mrr:0.897223
+	train time:52.0409s  val time:9.3023s
+	scope sample time:0.1659s  slice time:0.3718s  prop time:51.5032s
+Epoch 302:
+	train loss:19817.0632  val ap:0.869077  val mrr:0.896820
+	train time:50.5936s  val time:9.2976s
+	scope sample time:0.1697s  slice time:0.3733s  prop time:50.0506s
+Epoch 303:
+	train loss:19707.6005  val ap:0.868299  val mrr:0.898057
+	train time:51.9510s  val time:9.2790s
+	scope sample time:0.1663s  slice time:0.3718s  prop time:51.4129s
+Epoch 304:
+	train loss:19909.5572  val ap:0.866938  val mrr:0.896432
+	train time:51.9215s  val time:9.2756s
+	scope sample time:0.1635s  slice time:0.3710s  prop time:51.3871s
+Epoch 305:
+	train loss:19939.0479  val ap:0.866698  val mrr:0.897204
+	train time:51.8555s  val time:9.2656s
+	scope sample time:0.1650s  slice time:0.3720s  prop time:51.3186s
+Epoch 306:
+	train loss:19896.0789  val ap:0.865966  val mrr:0.894635
+	train time:50.5349s  val time:9.2875s
+	scope sample time:0.1653s  slice time:0.3719s  prop time:49.9976s
+Epoch 307:
+	train loss:20220.4866  val ap:0.867474  val mrr:0.896563
+	train time:51.8281s  val time:9.2831s
+	scope sample time:0.1644s  slice time:0.3710s  prop time:51.2926s
+Epoch 308:
+	train loss:19975.9475  val ap:0.866987  val mrr:0.896029
+	train time:51.8794s  val time:9.2891s
+	scope sample time:0.1626s  slice time:0.3715s  prop time:51.3454s
+Epoch 309:
+	train loss:19826.5821  val ap:0.866228  val mrr:0.896413
+	train time:50.6730s  val time:9.2890s
+	scope sample time:0.1641s  slice time:0.3712s  prop time:50.1377s
+Epoch 310:
+	train loss:19896.5636  val ap:0.869233  val mrr:0.896288
+	train time:51.9484s  val time:9.2755s
+	scope sample time:0.1682s  slice time:0.3714s  prop time:51.4087s
+Epoch 311:
+	train loss:19580.7876  val ap:0.867382  val mrr:0.896323
+	train time:51.8711s  val time:9.2783s
+	scope sample time:0.1651s  slice time:0.3709s  prop time:51.3351s
+Epoch 312:
+	train loss:19926.2791  val ap:0.865571  val mrr:0.896777
+	train time:50.4191s  val time:9.2748s
+	scope sample time:0.1646s  slice time:0.3716s  prop time:49.8829s
+Epoch 313:
+	train loss:19681.3782  val ap:0.867629  val mrr:0.897148
+	train time:51.9854s  val time:9.2677s
+	scope sample time:0.1612s  slice time:0.3707s  prop time:51.4535s
+Epoch 314:
+	train loss:19501.3035  val ap:0.865032  val mrr:0.894688
+	train time:51.9924s  val time:9.2719s
+	scope sample time:0.1626s  slice time:0.3711s  prop time:51.4587s
+Epoch 315:
+	train loss:19772.0513  val ap:0.865937  val mrr:0.896000
+	train time:51.8351s  val time:9.2850s
+	scope sample time:0.1573s  slice time:0.3707s  prop time:51.3071s
+Epoch 316:
+	train loss:19792.3715  val ap:0.865938  val mrr:0.896465
+	train time:50.3872s  val time:9.2846s
+	scope sample time:0.1615s  slice time:0.3729s  prop time:49.8528s
+Epoch 317:
+	train loss:19655.1544  val ap:0.866626  val mrr:0.896553
+	train time:51.8852s  val time:9.2690s
+	scope sample time:0.1701s  slice time:0.3714s  prop time:51.3438s
+Epoch 318:
+	train loss:19767.4475  val ap:0.867012  val mrr:0.896509
+	train time:51.9857s  val time:9.2782s
+	scope sample time:0.1673s  slice time:0.3706s  prop time:51.4478s
+Epoch 319:
+	train loss:19511.4231  val ap:0.868305  val mrr:0.897066
+	train time:50.4658s  val time:9.2791s
+	scope sample time:0.1569s  slice time:0.3722s  prop time:49.9368s
+Epoch 320:
+	train loss:19490.6967  val ap:0.866309  val mrr:0.895317
+	train time:51.9750s  val time:9.2782s
+	scope sample time:0.1668s  slice time:0.3720s  prop time:51.4362s
+Epoch 321:
+	train loss:19529.0888  val ap:0.865821  val mrr:0.894908
+	train time:51.8098s  val time:9.3082s
+	scope sample time:0.1630s  slice time:0.3731s  prop time:51.2737s
+Epoch 322:
+	train loss:19600.1259  val ap:0.865848  val mrr:0.894723
+	train time:50.4782s  val time:9.2824s
+	scope sample time:0.1607s  slice time:0.3719s  prop time:49.9456s
+Epoch 323:
+	train loss:19503.7633  val ap:0.866233  val mrr:0.895880
+	train time:51.9742s  val time:9.2749s
+	scope sample time:0.1611s  slice time:0.3720s  prop time:51.4411s
+Epoch 324:
+	train loss:19320.2121  val ap:0.867237  val mrr:0.896463
+	train time:51.9817s  val time:9.2781s
+	scope sample time:0.1630s  slice time:0.3717s  prop time:51.4469s
+Epoch 325:
+	train loss:19292.4988  val ap:0.866297  val mrr:0.895107
+	train time:51.7929s  val time:9.2633s
+	scope sample time:0.1635s  slice time:0.3711s  prop time:51.2583s
+Epoch 326:
+	train loss:19476.3695  val ap:0.863864  val mrr:0.893005
+	train time:50.0841s  val time:9.2749s
+	scope sample time:0.1514s  slice time:0.3714s  prop time:49.5613s
+Epoch 327:
+	train loss:19652.8900  val ap:0.866106  val mrr:0.895886
+	train time:51.5491s  val time:9.2673s
+	scope sample time:0.1552s  slice time:0.3701s  prop time:51.0237s
+Epoch 328:
+	train loss:19685.5192  val ap:0.865800  val mrr:0.893951
+	train time:51.5951s  val time:9.2607s
+	scope sample time:0.1696s  slice time:0.3736s  prop time:51.0520s
+Epoch 329:
+	train loss:19513.7755  val ap:0.864872  val mrr:0.893925
+	train time:50.6092s  val time:9.3074s
+	scope sample time:0.1620s  slice time:0.3697s  prop time:50.0775s
+Epoch 330:
+	train loss:19470.8955  val ap:0.863243  val mrr:0.893568
+	train time:52.2081s  val time:9.2815s
+	scope sample time:0.1631s  slice time:0.3711s  prop time:51.6739s
+Epoch 331:
+	train loss:19197.3605  val ap:0.863184  val mrr:0.893725
+	train time:52.0726s  val time:9.2703s
+	scope sample time:0.1618s  slice time:0.3714s  prop time:51.5394s
+Epoch 332:
+	train loss:19739.0296  val ap:0.864675  val mrr:0.895689
+	train time:50.5604s  val time:9.2811s
+	scope sample time:0.1594s  slice time:0.3694s  prop time:50.0316s
+Epoch 333:
+	train loss:19673.0934  val ap:0.861791  val mrr:0.893034
+	train time:52.0348s  val time:9.2838s
+	scope sample time:0.1709s  slice time:0.3736s  prop time:51.4903s
+Epoch 334:
+	train loss:19466.4075  val ap:0.863924  val mrr:0.893809
+	train time:51.9361s  val time:9.2902s
+	scope sample time:0.1662s  slice time:0.3697s  prop time:51.4002s
+Epoch 335:
+	train loss:19417.6455  val ap:0.863036  val mrr:0.893864
+	train time:51.9274s  val time:9.2858s
+	scope sample time:0.1692s  slice time:0.3728s  prop time:51.3853s
+Epoch 336:
+	train loss:19324.1627  val ap:0.866587  val mrr:0.894814
+	train time:50.6365s  val time:9.2791s
+	scope sample time:0.1662s  slice time:0.3732s  prop time:50.0971s
+Epoch 337:
+	train loss:19493.2925  val ap:0.866686  val mrr:0.895672
+	train time:51.9910s  val time:9.2803s
+	scope sample time:0.1670s  slice time:0.3699s  prop time:51.4541s
+Epoch 338:
+	train loss:19158.4401  val ap:0.865442  val mrr:0.893432
+	train time:52.0266s  val time:9.2762s
+	scope sample time:0.1730s  slice time:0.3735s  prop time:51.4801s
+Epoch 339:
+	train loss:19171.4117  val ap:0.863003  val mrr:0.893207
+	train time:50.5668s  val time:9.2650s
+	scope sample time:0.1648s  slice time:0.3729s  prop time:50.0290s
+Epoch 340:
+	train loss:19133.0417  val ap:0.865974  val mrr:0.895434
+	train time:51.6383s  val time:9.2633s
+	scope sample time:0.1611s  slice time:0.3725s  prop time:51.1047s
+Epoch 341:
+	train loss:19375.4278  val ap:0.863112  val mrr:0.894685
+	train time:51.6673s  val time:9.2585s
+	scope sample time:0.1559s  slice time:0.3711s  prop time:51.1403s
+Epoch 342:
+	train loss:19347.9027  val ap:0.863385  val mrr:0.892569
+	train time:50.3451s  val time:9.2585s
+	scope sample time:0.1647s  slice time:0.3725s  prop time:49.8078s
+Epoch 343:
+	train loss:19304.2306  val ap:0.866505  val mrr:0.894112
+	train time:51.6201s  val time:9.2587s
+	scope sample time:0.1593s  slice time:0.3692s  prop time:51.0916s
+Epoch 344:
+	train loss:19010.5680  val ap:0.867780  val mrr:0.896564
+	train time:51.7601s  val time:9.2708s
+	scope sample time:0.1674s  slice time:0.3719s  prop time:51.2209s
+Epoch 345:
+	train loss:19011.7352  val ap:0.866698  val mrr:0.896333
+	train time:51.7320s  val time:9.2570s
+	scope sample time:0.1718s  slice time:0.3732s  prop time:51.1870s
+Epoch 346:
+	train loss:19119.8958  val ap:0.869094  val mrr:0.896848
+	train time:50.4631s  val time:9.2473s
+	scope sample time:0.1654s  slice time:0.3727s  prop time:49.9251s
+Epoch 347:
+	train loss:18919.2333  val ap:0.866204  val mrr:0.895024
+	train time:51.8190s  val time:9.2554s
+	scope sample time:0.1666s  slice time:0.3719s  prop time:51.2805s
+Epoch 348:
+	train loss:18944.2397  val ap:0.866834  val mrr:0.896567
+	train time:51.6809s  val time:9.2774s
+	scope sample time:0.1656s  slice time:0.3717s  prop time:51.1436s
+Epoch 349:
+	train loss:19170.9119  val ap:0.863702  val mrr:0.894220
+	train time:50.2564s  val time:9.2566s
+	scope sample time:0.1676s  slice time:0.3740s  prop time:49.7148s
+Epoch 350:
+	train loss:19067.6116  val ap:0.865932  val mrr:0.894899
+	train time:51.5728s  val time:9.2647s
+	scope sample time:0.1618s  slice time:0.3706s  prop time:51.0404s
+Epoch 351:
+	train loss:19098.5420  val ap:0.863756  val mrr:0.893129
+	train time:51.6696s  val time:9.2663s
+	scope sample time:0.1600s  slice time:0.3695s  prop time:51.1401s
+Epoch 352:
+	train loss:19016.9888  val ap:0.866373  val mrr:0.895819
+	train time:50.2074s  val time:9.2607s
+	scope sample time:0.1620s  slice time:0.3707s  prop time:49.6747s
+Epoch 353:
+	train loss:18982.7947  val ap:0.868839  val mrr:0.897437
+	train time:51.6927s  val time:9.2726s
+	scope sample time:0.1563s  slice time:0.3693s  prop time:51.1671s
+Epoch 354:
+	train loss:18801.4437  val ap:0.865806  val mrr:0.895271
+	train time:51.6034s  val time:9.2531s
+	scope sample time:0.1565s  slice time:0.3696s  prop time:51.0773s
+Epoch 355:
+	train loss:19250.6363  val ap:0.865537  val mrr:0.895302
+	train time:51.6612s  val time:9.2729s
+	scope sample time:0.1559s  slice time:0.3701s  prop time:51.1352s
+Epoch 356:
+	train loss:18845.0095  val ap:0.864162  val mrr:0.894359
+	train time:50.3957s  val time:9.2613s
+	scope sample time:0.1661s  slice time:0.3722s  prop time:49.8573s
+Epoch 357:
+	train loss:18544.3134  val ap:0.861064  val mrr:0.892613
+	train time:51.5870s  val time:9.2570s
+	scope sample time:0.1657s  slice time:0.3727s  prop time:51.0486s
+Epoch 358:
+	train loss:18566.7862  val ap:0.865585  val mrr:0.893604
+	train time:51.6870s  val time:9.2671s
+	scope sample time:0.1656s  slice time:0.3709s  prop time:51.1505s
+Epoch 359:
+	train loss:18784.8406  val ap:0.864555  val mrr:0.894799
+	train time:50.3801s  val time:9.2560s
+	scope sample time:0.1607s  slice time:0.3724s  prop time:49.8470s
+Epoch 360:
+	train loss:19009.8179  val ap:0.865600  val mrr:0.894696
+	train time:51.5688s  val time:9.2706s
+	scope sample time:0.1648s  slice time:0.3706s  prop time:51.0333s
+Epoch 361:
+	train loss:18715.2175  val ap:0.866010  val mrr:0.894736
+	train time:52.6410s  val time:10.2478s
+	scope sample time:0.1619s  slice time:0.3711s  prop time:52.1079s
+Epoch 362:
+	train loss:18986.7275  val ap:0.866103  val mrr:0.894405
+	train time:61.9734s  val time:9.2711s
+	scope sample time:0.1968s  slice time:0.3730s  prop time:61.4036s
+Epoch 363:
+	train loss:18987.7888  val ap:0.863289  val mrr:0.893697
+	train time:50.4287s  val time:9.2744s
+	scope sample time:0.1585s  slice time:0.3717s  prop time:49.8985s
+Epoch 364:
+	train loss:18646.0431  val ap:0.862402  val mrr:0.893380
+	train time:51.7835s  val time:9.2504s
+	scope sample time:0.1693s  slice time:0.3718s  prop time:51.2424s
+Epoch 365:
+	train loss:19222.4400  val ap:0.862584  val mrr:0.894402
+	train time:51.8067s  val time:9.2664s
+	scope sample time:0.1634s  slice time:0.3718s  prop time:51.2715s
+Epoch 366:
+	train loss:18750.6594  val ap:0.864460  val mrr:0.894657
+	train time:50.4260s  val time:9.2701s
+	scope sample time:0.1646s  slice time:0.3717s  prop time:49.8896s
+Epoch 367:
+	train loss:18847.1970  val ap:0.863199  val mrr:0.892584
+	train time:51.6769s  val time:9.2765s
+	scope sample time:0.1654s  slice time:0.3715s  prop time:51.1400s
+Epoch 368:
+	train loss:18449.5511  val ap:0.864358  val mrr:0.894543
+	train time:51.7771s  val time:9.2542s
+	scope sample time:0.1674s  slice time:0.3729s  prop time:51.2368s
+Epoch 369:
+	train loss:18731.9117  val ap:0.863366  val mrr:0.893594
+	train time:50.3579s  val time:9.2720s
+	scope sample time:0.1635s  slice time:0.3696s  prop time:49.8248s
+Epoch 370:
+	train loss:18724.4424  val ap:0.866138  val mrr:0.895317
+	train time:51.8684s  val time:9.2599s
+	scope sample time:0.1699s  slice time:0.3701s  prop time:51.3283s
+Epoch 371:
+	train loss:18825.1914  val ap:0.864429  val mrr:0.893387
+	train time:51.7543s  val time:9.2754s
+	scope sample time:0.1641s  slice time:0.3707s  prop time:51.2194s
+Epoch 372:
+	train loss:18557.4452  val ap:0.864314  val mrr:0.894033
+	train time:51.7723s  val time:9.2467s
+	scope sample time:0.1723s  slice time:0.3705s  prop time:51.2296s
+Epoch 373:
+	train loss:18612.2599  val ap:0.863504  val mrr:0.892185
+	train time:50.4569s  val time:9.2559s
+	scope sample time:0.1625s  slice time:0.3697s  prop time:49.9247s
+Epoch 374:
+	train loss:18297.3510  val ap:0.865281  val mrr:0.894335
+	train time:51.7035s  val time:9.2824s
+	scope sample time:0.1608s  slice time:0.3707s  prop time:51.1721s
+Epoch 375:
+	train loss:18477.9289  val ap:0.864099  val mrr:0.894098
+	train time:51.7715s  val time:9.2720s
+	scope sample time:0.1585s  slice time:0.3701s  prop time:51.2429s
+Epoch 376:
+	train loss:18327.2374  val ap:0.867242  val mrr:0.895013
+	train time:50.4324s  val time:9.2588s
+	scope sample time:0.1642s  slice time:0.3710s  prop time:49.8972s
+Epoch 377:
+	train loss:18559.1043  val ap:0.866882  val mrr:0.894884
+	train time:51.8743s  val time:9.2701s
+	scope sample time:0.1733s  slice time:0.3716s  prop time:51.3294s
+Epoch 378:
+	train loss:18475.5817  val ap:0.864066  val mrr:0.894195
+	train time:51.7313s  val time:9.2728s
+	scope sample time:0.1632s  slice time:0.3725s  prop time:51.1956s
+Epoch 379:
+	train loss:18106.9989  val ap:0.865900  val mrr:0.895282
+	train time:50.5239s  val time:9.2575s
+	scope sample time:0.1686s  slice time:0.3733s  prop time:49.9820s
+Epoch 380:
+	train loss:18399.8402  val ap:0.862502  val mrr:0.892134
+	train time:51.9672s  val time:9.2631s
+	scope sample time:0.1681s  slice time:0.3723s  prop time:51.4268s
+Epoch 381:
+	train loss:18163.2910  val ap:0.863062  val mrr:0.894416
+	train time:51.7797s  val time:9.2751s
+	scope sample time:0.1572s  slice time:0.3722s  prop time:51.2503s
+Epoch 382:
+	train loss:18243.2008  val ap:0.864717  val mrr:0.893170
+	train time:51.9427s  val time:9.2663s
+	scope sample time:0.1655s  slice time:0.3705s  prop time:51.4066s
+Epoch 383:
+	train loss:18312.7886  val ap:0.865032  val mrr:0.893909
+	train time:50.5264s  val time:9.2683s
+	scope sample time:0.1656s  slice time:0.3709s  prop time:49.9899s
+Epoch 384:
+	train loss:18384.5517  val ap:0.865938  val mrr:0.894289
+	train time:51.9009s  val time:9.2729s
+	scope sample time:0.1632s  slice time:0.3715s  prop time:51.3662s
+Epoch 385:
+	train loss:18255.7946  val ap:0.865151  val mrr:0.894151
+	train time:51.8436s  val time:9.2646s
+	scope sample time:0.1735s  slice time:0.3730s  prop time:51.2971s
+Epoch 386:
+	train loss:18298.2179  val ap:0.863527  val mrr:0.894945
+	train time:50.5374s  val time:9.2725s
+	scope sample time:0.1737s  slice time:0.3737s  prop time:49.9900s
+Epoch 387:
+	train loss:17926.7301  val ap:0.866363  val mrr:0.895655
+	train time:51.7441s  val time:9.2666s
+	scope sample time:0.1631s  slice time:0.3706s  prop time:51.2104s
+Epoch 388:
+	train loss:18183.4717  val ap:0.864277  val mrr:0.892604
+	train time:51.7792s  val time:9.3304s
+	scope sample time:0.1675s  slice time:0.3708s  prop time:51.2409s
+Epoch 389:
+	train loss:18115.5088  val ap:0.864814  val mrr:0.894198
+	train time:50.8189s  val time:9.2879s
+	scope sample time:0.1694s  slice time:0.3715s  prop time:50.2780s
+Epoch 390:
+	train loss:17983.2246  val ap:0.864364  val mrr:0.893309
+	train time:52.0549s  val time:9.2876s
+	scope sample time:0.1637s  slice time:0.3708s  prop time:51.5205s
+Epoch 391:
+	train loss:17998.7176  val ap:0.863515  val mrr:0.893179
+	train time:51.9401s  val time:9.2917s
+	scope sample time:0.1627s  slice time:0.3707s  prop time:51.4067s
+Epoch 392:
+	train loss:18236.0678  val ap:0.865016  val mrr:0.893983
+	train time:51.9538s  val time:9.2627s
+	scope sample time:0.1591s  slice time:0.3713s  prop time:51.4234s
+Epoch 393:
+	train loss:18350.2022  val ap:0.864296  val mrr:0.893626
+	train time:50.6453s  val time:9.2685s
+	scope sample time:0.1647s  slice time:0.3721s  prop time:50.1084s
+Epoch 394:
+	train loss:18093.5616  val ap:0.864218  val mrr:0.892537
+	train time:51.8481s  val time:9.3023s
+	scope sample time:0.1620s  slice time:0.3700s  prop time:51.3161s
+Epoch 395:
+	train loss:18003.6495  val ap:0.865299  val mrr:0.894724
+	train time:51.8309s  val time:9.2705s
+	scope sample time:0.1601s  slice time:0.3708s  prop time:51.2999s
+Epoch 396:
+	train loss:18453.5854  val ap:0.865463  val mrr:0.895397
+	train time:50.5417s  val time:9.2827s
+	scope sample time:0.1657s  slice time:0.3696s  prop time:50.0064s
+Epoch 397:
+	train loss:17918.7477  val ap:0.863716  val mrr:0.893265
+	train time:51.9538s  val time:9.2669s
+	scope sample time:0.1707s  slice time:0.3723s  prop time:51.4109s
+Epoch 398:
+	train loss:18075.8351  val ap:0.864239  val mrr:0.892369
+	train time:51.9270s  val time:9.2813s
+	scope sample time:0.1641s  slice time:0.3710s  prop time:51.3919s
+Epoch 399:
+	train loss:17999.5589  val ap:0.865780  val mrr:0.893812
+	train time:50.6023s  val time:9.2750s
+	scope sample time:0.1553s  slice time:0.3705s  prop time:50.0765s
+Loading model at epoch 258 with val AP 0.870008...
+	test AP:0.620382  test MRR:0.725353
