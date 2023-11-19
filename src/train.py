@@ -62,8 +62,6 @@ def eval(model, dataloader):
     while not dataloader.epoch_end:
         blocks, msgs = dataloader.get_blocks()
         pred_pos, pred_neg = model(blocks, msgs)
-        if model.memory is not None:
-            model.memory.update_memory_from_stored()
         y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
         y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
         aps.append(average_precision_score(y_true, y_pred))
@@ -188,7 +186,6 @@ with torch.profiler.profile(
         if sampler is not None:
             sampler.train()
         total_loss = 0
-        total_sample_loss = 0
 
         if args.no_time: t_s = time.time()
         if args.print_cache_hit_rate:
@@ -215,36 +212,7 @@ with torch.profiler.profile(
             loss = loss_pos.mean()
             loss += criterion(pred_neg, torch.zeros_like(pred_neg)).mean()
             loss.backward()
-
-            if config['sample'][0]['type'] == 'adapt':
-                log_prob = sampler.get_log_prob()
-                sample_loss = model.sample_loss(log_prob)
-                if config['train'][0]['order'].startswith('gradient') and args.gradient_option == 'unbiased':
-                    """ Unbiased loss:
-                    n = train_loader.src_nid.size(0)
-                    new_loss_i = loss_i * (1/p) * (1/n) = loss_i / (n*p)
-                    Exp(loss_i) = sum(loss_i * (1/n))
-                    Exp (new_loss_i) = sum(loss_i * (1/p) * (1/n) * p) = Exp(loss_i)
-                    """
-                    src_prob = train_loader.root_prob[blocks[-1].gradient_idx]
-                    if len(blocks) == 1:
-                        # GraphMixer's one layer model
-                        sample_loss[:-blocks[-1].neg_dst_size] /= train_loader.src_nid.size(0) * src_prob.repeat(2)
-                        # sample_loss[:] /= train_loader.src_nid.size(0) * src_prob.repeat(2)  # without neg edges
-                    elif len(blocks) == 2:
-                        # TGAT's two layer model:
-                        # 1800 * 10 + 1800, 0 ~ 12000 & 18000 ~ 19200
-                        sample_loss[:blocks[-1].src_size * 2 * sampler.num_sample] /= \
-                            train_loader.src_nid.size(0) * src_prob.unsqueeze(-1).repeat(2, sampler.num_sample).flatten()
-                        sample_loss[-blocks[-1].n: -blocks[-1].neg_dst_size] /= \
-                            train_loader.src_nid.size(0) * src_prob.repeat(2)
-                    else:
-                        raise NotImplementedError
-                sample_loss = sample_loss.mean()
-                sample_loss.backward()
-                # torch.nn.utils.clip_grad_norm_(mapper.parameters(), max_norm=1, norm_type=2, error_if_nonfinite=True)
-            else:
-                sample_loss = 0
+            ample_loss = 0
 
             optimizer.step()
             globals.timer.end_train()
@@ -254,10 +222,7 @@ with torch.profiler.profile(
                 profiler.step()
                 
             with torch.no_grad():
-                if model.memory is not None:
-                    model.memory.update_memory_from_stored()
                 total_loss += float(loss) * config['train'][0]['batch_size']
-                total_sample_loss += float(sample_loss) * config['train'][0]['batch_size']
                 if config['train'][0]['order'].startswith('gradient'):
                     weights = torch.special.expit(pred_pos)
                     train_loader.update_gradient(blocks[-1].gradient_idx, weights)
@@ -285,13 +250,9 @@ with torch.profiler.profile(
 
         if args.tb_log_prefix != '':
             writer.add_scalar(tag='Loss/Train', scalar_value=total_loss, global_step=e)
-            writer.add_scalar(tag='Loss/Sample', scalar_value=total_sample_loss, global_step=e)
             writer.add_scalar(tag='AP/Val', scalar_value=ap, global_step=e)
             writer.add_scalar(tag='MRR/Val', scalar_value=mrr, global_step=e)
-        if config['sample'][0]['type'] == 'adapt':
-            print('\ttrain loss:{:.4f}  sample loss:{:.4f}  val ap:{:4f}  val mrr:{:4f}'.format(total_loss, total_sample_loss, ap, mrr))
-        else:
-            print('\ttrain loss:{:.4f}  val ap:{:4f}  val mrr:{:4f}'.format(total_loss, ap, mrr))
+        print('\ttrain loss:{:.4f}  val ap:{:4f}  val mrr:{:4f}'.format(total_loss, ap, mrr))
         if args.no_time:
             print('\trough train time: {:.2f}s'.format(t_rough))
         if args.print_cache_hit_rate:

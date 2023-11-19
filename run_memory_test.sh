@@ -16,7 +16,7 @@ gpus=(0)
 
 datasets=("${1}")
 orders=("chorno")
-runs=2
+runs=1
 
 trial="${2}"
 trial_dir="$(date +%Y-%m-%d)"_"${trial}"

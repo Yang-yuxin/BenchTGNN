@@ -1,0 +1,21 @@
+Epoch 0:
+	train loss:122582.5516  val ap:0.000000  val mrr:0.000000
+	train time:40.7681s  val time:0.0000s
+	scope sample time:0.1010s  slice time:0.0328s  prop time:40.6342s
+Epoch 1:
+	train loss:101753.8679  val ap:0.000000  val mrr:0.000000
+	train time:42.8907s  val time:0.0000s
+	scope sample time:0.0820s  slice time:0.0331s  prop time:42.7757s
+Epoch 2:
+	train loss:91395.7987  val ap:0.000000  val mrr:0.000000
+	train time:36.6379s  val time:0.0000s
+	scope sample time:0.0665s  slice time:0.0297s  prop time:36.5416s
+Epoch 3:
+	train loss:82489.1821  val ap:0.000000  val mrr:0.000000
+	train time:39.2961s  val time:0.0000s
+	scope sample time:0.0692s  slice time:0.0300s  prop time:39.1968s
+Epoch 4:
+	train loss:76433.4615  val ap:0.000000  val mrr:0.000000
+	train time:39.1285s  val time:0.0000s
+	scope sample time:0.0700s  slice time:0.0302s  prop time:39.0284s
+Epoch 5:
