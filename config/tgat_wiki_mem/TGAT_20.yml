@@ -8,10 +8,10 @@ eval:
   - batch_size: 100
     val_epoch: 100  # the training epoch that start evaluation on the validation set
 scope:
-  - layer: 1
+  - layer: 2
     neighbor:
       - 20
-      # - 20
+      - 20
     strategy: 'uniform'
 sample:
   # - type: 'adapt'
@@ -38,6 +38,6 @@ gnn:
     time_enc: 'learnable'
     dim_time: 100
     dim_out: 100
-    memory_type: 'gru'
-    dim_memory: 150
-    msg_reducer: 'mean'
+    memory_type: 'embedding'
+    dim_memory: 100
+    msg_reducer: 'last'

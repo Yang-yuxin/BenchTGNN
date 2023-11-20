@@ -1,7 +1,8 @@
 import os
 import argparse
-
 import torch
+# from torch.profiler import profile, record_function, ProfilerActivity
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, help='dataset name')
@@ -41,7 +42,6 @@ import globals
 import yaml
 from utils import *
 from model import TGNN
-from model import AdaptSampler
 from dataloader import DataLoader
 from contextlib import nullcontext
 from torch.utils.tensorboard import SummaryWriter
@@ -55,8 +55,6 @@ torch.autograd.set_detect_anomaly(True)
 @torch.no_grad()
 def eval(model, dataloader):
     model.eval()
-    if dataloader.sampler is not None:
-        dataloader.sampler.eval()
     aps = list()
     mrrs = list()
     while not dataloader.epoch_end:
@@ -126,7 +124,6 @@ n_node = g[0].shape[0]
 
 """Model"""
 device = 'cuda'
-sampler = None
 params = []
 model = TGNN(config, device, n_node, dim_node_feat, dim_edge_feat)
 params.append({
@@ -140,7 +137,6 @@ criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
                           nfeat, efeat, config['train'][0]['batch_size'],
-                          sampler=sampler,
                           device=device, mode='train',
                           type_sample=config['scope'][0]['strategy'],
                           order=config['train'][0]['order'],
@@ -150,7 +146,6 @@ train_loader = DataLoader(g, config['scope'][0]['neighbor'],
 val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['val_src'], edges['val_dst'], edges['val_time'], edges['neg_dst'],
                         nfeat, efeat, config['eval'][0]['batch_size'],
-                        sampler=sampler,
                         device=device, mode='val',
                         eval_neg_dst_nid=edges['val_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
@@ -159,7 +154,6 @@ val_loader = DataLoader(g, config['scope'][0]['neighbor'],
 test_loader = DataLoader(g, config['scope'][0]['neighbor'],
                          edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
                          nfeat, efeat, config['eval'][0]['batch_size'],
-                         sampler=sampler,  # load from dict
                          device=device, mode='test',
                          eval_neg_dst_nid=edges['test_neg_dst'],
                          type_sample=config['scope'][0]['strategy'],
@@ -171,20 +165,21 @@ if args.edge_feature_access_fn != '':
 
 best_ap = 0
 best_e = 0
+use_memory = (config['gnn'][0]['memory_type'] != 'none')
 with torch.profiler.profile(
         schedule=torch.profiler.schedule(wait=50, warmup=50, active=20, skip_first=100, repeat=1),
         on_trace_ready=torch.profiler.tensorboard_trace_handler(profile_path_saver)
 ) if args.profile else nullcontext() as profiler:
     for e in range(config['train'][0]['epoch']):
         print('Epoch {:d}:'.format(e))
+        if use_memory:
+            model.memory.__init_memory__()
 
         if args.edge_feature_access_fn != '':
             efeat_access_freq.append(torch.zeros(efeat.shape[0], dtype=torch.int32, device='cpu'))
 
         # training
         model.train()
-        if sampler is not None:
-            sampler.train()
         total_loss = 0
 
         if args.no_time: t_s = time.time()
@@ -207,13 +202,14 @@ with torch.profiler.profile(
 
             globals.timer.start_train()
             optimizer.zero_grad()
+            # with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof:
+                # with record_function("model_prop_forward"):        
             pred_pos, pred_neg = model(blocks, messages)
+            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
             loss_pos = criterion(pred_pos, torch.ones_like(pred_pos))
             loss = loss_pos.mean()
             loss += criterion(pred_neg, torch.zeros_like(pred_neg)).mean()
             loss.backward()
-            ample_loss = 0
-
             optimizer.step()
             globals.timer.end_train()
             
@@ -226,6 +222,7 @@ with torch.profiler.profile(
                 if config['train'][0]['order'].startswith('gradient'):
                     weights = torch.special.expit(pred_pos)
                     train_loader.update_gradient(blocks[-1].gradient_idx, weights)
+                    
         if args.print_cache_hit_rate:
             oracle_cache_hit_rate = train_loader.reset(log_cache_hit_miss=True)
         else:
@@ -244,8 +241,6 @@ with torch.profiler.profile(
                 best_e = e
                 best_ap = ap
                 param_dict = {'model': model.state_dict()}
-                if sampler is not None:
-                    param_dict['sampler'] = sampler.state_dict()
                 torch.save(param_dict, path_saver)
 
         if args.tb_log_prefix != '':
@@ -270,7 +265,5 @@ if args.edge_feature_access_fn != '':
 print('Loading model at epoch {} with val AP {:4f}...'.format(best_e, best_ap))
 param_dict = torch.load(path_saver)
 model.load_state_dict(param_dict['model'])
-if sampler is not None:
-    sampler.load_state_dict(param_dict['sampler'])
 ap, mrr = eval(model, test_loader)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))

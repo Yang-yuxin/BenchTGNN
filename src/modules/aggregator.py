@@ -6,7 +6,7 @@ from torch.nn import init
 class TransformerAggregator(nn.Module):
 
     def __init__(self, dim_node_feat, dim_edge_feat, dim_time, dim_memory, num_head, dim_out,
-                 dropout=0.0, att_clamp=10., save_h_neigh_grad=False):
+                 dropout=0.0, att_clamp=10.):
         super(TransformerAggregator, self).__init__()
 
         self.h_v = None
@@ -33,7 +33,6 @@ class TransformerAggregator(nn.Module):
         self.layer_norm = nn.LayerNorm(dim_out)
 
         self.att_clamp = att_clamp
-        self.neigh_grad = save_h_neigh_grad
 
     @property
     def device(self):
@@ -56,22 +55,9 @@ class TransformerAggregator(nn.Module):
         h_k = h_k.view((h_q.shape[0], -1, self.num_head, h_q.shape[-1]))
         h_v = h_v.view((h_q.shape[0], -1, self.num_head, h_q.shape[-1]))
 
-        if self.neigh_grad:
-            self.h_v = h_v
-
         h_att = self.att_act(torch.sum(h_q * h_k, dim=3))
-
-        if self.neigh_grad:
-            self.h_exp_a = torch.exp(torch.clamp(h_att, -self.att_clamp, self.att_clamp)).unsqueeze(-1)
-            # self.h_exp_a = torch.exp(h_att - h_att.max()).unsqueeze(-1)
-
         h_att = F.softmax(h_att, dim=1).unsqueeze(-1)
         h_neigh = (h_v * h_att).sum(dim=1)
-
-        if self.neigh_grad:
-            self.h_neigh = h_neigh
-            if self.training: self.h_neigh.retain_grad()
-
         h_neigh = h_neigh.view(h_v.shape[0], -1)
         h_out = self.w_out(torch.cat([h_neigh, root_node_feature], dim=1)) # residual
         h_out = self.layer_norm(nn.functional.relu(self.dropout(h_out)))
@@ -84,13 +70,11 @@ class FeedForward(nn.Module):
     """
 
     def __init__(self, dims, expansion_factor=1., dropout=0., use_single_layer=False,
-                 out_dims=0, use_act=True,
-                 save_h_neigh_grad=False):
+                 out_dims=0, use_act=True):
         super().__init__()
 
         self.h_v = None
         self.h_neigh = None
-        self.save_grad = save_h_neigh_grad
 
         self.use_single_layer = use_single_layer
         self.expansion_factor = expansion_factor
@@ -149,15 +133,8 @@ class FeedForward(nn.Module):
     def forward(self, x):
         if x.shape[-1] == 0:
             return x
-        
-        if self.save_grad:
-            self.h_v = x
 
         x = self.linear_0(x)
-
-        if self.save_grad:
-            self.h_neigh = x
-            if self.training: self.h_neigh.retain_grad()
 
         if self.use_act:
             x = F.gelu(x)
@@ -179,13 +156,11 @@ class MixerBlock(nn.Module):
     def __init__(self, num_neighbor, dim_feat,
                  token_expansion_factor=0.5,
                  channel_expansion_factor=4.,
-                 dropout=0.,
-                 save_h_neigh_grad=False):
+                 dropout=0.,):
         super().__init__()
 
         self.token_layernorm = nn.LayerNorm(dim_feat)
-        self.token_forward = FeedForward(num_neighbor, token_expansion_factor, dropout,
-                                         save_h_neigh_grad=save_h_neigh_grad)
+        self.token_forward = FeedForward(num_neighbor, token_expansion_factor, dropout,)
 
         self.channel_layernorm = nn.LayerNorm(dim_feat)
         self.channel_forward = FeedForward(dim_feat, channel_expansion_factor, dropout)
@@ -218,8 +193,7 @@ class MixerBlock(nn.Module):
 
 class MixerAggregator(nn.Module):
 
-    def __init__(self, num_neighbor, dim_node_feat, dim_edge_feat, dim_time, dim_memory, dim_out, dropout=0.0,
-                 save_h_neigh_grad=False):
+    def __init__(self, num_neighbor, dim_node_feat, dim_edge_feat, dim_time, dim_memory, dim_out, dropout=0.0,):
         super(MixerAggregator, self).__init__()
 
         self.num_neighbor = num_neighbor
@@ -230,7 +204,7 @@ class MixerAggregator(nn.Module):
         self.dim_out = dim_out
 
         self.mixer = MixerBlock(num_neighbor, dim_node_feat + dim_edge_feat + dim_time + dim_memory,
-                                dropout=dropout, save_h_neigh_grad=save_h_neigh_grad)
+                                dropout=dropout,)
         self.layer_norm = nn.LayerNorm(dim_node_feat + dim_edge_feat + dim_time + dim_memory)
         self.mlp_out = nn.Linear(dim_node_feat + dim_edge_feat + dim_time + dim_memory, dim_out)
 

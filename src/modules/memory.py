@@ -5,18 +5,18 @@ from torch import nn
 from torch.nn import init
 from collections import defaultdict
 from modules.time_encoder import LearnableTimeEncoder, FixedTimeEncoder
+# from torch.profiler import profile, record_function, ProfilerActivity
 
 class Memory(nn.Module):
-    def __init__(self, n_nodes, dim_memory):
+    def __init__(self, n_nodes, dim_memory, device):
         super(Memory, self).__init__()
         self.n_nodes = n_nodes
         self.dim_memory = dim_memory
-        self.memory = nn.Parameter(torch.zeros(n_nodes, dim_memory), requires_grad=False)
-        self.last_update = nn.Parameter(torch.zeros(self.n_nodes),
-                                    requires_grad=False)
         self.new_memory = None
         self.update_nids = None
-    
+        self.device = device
+        self.__init_memory__()
+
     def get_memory(self, nids):
         return self.memory[nids, :]
     
@@ -25,6 +25,11 @@ class Memory(nn.Module):
 
     def get_last_update(self, nids):
         return self.last_update[nids]
+    
+    def __init_memory__(self):
+        self.memory = nn.Parameter(nn.init.orthogonal_(torch.randn(self.n_nodes, self.dim_memory)), requires_grad=False).to(self.device)
+        self.last_update = nn.Parameter(torch.zeros(self.n_nodes),
+                                            requires_grad=False).to(self.device)
     
     # def update_memory_from_stored(self):
     #     self.memory[self.update_nids, :] = self.new_memory
@@ -46,8 +51,8 @@ class Memory(nn.Module):
 
 
 class GRUMemory(Memory):
-    def __init__(self, n_nodes, dim_memory, dim_msg, dim_time, msg_reducer_type, time_encoder_type):
-        super(GRUMemory, self).__init__(n_nodes, dim_memory)
+    def __init__(self, device, n_nodes, dim_memory, dim_msg, dim_time, msg_reducer_type, time_encoder_type):
+        super(GRUMemory, self).__init__(n_nodes, dim_memory, device)
         # Treat memory as parameter so that it is saved and loaded together with the model
         self.memory.requires_grad = False
         self.memory_updater = nn.GRUCell(input_size=dim_msg,
@@ -77,6 +82,24 @@ class GRUMemory(Memory):
                          edge_times,
                          edge_features):
         # TODO: implement the version that uses src and dst node embeddings
+        # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+        #     with record_function("get_memory"):  
+        #         src_memory = self.get_memory(src_nodes)
+        #         dst_memory = self.get_memory(dst_nodes)
+        #     with record_function("get_time_encoding"):  
+        #         source_time_delta = edge_times - self.get_last_update(src_nodes)
+        #         source_time_delta_encoding = self.time_encoder(source_time_delta.unsqueeze(dim=1)).view(len(src_nodes), -1)
+        #     with record_function("concatenation"):
+        #         src_message = torch.cat([src_memory, dst_memory, edge_features,
+        #                         source_time_delta_encoding],
+        #                         dim=1)
+        #     messages = defaultdict(list)
+        #     with record_function("get_unique_msgs"):  
+        #         unique_sources = torch.unique(src_nodes)
+        #     with record_function("appending_msgs"):  
+        #         for i in range(len(src_nodes)):
+        #             messages[src_nodes[i].item()].append((src_message[i], edge_times[i]))
+        # print(prof.key_averages().table(sort_by="cpu_time_total",))
         src_memory = self.get_memory(src_nodes)
         dst_memory = self.get_memory(dst_nodes)
         source_time_delta = edge_times - self.get_last_update(src_nodes)
@@ -88,26 +111,50 @@ class GRUMemory(Memory):
         unique_sources = torch.unique(src_nodes)
 
         for i in range(len(src_nodes)):
-            messages[src_nodes[i].item()].append((src_message[i], edge_times[i]))
+            messages[src_nodes[i].item()].append((src_message[i], edge_times[i])) # LOWWWWWWWWWW efficiency!!!
         return unique_sources, messages
             
 
     def update_memory(self, src_nids, src_embeddings, dst_nids, dst_embeddings, edge_times, edge_features):
-        unique_sources, source_id_to_messages = self.get_raw_messages(src_nids,
-                                                                    src_embeddings,
-                                                                    dst_nids,
-                                                                    dst_embeddings,
-                                                                    edge_times, edge_features)
+        # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+        #     with record_function("get_raw_msgs"):  
+        #         unique_sources, source_id_to_messages = self.get_raw_messages(src_nids,
+        #                                                             src_embeddings,
+        #                                                             dst_nids,
+        #                                                             dst_embeddings,
+        #                                                             edge_times, edge_features)
         
+        #         unique_destinations, destination_id_to_messages = self.get_raw_messages(dst_nids,
+        #                                                                       dst_embeddings,
+        #                                                                       src_nids,
+        #                                                                       src_embeddings,
+        #                                                                       edge_times, edge_features)
+            
+        #     for nodes, messages in zip([unique_sources, unique_destinations], [source_id_to_messages, destination_id_to_messages]):
+        #         with record_function("aggr_msgs"):  
+        #             unique_nids, unique_messages, unique_timestamps = \
+        #             self.message_reducer.aggregate(nodes, messages)
+        #         with record_function("update_mem_unique"):  
+        #             self.update_memory_by_reduced_messages(unique_nids, unique_messages, unique_timestamps)
+        # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))
+
+        unique_sources, source_id_to_messages = self.get_raw_messages(src_nids,
+                                                            src_embeddings,
+                                                            dst_nids,
+                                                            dst_embeddings,
+                                                            edge_times, edge_features)
+
         unique_destinations, destination_id_to_messages = self.get_raw_messages(dst_nids,
-                                                                              dst_embeddings,
-                                                                              src_nids,
-                                                                              src_embeddings,
-                                                                              edge_times, edge_features)
+                                                                        dst_embeddings,
+                                                                        src_nids,
+                                                                        src_embeddings,
+                                                                        edge_times, edge_features)
+        
         for nodes, messages in zip([unique_sources, unique_destinations], [source_id_to_messages, destination_id_to_messages]):
             unique_nids, unique_messages, unique_timestamps = \
             self.message_reducer.aggregate(nodes, messages)
             self.update_memory_by_reduced_messages(unique_nids, unique_messages, unique_timestamps)
+        
             
 
     def update_memory_by_reduced_messages(self, unique_nids, unique_messages, unique_timestamps):
@@ -124,8 +171,8 @@ class GRUMemory(Memory):
 
 
 class EmbeddingTableMemory(Memory):
-    def __init__(self, n_nodes, dim_memory, dim_msg=0):
-        super(EmbeddingTableMemory, self).__init__(n_nodes, dim_memory)
+    def __init__(self, device, n_nodes, dim_memory, dim_msg=0):
+        super(EmbeddingTableMemory, self).__init__(n_nodes, dim_memory, device)
         # Treat memory as parameter so that it is saved and loaded together with the model
         self.memory.requires_grad = True
     
@@ -157,9 +204,10 @@ class LastMemoryMessageReducer(nn.Module):
         unique_messages = []
         unique_timestamps = []
         for nid in unique_nids:
-            assert len(messages[nid]) > 0
-            unique_messages.append(messages[nid][-1][0])
-            unique_timestamps.append(messages[nid][-1][1])
+            nid_item = nid.item()
+            assert len(messages[nid_item]) > 0
+            unique_messages.append(messages[nid_item][-1][0])
+            unique_timestamps.append(messages[nid_item][-1][1])
         unique_messages = torch.stack(unique_messages) if len(unique_nids) > 0 else []
         unique_timestamps = torch.stack(unique_timestamps) if len(unique_nids) > 0 else []
         return unique_nids, unique_messages, unique_timestamps

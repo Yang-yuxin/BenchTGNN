@@ -32,7 +32,6 @@ import globals
 import yaml
 from utils import *
 from model import TGNN
-from model import AdaptSampler
 from dataloader import DataLoader
 from contextlib import nullcontext
 from torch.utils.tensorboard import SummaryWriter
@@ -44,8 +43,6 @@ if not args.no_time:
 @torch.no_grad()
 def eval(model, dataloader):
     model.eval()
-    if dataloader.sampler is not None:
-        dataloader.sampler.eval()
     aps = list()
     mrrs = list()
     while not dataloader.epoch_end:
@@ -77,16 +74,7 @@ dim_node_feat = nfeat.shape[-1] if nfeat is not None else 0
 """Model"""
 path_model = args.model_path
 device = 'cuda'
-sampler = None
 params = []
-if config['sample'][0]['type'] == 'adapt':
-    sampler = AdaptSampler(config, dim_edge_feat, dim_node_feat).to(device)
-    params.append({
-        'params': sampler.parameters(),
-        'lr': config['sample'][0]['lr'],
-        'weight_decay': float(config['sample'][0]['weight_decay']),
-        # 'betas': (0.99, 0.9999)
-    })
 model = TGNN(config, dim_node_feat, dim_edge_feat).to(device)
 params.append({
     'params': model.parameters(),
@@ -99,8 +87,6 @@ criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
                           nfeat, efeat, config['train'][0]['batch_size'],
-                          sampler=sampler,
-                          device=device, mode='train',
                           type_sample=config['scope'][0]['strategy'],
                           order=config['train'][0]['order'],
                           # edge_deg=edges['train_deg'],
@@ -108,7 +94,6 @@ train_loader = DataLoader(g, config['scope'][0]['neighbor'],
 val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['val_src'], edges['val_dst'], edges['val_time'], edges['neg_dst'],
                         nfeat, efeat, config['eval'][0]['batch_size'],
-                        sampler=sampler,
                         device=device, mode='val',
                         eval_neg_dst_nid=edges['val_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
@@ -116,7 +101,6 @@ val_loader = DataLoader(g, config['scope'][0]['neighbor'],
 test_loader = DataLoader(g, config['scope'][0]['neighbor'],
                          edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
                          nfeat, efeat, config['eval'][0]['batch_size'],
-                         sampler=sampler,  # load from dict
                          device=device, mode='test',
                          eval_neg_dst_nid=edges['test_neg_dst'],
                          type_sample=config['scope'][0]['strategy'],
@@ -125,7 +109,5 @@ test_loader = DataLoader(g, config['scope'][0]['neighbor'],
 print('Loading model at path {}...'.format(path_model))
 param_dict = torch.load(path_model)
 model.load_state_dict(param_dict['model'])
-if sampler is not None:
-    sampler.load_state_dict(param_dict['sampler'])
 ap, mrr = eval(model, test_loader)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))

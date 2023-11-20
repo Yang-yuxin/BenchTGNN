@@ -2,6 +2,7 @@ import dgl
 import torch
 import globals
 from cache import HistoricalCacheConfig
+from torch.profiler import profile, record_function, ProfilerActivity
 
 from temporal_sampling import sample_with_pad
 from utils import DenseTemporalBlock
@@ -24,7 +25,6 @@ class DataLoader:
     def __init__(self, g, fanout,
                  src_nid, dst_nid, timestamp, neg_dst_nid,
                  nfeat, efeat, batch_size,
-                 sampler=None,
                  device='cuda', mode='train',
                  eval_neg_dst_nid=None,
                  type_sample='uniform',
@@ -86,8 +86,6 @@ class DataLoader:
 
         self.batch_size = batch_size
         self.device = device
-
-        self.sampler = sampler
 
         assert mode in ['train', 'val', 'test']
         self.mode = mode
@@ -165,11 +163,6 @@ class DataLoader:
 
             if self.enable_cache:
                 self.cache.update(neigh_eid)
-
-            if self.sampler is not None:
-                if self.mode == 'train': globals.timer.start_neighbor_sample()
-                block = self.sampler(block, i == len(self.fanout) - 1)
-                if self.mode == 'train': globals.timer.end_neighbor_sample()
 
             if self.mode == 'train': globals.timer.start_scope_sample()
             # concat root set after frontier set to avoid affecting local_neigh indices
