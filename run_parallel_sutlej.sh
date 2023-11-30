@@ -4,7 +4,7 @@
 # Run small datasets WIKI / REDDIT on ganges
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID;
-gpus=(0)
+gpus=(1 2 3)
 #echo "Enter a list of device numbers separated by commas:"
 #IFS=',' read -ra gpus
 #echo -n 'Schedule tasks on GPUs: '
@@ -16,7 +16,7 @@ gpus=(0)
 
 datasets=("${1}")
 orders=("chorno")
-runs=1
+runs=5
 
 trial="${2}"
 trial_dir="$(date +%Y-%m-%d)"_"${trial}"
@@ -63,6 +63,7 @@ do
                                               --data "${dataset}" \
                                               --override_order "${order}" \
                                               --gpu "${gpu}" \
+                                              --tb_log_prefix "log_tb" \
                                               --pure_gpu \
                                               --profile \
             | tee "${log_dir}"/"${order}"_"${dataset}"_"${config%.*}"_"${i}".out &

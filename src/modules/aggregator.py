@@ -6,7 +6,7 @@ from torch.nn import init
 class TransformerAggregator(nn.Module):
 
     def __init__(self, dim_node_feat, dim_edge_feat, dim_time, dim_memory, num_head, dim_out,
-                 dropout=0.0, att_clamp=10.):
+                 dropout=0.0):
         super(TransformerAggregator, self).__init__()
 
         self.h_v = None
@@ -31,8 +31,6 @@ class TransformerAggregator(nn.Module):
         self.w_out = nn.Linear(dim_node_feat + dim_out, dim_out)
 
         self.layer_norm = nn.LayerNorm(dim_out)
-
-        self.att_clamp = att_clamp
 
     @property
     def device(self):

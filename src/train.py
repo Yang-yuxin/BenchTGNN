@@ -4,6 +4,7 @@ import torch
 # from torch.profiler import profile, record_function, ProfilerActivity
 import time
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, help='dataset name')
 parser.add_argument('--root_path', type=str, default='DATA', help='dataset root path')
@@ -46,6 +47,7 @@ from dataloader import DataLoader
 from contextlib import nullcontext
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import average_precision_score
+from modules.memory import GRUMemory
 
 if not args.no_time:
     globals.timer.set_enable()
@@ -86,8 +88,6 @@ if args.override_scope > 0:
     fanout = config['scope'][0]['neighbor']
     for i in range(len(fanout)):
         fanout[i] = args.override_scope
-if args.override_neighbor > 0:
-    config['sample'][0]['neighbor'] = args.override_neighbor
 
 """Logger"""
 path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[1].split('.')[0],
@@ -211,6 +211,8 @@ with torch.profiler.profile(
             loss += criterion(pred_neg, torch.zeros_like(pred_neg)).mean()
             loss.backward()
             optimizer.step()
+            if isinstance(model.memory, GRUMemory):
+                model.memory.detach_memory()
             globals.timer.end_train()
             
 

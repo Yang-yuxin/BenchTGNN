@@ -37,6 +37,7 @@ class DataLoader:
                  pure_gpu=False,):
         self.g = [el.to(device) for el in g]  # [indptr, indices, eid, timestamp]
         self.fanout = fanout  # e.g. [10, 5]
+        # import pdb; pdb.set_trace()
 
         assert src_nid.shape[0] == dst_nid.shape[0] == timestamp.shape[0]
         self.src_nid = src_nid.to(device)

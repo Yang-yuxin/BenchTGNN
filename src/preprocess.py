@@ -110,4 +110,4 @@ ts = ts[keep]
 np.savez('DATA/{}/ext_full_clipped.npz'.format(args.data), indptr=indptr,
          indices=indices, ts=ts, eid=eid)
 
-os.system('chgrp -R atgnn DATA')
+# os.system('chgrp -R atgnn DATA')
