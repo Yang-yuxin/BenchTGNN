@@ -69,9 +69,10 @@ def eval(model, dataloader):
             torch.sum(pred_pos.squeeze() < pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) + 1).type(
             torch.float))
     dataloader.reset()
+    # import pdb; pdb.set_trace()
     ap = float(torch.tensor(aps).mean())
     mrr = float(torch.cat(mrrs).mean())
-    return ap, mrr
+    return ap, mrr, aps, mrrs
 
 
 config = yaml.safe_load(open(args.config, 'r'))
@@ -90,17 +91,14 @@ if args.override_scope > 0:
         fanout[i] = args.override_scope
 
 """Logger"""
-# path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[1].split('.')[0],
-#                                           time.strftime('%m-%d %H:%M:%S'))
-path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[-1].split('.')[0],
+path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[1].split('.')[0],
                                           time.strftime('%m-%d %H:%M:%S'))
 path = os.path.dirname(path_saver)
 os.makedirs(path, exist_ok=True)
-# print(path_saver)
 
 if args.tb_log_prefix != '':
     tb_path_saver = 'log_tb/{}{}_{}_{}'.format(args.tb_log_prefix, args.data,
-                                               args.config.split('/')[-1].split('.')[0],
+                                               args.config.split('/')[1].split('.')[0],
                                                time.strftime('%m-%d %H:%M:%S'))
     os.makedirs('log_tb/', exist_ok=True)
     writer = SummaryWriter(log_dir=tb_path_saver)
@@ -129,16 +127,6 @@ n_node = g[0].shape[0]
 device = 'cuda'
 params = []
 model = TGNN(config, device, n_node, dim_node_feat, dim_edge_feat)
-params.append({
-    'params': model.parameters(),
-    'lr': config['train'][0]['lr']
-})
-optimizer = torch.optim.Adam(params)
-if model.memory is not None:
-    model.memory.to_device()
-criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
-
-"""Loader"""
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
                           nfeat, efeat, config['train'][0]['batch_size'],
@@ -165,138 +153,16 @@ test_loader = DataLoader(g, config['scope'][0]['neighbor'],
                          memory=config['gnn'][0]['memory_type'],
                          enable_cache=False, pure_gpu=args.pure_gpu)
 
-if args.edge_feature_access_fn != '':
-    efeat_access_freq = list()
 
-best_ap = 0
-best_e = 0
-use_memory = (config['gnn'][0]['memory_type'] != 'none')
-with torch.profiler.profile(
-        schedule=torch.profiler.schedule(wait=50, warmup=50, active=20, skip_first=100, repeat=1),
-        on_trace_ready=torch.profiler.tensorboard_trace_handler(profile_path_saver)
-) if args.profile else nullcontext() as profiler:
-    for e in range(config['train'][0]['epoch']):
-        print('Epoch {:d}:'.format(e))
-        if config['gnn'][0]['memory_type'] == 'gru':
-            model.memory.__init_memory__(True)
-            # import pdb; pdb.set_trace()
-
-        if args.edge_feature_access_fn != '':
-            efeat_access_freq.append(torch.zeros(efeat.shape[0], dtype=torch.int32, device='cpu'))
-
-        # training
-        model.train()
-        total_loss = 0
-
-        if args.no_time: t_s = time.time()
-        if args.print_cache_hit_rate:
-            hit_count = 0
-            miss_count = 0
-        aps = []
-        mrrs = []
-        while not train_loader.epoch_end:
-            blocks, messages = train_loader.get_blocks(log_cache_hit_miss=args.print_cache_hit_rate)
-            if args.print_cache_hit_rate:
-                for block in blocks:
-                    hit_count += block.cache_hit_count
-                    miss_count += block.cache_miss_count
-
-            if args.edge_feature_access_fn != '':
-                with torch.no_grad():
-                    for b in blocks:
-                        access = b.neighbor_eid.flatten().detach().cpu()
-                        value = torch.ones_like(access, dtype=torch.int32)
-                        efeat_access_freq[-1].put_(access, value, accumulate=True)
-
-            globals.timer.start_train()
-            optimizer.zero_grad()
-            # with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof:
-            #     with record_function("model_prop_forward"):        
-            #         pred_pos, pred_neg = model(blocks, messages)
-            #     loss_pos = criterion(pred_pos, torch.ones_like(pred_pos))
-            #     loss = loss_pos.mean()
-            #     loss += criterion(pred_neg, torch.zeros_like(pred_neg)).mean()
-            #     with record_function("loss_backward"):
-            #         loss.backward()
-            #     with record_function("optimizer_step"):
-            #         optimizer.step()
-            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))    
-            pred_pos, pred_neg = model(blocks, messages)
-            loss_pos = criterion(pred_pos, torch.ones_like(pred_pos))
-            
-            loss = loss_pos.mean()
-            loss += criterion(pred_neg, torch.zeros_like(pred_neg)).mean()
-            loss.backward()
-            optimizer.step()
-            with torch.no_grad():
-                y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
-                y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
-                aps.append(average_precision_score(y_true, y_pred))
-                mrrs.append(torch.reciprocal(
-                torch.sum(pred_pos.squeeze() < pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) + 1).type(
-                torch.float))
-            if isinstance(model.memory, GRUMemory):
-                model.memory.detach_memory()
-            globals.timer.end_train()
-            
-
-            if args.profile:
-                profiler.step()
-                
-            with torch.no_grad():
-                total_loss += float(loss) * config['train'][0]['batch_size']
-                if config['train'][0]['order'].startswith('gradient'):
-                    weights = torch.special.expit(pred_pos)
-                    train_loader.update_gradient(blocks[-1].gradient_idx, weights)
-        train_ap = float(torch.tensor(aps).mean())
-        train_mrr = float(torch.cat(mrrs).mean())
-        train_memory_backup = model.memory.backup_memory()
-        # print(ap, mrr)
-        if args.print_cache_hit_rate:
-            oracle_cache_hit_rate = train_loader.reset(log_cache_hit_miss=True)
-        else:
-            train_loader.reset()
-        if args.no_time:
-            torch.cuda.synchronize()
-            t_rough = time.time() - t_s
-
-        ap = mrr = 0.
-        time_val = 0.
-        if e >= config['eval'][0]['val_epoch']:
-            globals.timer.start_val()
-            ap, mrr = eval(model, val_loader)
-            globals.timer.end_val()
-            if ap > best_ap:
-                best_e = e
-                best_ap = ap
-                param_dict = {'model': model.state_dict()}
-                # if config['gnn'][0]['memory_type'] == 'gru':
-                #     param_dict['memory'] = model.memory.memory
-                torch.save(param_dict, path_saver)
-
-        if args.tb_log_prefix != '':
-            writer.add_scalar(tag='Loss/Train', scalar_value=total_loss, global_step=e)
-            writer.add_scalar(tag='AP/Val', scalar_value=ap, global_step=e)
-            writer.add_scalar(tag='MRR/Val', scalar_value=mrr, global_step=e)
-            writer.add_scalar(tag='MRR/Train', scalar_value=train_mrr, global_step=e)
-            writer.add_scalar(tag='AP/Train', scalar_value=train_ap, global_step=e)
-        print('\ttrain loss:{:.4f} train ap:{:4f} train mrr:{:4f} val ap:{:4f}  val mrr:{:4f}'.format(total_loss, train_ap, train_mrr, ap, mrr))
-        if args.no_time:
-            print('\trough train time: {:.2f}s'.format(t_rough))
-        if args.print_cache_hit_rate:
-            print('\tcache hit rate: {:.2f}%  oracle hit rate: {:.2f}%'.format(hit_count / (hit_count + miss_count) * 100, oracle_cache_hit_rate * 100))
-        else:
-            globals.timer.print(prefix='\t')
-            globals.timer.reset()
-
-if args.tb_log_prefix != '':
-    writer.close()
-
-if args.edge_feature_access_fn != '':
-    torch.save(efeat_access_freq, efeat_access_path_saver)
-
-print('Loading model at epoch {} with val AP {:4f}...'.format(best_e, best_ap))
-param_dict = torch.load(path_saver)
+# param_dict = torch.load('models/WIKI_TGAT_wiki_12-05 18:11:37.pkl')
+# param_dict = torch.load('models/WIKI_TGAT_re_gru_12-10 17:57:58.pkl')
+param_dict = torch.load('models/WIKI_TGAT_re_gru_12-10 21:38:19.pkl')
+# models/WIKI_TGAT_re_gru_12-10 21:38:19.pkl
 model.load_state_dict(param_dict['model'])
-ap, mrr = eval(model, test_loader)
+model.memory.__init_memory__(True)
+_ = eval(model, train_loader)
+ap, mrr, aps, mrrs = eval(model, val_loader)
+import pdb; pdb.set_trace()
+ap, mrr, aps, mrrs = eval(model, test_loader)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))
+import pdb; pdb.set_trace()

@@ -1,0 +1,26 @@
+train:
+  - order: 'chorno' # chorno means training mini-batches are formed in chronological order
+    epoch: 300
+    batch_size: 600
+    lr: 0.0005
+    dropout: 0.1
+eval:
+  - batch_size: 100
+    val_epoch: 100  # the training epoch that start evaluation on the validation set
+scope:
+  - layer: 2
+    neighbor:
+      - 20
+      - 20
+    strategy: 'uniform'
+gnn:
+  - arch: 'transformer'
+    layer: 2
+    att_head: 2
+    time_enc: 'learnable'
+    dim_time: 100
+    dim_out: 100
+    memory_type: 'embedding'
+    dim_memory: 172
+    msg_reducer: 'last'
+    memory_update_use_embed: True

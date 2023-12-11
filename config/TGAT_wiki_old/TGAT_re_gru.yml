@@ -12,7 +12,7 @@ scope:
     neighbor:
       - 20
       - 20
-    strategy: 'uniform'
+    strategy: 'recent'
 gnn:
   - arch: 'transformer'
     layer: 2
@@ -20,7 +20,7 @@ gnn:
     time_enc: 'learnable'
     dim_time: 100
     dim_out: 100
-    memory_type: 'embedding'
+    memory_type: 'gru'
     dim_memory: 100
     msg_reducer: 'last'
-    memory_update_use_embed: True
+    memory_update_use_embed: False

@@ -5,7 +5,7 @@ from torch.nn import init
 
 class TransformerAggregator(nn.Module):
 
-    def __init__(self, dim_node_feat, dim_edge_feat, dim_time, dim_memory, num_head, dim_out,
+    def __init__(self, dim_node_feat, dim_time, dim_edge_feat, dim_memory, dim_out, num_head, 
                  dropout=0.0):
         super(TransformerAggregator, self).__init__()
 
@@ -13,10 +13,10 @@ class TransformerAggregator(nn.Module):
         self.h_exp_a = None
         self.h_neigh = None
 
-        self.dim_node_feat = dim_node_feat
+        self.dim_node_feat = dim_node_feat if dim_node_feat > 0 else dim_memory
+        
         self.dim_edge_feat = dim_edge_feat
         self.dim_time = dim_time
-        self.dim_memory = dim_memory
         self.num_head = num_head
         self.dim_out = dim_out
 
@@ -25,10 +25,11 @@ class TransformerAggregator(nn.Module):
         self.att_dropout = nn.Dropout(dropout)
         self.att_act = nn.LeakyReLU(0.2)
 
-        self.w_q = nn.Linear(dim_node_feat + dim_time + dim_memory, dim_out)
-        self.w_k = nn.Linear(dim_node_feat + dim_edge_feat + dim_time + dim_memory, dim_out)
-        self.w_v = nn.Linear(dim_node_feat + dim_edge_feat + dim_time + dim_memory, dim_out)
-        self.w_out = nn.Linear(dim_node_feat + dim_out, dim_out)
+        self.w_q = nn.Linear(self.dim_node_feat + dim_time, dim_out)
+        self.w_k = nn.Linear(self.dim_node_feat + dim_edge_feat + dim_time, dim_out)
+        self.w_v = nn.Linear(self.dim_node_feat + dim_edge_feat + dim_time, dim_out)
+        self.w_out = nn.Linear(self.dim_node_feat + dim_out, dim_out)
+        # import pdb; pdb.set_trace()
 
         self.layer_norm = nn.LayerNorm(dim_out)
 
@@ -38,16 +39,14 @@ class TransformerAggregator(nn.Module):
 
     def forward(self, 
                 root_node_feature, 
-                neighbor_node_feature, 
-                neighbor_edge_feature,
                 zero_time_feat,
-                edge_time_feat,
-                root_node_memory,
-                neighbor_node_memory):
+                neighbor_node_feature,
+                neighbor_edge_feature,
+                edge_time_feat):
         
-        h_q = self.w_q(torch.cat([root_node_feature, zero_time_feat, root_node_memory], dim=1))
-        h_k = self.w_k(torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat, neighbor_node_memory], dim=1))
-        h_v = self.w_v(torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat, neighbor_node_memory], dim=1))
+        h_q = self.w_q(torch.cat([root_node_feature, zero_time_feat], dim=1))
+        h_k = self.w_k(torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat], dim=1))
+        h_v = self.w_v(torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat], dim=1))
 
         h_q = h_q.view((h_q.shape[0], 1, self.num_head, -1))
         h_k = h_k.view((h_q.shape[0], -1, self.num_head, h_q.shape[-1]))
