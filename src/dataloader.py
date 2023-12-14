@@ -24,7 +24,7 @@ class DataLoader:
 
     def __init__(self, g, fanout,
                  src_nid, dst_nid, timestamp, neg_dst_nid,
-                 nfeat, efeat, batch_size,
+                 nfeat, efeat, train_edge_end, val_edge_end, batch_size,
                  device='cuda', mode='train',
                  eval_neg_dst_nid=None,
                  type_sample='uniform',
@@ -77,6 +77,9 @@ class DataLoader:
             self.efeat = efeat.to(device) if efeat is not None else None
         else:
             self.efeat = efeat.pin_memory() if efeat is not None else None
+
+        self.train_edge_end = train_edge_end
+        self.val_edge_end = val_edge_end
 
         if self.enable_cache:
             num_cached_edges = int(efeat.shape[0]*cached_ratio)
@@ -179,7 +182,13 @@ class DataLoader:
             blocks.insert(0, block)
             if self.mode == 'train': globals.timer.end_scope_sample()
         if self.use_memory:
-            block_pos_edge_feats = self.efeat[batch_idx]
+            if self.mode == 'train':
+                efeat = self.efeat[:self.train_edge_end]
+            elif self.mode == 'val':
+                efeat = self.efeat[self.train_edge_end:self.val_edge_end]
+            else:
+                efeat = self.efeat[self.val_edge_end:]
+            block_pos_edge_feats = efeat[batch_idx]
         else:
             block_pos_edge_feats = None
         return blocks, block_pos_edge_feats

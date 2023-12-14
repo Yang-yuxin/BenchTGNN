@@ -3,7 +3,7 @@ import argparse
 import torch
 from torch.profiler import profile, record_function, ProfilerActivity
 import time
-
+import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, help='dataset name')
@@ -137,11 +137,14 @@ optimizer = torch.optim.Adam(params)
 if model.memory is not None:
     model.memory.to_device()
 criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
+df = pd.read_csv('DATA/{}/edges.csv'.format(args.data))
+train_edge_end = df[df['ext_roll'].gt(0)].index[0]
+val_edge_end = df[df['ext_roll'].gt(1)].index[0]
 
 """Loader"""
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
-                          nfeat, efeat, config['train'][0]['batch_size'],
+                          nfeat, efeat, train_edge_end, val_edge_end, config['train'][0]['batch_size'],
                           device=device, mode='train',
                           type_sample=config['scope'][0]['strategy'],
                           order=config['train'][0]['order'],
@@ -150,7 +153,7 @@ train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           cached_ratio=args.cached_ratio, enable_cache=args.cache, pure_gpu=args.pure_gpu)
 val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['val_src'], edges['val_dst'], edges['val_time'], edges['neg_dst'],
-                        nfeat, efeat, config['eval'][0]['batch_size'],
+                        nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
                         device=device, mode='val',
                         eval_neg_dst_nid=edges['val_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
@@ -158,7 +161,7 @@ val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         enable_cache=False, pure_gpu=args.pure_gpu)
 test_loader = DataLoader(g, config['scope'][0]['neighbor'],
                          edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
-                         nfeat, efeat, config['eval'][0]['batch_size'],
+                         nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
                          device=device, mode='test',
                          eval_neg_dst_nid=edges['test_neg_dst'],
                          type_sample=config['scope'][0]['strategy'],
@@ -167,7 +170,7 @@ test_loader = DataLoader(g, config['scope'][0]['neighbor'],
 
 if args.edge_feature_access_fn != '':
     efeat_access_freq = list()
-
+import pdb; pdb.set_trace()
 best_ap = 0
 best_e = 0
 use_memory = (config['gnn'][0]['memory_type'] != 'none')
