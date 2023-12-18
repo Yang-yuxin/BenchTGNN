@@ -17,7 +17,6 @@ class Memory(nn.Module):
         self.device = device
         self.mailbox = torch.zeros((n_nodes, dim_msg), dtype=torch.float32).to(self.device)
         self.mailbox_ts = torch.zeros((n_nodes), dtype=torch.float32).to(self.device)
-        self.mailbox_is_empty = torch.ones((n_nodes), dtype=torch.bool).to(self.device)
         self.last_update = torch.zeros(n_nodes).to(self.device)
        
         
@@ -43,7 +42,6 @@ class Memory(nn.Module):
         self.mailbox.fill_(0)
         self.mailbox_ts.fill_(0)
         self.last_update.fill_(0)
-        self.mailbox_is_empty.fill_(1)
     
 
     def set_last_update(self, nids, last_update):
@@ -92,7 +90,6 @@ class GRUMemory(Memory):
         """
         Store messages in the self.messages[src_nodes]
         """
-        # import pdb; pdb.set_trace()
         # TODO: implement the version that uses src and dst node embeddings
         src_memory = self.get_memory(src_nodes, self.memory) 
         if self.use_embedding_in_message:
@@ -101,56 +98,49 @@ class GRUMemory(Memory):
         if self.use_embedding_in_message:
             dst_memory = self.linear(torch.cat([dst_node_embeddings, dst_memory], 1))
         
-        source_time_delta = edge_times - self.get_last_update(src_nodes)
-        source_time_delta_encoding = self.time_encoder(source_time_delta.unsqueeze(dim=1)).view(len(src_nodes), -1)
-        src_message = torch.cat([src_memory, dst_memory, edge_features,
-                                source_time_delta_encoding],
-                                dim=1)
+        # source_time_delta = edge_times - self.get_last_update(src_nodes)
+        # source_time_delta_encoding = self.time_encoder(source_time_delta.unsqueeze(dim=1)).view(len(src_nodes), -1)
+        # src_message = torch.cat([src_memory, dst_memory, edge_features,
+        #                         source_time_delta_encoding],
+        #                         dim=1)
+        # source_time_delta = edge_times - self.get_last_update(src_nodes)
+        # source_time_delta_encoding = self.time_encoder(source_time_delta.unsqueeze(dim=1)).view(len(src_nodes), -1)
+        src_message = torch.cat([src_memory, dst_memory, edge_features], dim=1)
+        dst_message = torch.cat([dst_memory, src_memory, edge_features], dim=1)
+        nid = torch.cat([src_nodes.unsqueeze(1), dst_nodes.unsqueeze(1)], dim=1).reshape(-1)
+        mail = torch.cat([src_message, dst_message], dim=1).reshape(-1, src_message.shape[1])
         # tgn mailbox
-        unique_sources, inv = torch.unique(src_nodes, return_inverse=True)
+        unique_sources, inv = torch.unique(nid, return_inverse=True)
         perm = torch.arange(inv.size(0), dtype=inv.dtype, device=inv.device)
         perm = inv.new_empty(unique_sources.size(0)).scatter_(0, inv, perm)
-        nid = src_nodes[perm]
-        mail = src_message[perm]
+        nid = nid[perm]
+        mail = mail[perm]
         mail_ts = edge_times[perm]
         if self.message_reducer_type == 'last':
-            
-            idx_to_update = torch.where(self.mailbox_is_empty[nid.long()] == 1)[0]
-            self.mailbox[nid[idx_to_update].long()] = mail[idx_to_update]
-            self.mailbox_ts[nid[idx_to_update].long()] = mail_ts[idx_to_update]
-            idx_to_compare = torch.where(self.mailbox_is_empty[nid.long()] == 0)[0]
-            assert len(idx_to_compare) == 0
-            # if (len(idx_to_compare)):
-            #     import pdb; pdb.set_trace()
-            # idx_to_update = idx_to_compare[torch.where(self.mailbox_ts[nid[idx_to_compare].long()] <= mail_ts[idx_to_compare])[0]]
-            # self.mailbox[nid[idx_to_update].long()] = mail[idx_to_update]
-            # self.mailbox_ts[nid[idx_to_update].long()] = mail_ts[idx_to_update]
-            # self.mailbox_is_empty[nid.long()] = 0
-            # import pdb; pdb.set_trace()
+            idx_to_update = nid
+            self.mailbox[nid.long()] = mail
+            self.mailbox_ts[nid.long()] = mail_ts
         else:
             raise NotImplementedError
 
     def update_memory(self, nodes):
         unique_nids = torch.unique(nodes)
-        to_update_nids = unique_nids[torch.where(self.mailbox_is_empty[unique_nids] == 0)[0]]
+        to_update_nids = unique_nids
         memory = self.get_memory(to_update_nids, self.memory)
         updated_memory = self.memory_updater(self.mailbox[to_update_nids, :], memory)
         self.set_memory(to_update_nids, updated_memory)
         self.set_last_update(to_update_nids, self.mailbox_ts[to_update_nids])
 
     
-    def clear_mailbox(self, nodes):
-        self.mailbox_is_empty[torch.unique(nodes).long()] = 1
 
 
     def get_updated_memory(self, nodes):
         unique_nids, inv = torch.unique(nodes, return_inverse=True)
-        to_update_nids = unique_nids[torch.where(self.mailbox_is_empty[unique_nids] == 0)[0]]
+        to_update_nids = unique_nids
         # import pdb; pdb.set_trace()
         memory = self.get_memory(to_update_nids, self.memory)
         updated_memory = self.memory.data.clone()
         with torch.no_grad():
-            # import pdb; pdb.set_trace()
             updated_memory[to_update_nids] = self.memory_updater(self.mailbox[to_update_nids, :], updated_memory[to_update_nids, :])
         return updated_memory[nodes, :], self.last_update[nodes].data.clone()
 
@@ -158,12 +148,6 @@ class GRUMemory(Memory):
         self.memory.detach_()
         self.mailbox.detach_()
     
-    def backup_memory(self):
-        return self.memory.clone(), self.mailbox.clone(), self.mailbox_ts.clone(), self.mailbox_is_empty.clone()
-
-    def restore_memory(self, memory):
-        self.memory, self.mailbox, self.mailbox_ts, self.mailbox_is_empty = memory[0].clone(), memory[1].clone(), \
-        memory[2].clone(), memory[3].clone()
 
 class EmbeddingTableMemory(Memory):    
     def __init__(self, device, n_nodes, dim_memory, dim_msg=0):

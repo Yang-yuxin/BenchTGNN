@@ -40,7 +40,7 @@ class TGNN(torch.nn.Module):
         if memory_type == 'gru':
             dim_memory = gnn_config['dim_memory']
             dim_time = gnn_config['dim_time']
-            dim_msg = dim_memory * 2 + dim_edge_feat + dim_time
+            dim_msg = dim_memory * 2 + dim_edge_feat
             self.memory = GRUMemory(device, n_nodes, dim_memory, dim_node_feat, dim_msg, dim_time, 
                                     gnn_config['msg_reducer'], time_encoder_type, use_embedding_in_message)
             dim_memory = gnn_config['dim_memory']
@@ -152,12 +152,12 @@ class TGNN(torch.nn.Module):
             src_nids = block.root_nid[:block.pos_dst_size]
             dst_nids = block.root_nid[block.pos_dst_size:block.pos_dst_size*2]
             positives = torch.cat([src_nids, dst_nids])
-            pos_edge_times = block.root_ts[:block.pos_dst_size]
+            pos_edge_times = block.root_ts[:2 * block.pos_dst_size]
             self.memory.update_memory(positives)
             if not torch.allclose(updated_memory[positives], self.memory.get_memory(positives, self.memory.memory), atol=2e-5): 
                 print("Something wrong in how the memory was updated")
                 import pdb; pdb.set_trace()
-            self.memory.clear_mailbox(positives)
+            # self.memory.clear_mailbox(positives)
             self.memory.store_raw_messages(src_nids, None, dst_nids, None, pos_edge_times, pos_edge_feats)
             # self.memory.store_raw_messages(dst_nids, None, src_nids, None, pos_edge_times, pos_edge_feats)
             # import pdb; pdb.set_trace()

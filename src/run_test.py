@@ -1,6 +1,7 @@
 import os
 import argparse
 import torch
+import pandas as pd
 from torch.profiler import profile, record_function, ProfilerActivity
 import time
 
@@ -127,9 +128,14 @@ n_node = g[0].shape[0]
 device = 'cuda'
 params = []
 model = TGNN(config, device, n_node, dim_node_feat, dim_edge_feat)
+df = pd.read_csv('DATA/{}/edges.csv'.format(args.data))
+train_edge_end = df[df['ext_roll'].gt(0)].index[0]
+val_edge_end = df[df['ext_roll'].gt(1)].index[0]
+
+"""Loader"""
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
-                          nfeat, efeat, config['train'][0]['batch_size'],
+                          nfeat, efeat, train_edge_end, val_edge_end, config['train'][0]['batch_size'],
                           device=device, mode='train',
                           type_sample=config['scope'][0]['strategy'],
                           order=config['train'][0]['order'],
@@ -138,7 +144,7 @@ train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           cached_ratio=args.cached_ratio, enable_cache=args.cache, pure_gpu=args.pure_gpu)
 val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['val_src'], edges['val_dst'], edges['val_time'], edges['neg_dst'],
-                        nfeat, efeat, config['eval'][0]['batch_size'],
+                        nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
                         device=device, mode='val',
                         eval_neg_dst_nid=edges['val_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
@@ -146,7 +152,7 @@ val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         enable_cache=False, pure_gpu=args.pure_gpu)
 test_loader = DataLoader(g, config['scope'][0]['neighbor'],
                          edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
-                         nfeat, efeat, config['eval'][0]['batch_size'],
+                         nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
                          device=device, mode='test',
                          eval_neg_dst_nid=edges['test_neg_dst'],
                          type_sample=config['scope'][0]['strategy'],
@@ -156,13 +162,11 @@ test_loader = DataLoader(g, config['scope'][0]['neighbor'],
 
 # param_dict = torch.load('models/WIKI_TGAT_wiki_12-05 18:11:37.pkl')
 # param_dict = torch.load('models/WIKI_TGAT_re_gru_12-10 17:57:58.pkl')
-param_dict = torch.load('models/WIKI_TGAT_re_gru_12-10 21:38:19.pkl')
-# models/WIKI_TGAT_re_gru_12-10 21:38:19.pkl
+# param_dict = torch.load('models/WIKI_TGAT_re_gru_12-10 21:34:22.pkl')
+param_dict = torch.load('models/WIKI_TGAT_re_gru_12-17 16:29:25.pkl')
 model.load_state_dict(param_dict['model'])
 model.memory.__init_memory__(True)
 _ = eval(model, train_loader)
 ap, mrr, aps, mrrs = eval(model, val_loader)
-import pdb; pdb.set_trace()
 ap, mrr, aps, mrrs = eval(model, test_loader)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))
-import pdb; pdb.set_trace()

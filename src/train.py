@@ -170,7 +170,7 @@ test_loader = DataLoader(g, config['scope'][0]['neighbor'],
 
 if args.edge_feature_access_fn != '':
     efeat_access_freq = list()
-import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 best_ap = 0
 best_e = 0
 use_memory = (config['gnn'][0]['memory_type'] != 'none')
@@ -253,7 +253,6 @@ with torch.profiler.profile(
                     train_loader.update_gradient(blocks[-1].gradient_idx, weights)
         train_ap = float(torch.tensor(aps).mean())
         train_mrr = float(torch.cat(mrrs).mean())
-        train_memory_backup = model.memory.backup_memory()
         # print(ap, mrr)
         if args.print_cache_hit_rate:
             oracle_cache_hit_rate = train_loader.reset(log_cache_hit_miss=True)
@@ -301,5 +300,8 @@ if args.edge_feature_access_fn != '':
 print('Loading model at epoch {} with val AP {:4f}...'.format(best_e, best_ap))
 param_dict = torch.load(path_saver)
 model.load_state_dict(param_dict['model'])
+model.memory.__init_memory__(True)
+_ = eval(model, train_loader)
+_ = eval(model, val_loader)
 ap, mrr = eval(model, test_loader)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))

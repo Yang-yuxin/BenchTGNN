@@ -54,6 +54,7 @@ class TransformerAggregator(nn.Module):
 
         h_att = self.att_act(torch.sum(h_q * h_k, dim=3))
         h_att = F.softmax(h_att, dim=1).unsqueeze(-1)
+        h_att = self.att_dropout(h_att)
         h_neigh = (h_v * h_att).sum(dim=1)
         h_neigh = h_neigh.view(h_v.shape[0], -1)
         h_out = self.w_out(torch.cat([h_neigh, root_node_feature], dim=1)) # residual
