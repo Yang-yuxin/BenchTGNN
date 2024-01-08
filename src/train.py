@@ -92,11 +92,14 @@ if args.override_scope > 0:
 """Logger"""
 # path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[1].split('.')[0],
 #                                           time.strftime('%m-%d %H:%M:%S'))
-path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[-1].split('.')[0],
-                                          time.strftime('%m-%d %H:%M:%S'))
-path = os.path.dirname(path_saver)
+
+time_str = time.strftime('%m-%d %H:%M:%S')
+path_saver_prefix = 'models/{}_{}_{}/'.format(args.data, args.config.split('/')[-1].split('.')[0], time_str)
+
+
+path = os.path.dirname(path_saver_prefix)
 os.makedirs(path, exist_ok=True)
-# print(path_saver)
+
 
 if args.tb_log_prefix != '':
     tb_path_saver = 'log_tb/{}{}_{}_{}'.format(args.tb_log_prefix, args.data,
@@ -137,9 +140,8 @@ optimizer = torch.optim.Adam(params)
 if model.memory is not None:
     model.memory.to_device()
 criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
-df = pd.read_csv('DATA/{}/edges.csv'.format(args.data))
-train_edge_end = df[df['ext_roll'].gt(0)].index[0]
-val_edge_end = df[df['ext_roll'].gt(1)].index[0]
+train_edge_end = len(edges['train_src'])
+val_edge_end = len(edges['train_src']) + len(edges['val_src'])
 
 """Loader"""
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
@@ -274,7 +276,9 @@ with torch.profiler.profile(
                 param_dict = {'model': model.state_dict()}
                 # if config['gnn'][0]['memory_type'] == 'gru':
                 #     param_dict['memory'] = model.memory.memory
-                torch.save(param_dict, path_saver)
+                torch.save(param_dict, path_saver_prefix + 'best.pkl')
+            if e % config['train'][0]['save_every'] == 0:
+                torch.save(param_dict, path_saver_prefix + '{}.pkl'.format(e))
 
         if args.tb_log_prefix != '':
             writer.add_scalar(tag='Loss/Train', scalar_value=total_loss, global_step=e)
@@ -298,10 +302,11 @@ if args.edge_feature_access_fn != '':
     torch.save(efeat_access_freq, efeat_access_path_saver)
 
 print('Loading model at epoch {} with val AP {:4f}...'.format(best_e, best_ap))
-param_dict = torch.load(path_saver)
+param_dict = torch.load(path_saver_prefix + 'best.pkl')
 model.load_state_dict(param_dict['model'])
-model.memory.__init_memory__(True)
-_ = eval(model, train_loader)
-_ = eval(model, val_loader)
+if isinstance(model.memory, GRUMemory):
+    model.memory.__init_memory__(True)
+    _ = eval(model, train_loader)
+    _ = eval(model, val_loader)
 ap, mrr = eval(model, test_loader)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))

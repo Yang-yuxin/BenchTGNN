@@ -45,13 +45,13 @@ class TGNN(torch.nn.Module):
                                     gnn_config['msg_reducer'], time_encoder_type, use_embedding_in_message)
             dim_memory = gnn_config['dim_memory']
             if dim_node_feat > 0:
-                self.memory_mapper = nn.Linear(dim_memory, dim_node_feat)
+                self.memory_mapper = nn.Linear(dim_node_feat, dim_memory)
         elif memory_type == 'embedding':
             dim_memory = gnn_config['dim_memory']
             self.memory = EmbeddingTableMemory(device, n_nodes, dim_memory)
             dim_memory = gnn_config['dim_memory']
             if dim_node_feat > 0:
-                self.memory_mapper = nn.Linear(dim_memory, dim_node_feat)
+                self.memory_mapper = nn.Linear(dim_node_feat, dim_memory)
         elif memory_type == 'none':
             self.memory = None
             dim_memory = 0
@@ -124,12 +124,14 @@ class TGNN(torch.nn.Module):
                 root_node_feature = block.root_node_feature
             else:
                 root_node_memory = self.memory.get_memory(block.root_nid, updated_memory) if self.memory is not None else torch.tensor([]).to(self.device)
+                # import pdb; pdb.set_trace()
                 neighbor_node_memory = self.memory.get_memory(block.neighbor_nid, updated_memory).reshape(-1, self.memory.dim_memory) \
                 if self.memory is not None else torch.tensor([]).to(self.device)
                 if h_in is None:
+                    # import pdb; pdb.set_trace()
                     if neighbor_node_feature.shape[1] > 0:
-                        neighbor_node_feature = neighbor_node_feature + self.memory_mapper(neighbor_node_memory)
-                        root_node_feature = block.root_node_feature + self.memory_mapper(root_node_memory)
+                        neighbor_node_feature = neighbor_node_memory + self.memory_mapper(neighbor_node_feature)
+                        root_node_feature = root_node_memory + self.memory_mapper(block.root_node_feature)
                     else:
                         neighbor_node_feature = neighbor_node_memory
                         root_node_feature = root_node_memory
@@ -145,7 +147,6 @@ class TGNN(torch.nn.Module):
                                 neighbor_node_feature,
                                 neighbor_edge_feature,
                                 edge_time_feat)
-            # import pdb; pdb.set_trace()
 
         if isinstance(self.memory, GRUMemory):
             block = blocks[-1]

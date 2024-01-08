@@ -130,9 +130,6 @@ class GRUMemory(Memory):
         self.set_memory(unique_nids, memory[perm])
         self.set_last_update(unique_nids, self.mailbox_ts[unique_nids])
 
-    
-
-
     def get_updated_memory(self, nodes):
         unique_nids, inv = torch.unique(nodes, return_inverse=True)
         to_update_nids = unique_nids

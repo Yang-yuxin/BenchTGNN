@@ -48,7 +48,8 @@ do
             do
                 for gpu in "${gpus[@]}";
                 do
-                    if [ "$(nvidia-smi -i "${gpu}" --query-compute-apps=pid --format=csv,noheader | wc -l)" -eq 0 ]; then
+                    # if [ "$(nvidia-smi -i "${gpu}" --query-compute-apps=pid --format=csv,noheader | wc -l)" -eq 0 ]; then
+                    if [ "$(nvidia-smi -i "${gpu}" --query-compute-apps=pid --format=csv,noheader | wc -l)" -le 1 ]; then
                         scheduled=true
                         break
                     fi

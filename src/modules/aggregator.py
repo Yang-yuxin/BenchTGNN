@@ -201,6 +201,7 @@ class MixerAggregator(nn.Module):
         self.dim_memory = dim_memory
         self.dim_out = dim_out
 
+        # import pdb; pdb.set_trace()
         self.mixer = MixerBlock(num_neighbor, dim_node_feat + dim_edge_feat + dim_time + dim_memory,
                                 dropout=dropout,)
         self.layer_norm = nn.LayerNorm(dim_node_feat + dim_edge_feat + dim_time + dim_memory)
@@ -211,14 +212,11 @@ class MixerAggregator(nn.Module):
 
     def forward(self, 
                 root_node_feature, 
+                zero_time_feat,
                 neighbor_node_feature, 
                 neighbor_edge_feature,
-                zero_time_feat,
-                edge_time_feat,
-                root_node_memory,
-                neighbor_node_memory):
-
-        feats = torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat, neighbor_node_memory], dim=1)
+                edge_time_feat):
+        feats = torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat], dim=1)
         feats = feats.view(-1, self.num_neighbor, feats.shape[-1])
 
         feats = self.mixer(feats)

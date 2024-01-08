@@ -40,8 +40,8 @@ if args.clip_root_set:
         src = src[-max_num_set:]
         dst = dst[-max_num_set:]
         time = time[-max_num_set:]
-        train_edge_end = int(max_num_set * 0.6)
-        val_edge_end = train_edge_end + int(max_num_set * 0.2)
+        train_edge_end = int(max_num_set * 0.7)
+        val_edge_end = train_edge_end + int(max_num_set * 0.15)
 
 pt_edge['train_src'] = src[:train_edge_end]
 pt_edge['train_dst'] = dst[:train_edge_end]
