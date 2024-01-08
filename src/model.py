@@ -153,7 +153,7 @@ class TGNN(torch.nn.Module):
             dst_nids = block.root_nid[block.pos_dst_size:block.pos_dst_size*2]
             positives = torch.cat([src_nids, dst_nids])
             pos_edge_times = block.root_ts[:2 * block.pos_dst_size]
-            self.memory.update_memory(positives)
+            self.memory.update_memory(positives, root_node_memory[:2 * block.pos_dst_size])
             if not torch.allclose(updated_memory[positives], self.memory.get_memory(positives, self.memory.memory), atol=2e-5): 
                 print("Something wrong in how the memory was updated")
                 import pdb; pdb.set_trace()

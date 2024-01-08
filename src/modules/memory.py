@@ -123,13 +123,12 @@ class GRUMemory(Memory):
         else:
             raise NotImplementedError
 
-    def update_memory(self, nodes):
-        unique_nids = torch.unique(nodes)
-        to_update_nids = unique_nids
-        memory = self.get_memory(to_update_nids, self.memory)
-        updated_memory = self.memory_updater(self.mailbox[to_update_nids, :], memory)
-        self.set_memory(to_update_nids, updated_memory)
-        self.set_last_update(to_update_nids, self.mailbox_ts[to_update_nids])
+    def update_memory(self, nodes, memory):
+        unique_nids, inv = torch.unique(nodes, return_inverse=True)
+        perm = torch.arange(inv.size(0), dtype=inv.dtype, device=inv.device)
+        perm = inv.new_empty(unique_nids.size(0)).scatter_(0, inv, perm)
+        self.set_memory(unique_nids, memory[perm])
+        self.set_last_update(unique_nids, self.mailbox_ts[unique_nids])
 
     
 
@@ -140,8 +139,7 @@ class GRUMemory(Memory):
         # import pdb; pdb.set_trace()
         memory = self.get_memory(to_update_nids, self.memory)
         updated_memory = self.memory.data.clone()
-        with torch.no_grad():
-            updated_memory[to_update_nids] = self.memory_updater(self.mailbox[to_update_nids, :], updated_memory[to_update_nids, :])
+        updated_memory[to_update_nids] = self.memory_updater(self.mailbox[to_update_nids, :], updated_memory[to_update_nids, :])
         return updated_memory[nodes, :], self.last_update[nodes].data.clone()
 
     def detach_memory(self):
