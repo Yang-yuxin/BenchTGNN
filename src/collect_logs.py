@@ -24,7 +24,7 @@ log_dir = args.log_dir
 config_dir = args.config_dir + '/{}'.format(args.trial)
 
 orders = ['chorno', 'gradient']
-datasets = ['WIKI', 'REDDIT', 'Flight', 'MovieLens', 'sGDELT', 'GDELT']
+datasets = ['WIKI', 'REDDIT', 'Flight', 'MovieLens', 'sGDELT', 'GDELT', 'MOOC', 'LASTFM']
 configs = [f for f in os.listdir(config_dir) if f.endswith('.yml')]
 configs.sort()
 

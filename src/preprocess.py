@@ -88,6 +88,13 @@ if os.path.isfile('DATA/{}/edge_features.pt'.format(args.data)):
         feat = torch.cat([feat, torch.zeros_like(feat[0]).unsqueeze(0)], dim=0)
         torch.save(feat, 'DATA/{}/edge_features_pad.pt'.format(args.data))
 
+# add randomized features for LASTFM and MOOC
+if not os.path.isfile('DATA/{}/node_features.pt'.format(args.data)) and args.data in ['LASTFM', 'MOOC']:
+    if not os.path.isfile('DATA/{}/node_features_pad.pt'.format(args.data)):
+        feat = torch.randn(128, )
+        feat = torch.cat([feat, torch.zeros_like(feat[0]).unsqueeze(0)], dim=0)
+        torch.save(feat, 'DATA/{}/node_features_pad.pt'.format(args.data))
+
 # process graph
 g = np.load('DATA/{}/ext_full.npz'.format(args.data))
 indptr = g['indptr']

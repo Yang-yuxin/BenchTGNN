@@ -9,19 +9,19 @@ eval:
   - batch_size: 100
     val_epoch: 0  # the training epoch that start evaluation on the validation set
 scope:
-  - layer: 1
+  - layer: 2
     neighbor:
       - 20
-      # - 20
-    strategy: 'recent'
+      - 20
+    strategy: 'uniform'
 gnn:
-  - arch: 'transformer'
+  - arch: 'mixer'
     layer: 2
     att_head: 2
     time_enc: 'learnable'
     dim_time: 100
     dim_out: 100
-    memory_type: 'gru'
+    memory_type: 'none'
     dim_memory: 100
     msg_reducer: 'last'
     memory_update_use_embed: False

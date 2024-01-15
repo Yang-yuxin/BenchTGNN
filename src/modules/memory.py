@@ -35,7 +35,8 @@ class Memory(nn.Module):
     def __init_memory__(self, isgru):
         if isgru:
             # self.memory = nn.Parameter(torch.zeros(self.n_nodes, self.dim_memory), requires_grad=False).to(self.device)
-            torch.nn.init.normal_(self.memory)
+            # torch.nn.init.normal_(self.memory)
+            torch.nn.init.zeros_(self.memory)
             # self.memory.fill_(0)
         # self.memory.fill_(0)
         # self.memory = nn.Embedding(self.n_nodes, self.dim_memory).to(self.device)

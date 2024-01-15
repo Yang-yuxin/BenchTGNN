@@ -90,7 +90,7 @@ class TGNN(torch.nn.Module):
                 self.layers.append(TransformerAggregator(dim_out, dim_time, dim_edge_feat, dim_memory, dim_out, gnn_config['att_head'], 
                                                     train_config['dropout'],))
             elif gnn_config['arch'] == 'mixer':
-                self.layers.append(MixerAggregator(num_neighbors, dim_out,
+                self.layers.append(MixerAggregator(num_neighbors, dim_node_feat,
                                                    dim_edge_feat, gnn_config['dim_time'], dim_memory,
                                                    dim_out, train_config['dropout']))
         
@@ -110,8 +110,7 @@ class TGNN(torch.nn.Module):
         for block, layer in zip(blocks, self.layers):
                 
             if h_in is not None:
-                block.slice_hidden_node_features(h_in)
-                
+                block.slice_hidden_node_features(h_in)    
             neighbor_node_feature = block.neighbor_node_feature.view(
                 block.neighbor_node_feature.shape[0] * block.neighbor_node_feature.shape[1],
                 block.neighbor_node_feature.shape[2]
