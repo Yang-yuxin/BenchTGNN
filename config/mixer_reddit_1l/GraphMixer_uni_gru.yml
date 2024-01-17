@@ -18,7 +18,7 @@ gnn:
   - arch: 'mixer'
     layer: 2
     att_head: 2
-    time_enc: 'learnable'
+    time_enc: 'fixed'
     dim_time: 100
     dim_out: 100
     memory_type: 'gru'

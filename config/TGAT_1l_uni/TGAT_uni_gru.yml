@@ -15,8 +15,8 @@ scope:
       # - 20
     strategy: 'uniform'
 gnn:
-  - arch: 'mixer'
-    layer: 2
+  - arch: 'transformer'
+    layer: 1
     att_head: 2
     time_enc: 'learnable'
     dim_time: 100

@@ -16,12 +16,12 @@ scope:
     strategy: 'uniform'
 gnn:
   - arch: 'mixer'
-    layer: 2
+    layer: 1
     att_head: 2
-    time_enc: 'learnable'
+    time_enc: 'fixed'
     dim_time: 100
     dim_out: 100
-    memory_type: 'gru'
+    memory_type: 'none'
     dim_memory: 100
     msg_reducer: 'last'
-    memory_update_use_embed: False
+    memory_update_use_embed: True

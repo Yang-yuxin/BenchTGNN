@@ -80,7 +80,12 @@ class TGNN(torch.nn.Module):
             self.layers.append(TransformerAggregator(dim_node_feat, dim_time, dim_edge_feat,dim_memory, dim_out, gnn_config['att_head'], 
                                                     train_config['dropout'],))
         elif gnn_config['arch'] == 'mixer':
-            self.layers.append(MixerAggregator(num_neighbors, dim_node_feat, dim_edge_feat,
+            if self.memory:
+                self.layers.append(MixerAggregator(num_neighbors, dim_memory, dim_edge_feat,
+                                               gnn_config['dim_time'], dim_memory, 
+                                               dim_out, train_config['dropout'], ))
+            else:
+                self.layers.append(MixerAggregator(num_neighbors, dim_node_feat, dim_edge_feat,
                                                gnn_config['dim_time'], dim_memory, 
                                                dim_out, train_config['dropout'], ))
         else:
@@ -90,7 +95,7 @@ class TGNN(torch.nn.Module):
                 self.layers.append(TransformerAggregator(dim_out, dim_time, dim_edge_feat, dim_memory, dim_out, gnn_config['att_head'], 
                                                     train_config['dropout'],))
             elif gnn_config['arch'] == 'mixer':
-                self.layers.append(MixerAggregator(num_neighbors, dim_node_feat,
+                self.layers.append(MixerAggregator(num_neighbors, dim_out,
                                                    dim_edge_feat, gnn_config['dim_time'], dim_memory,
                                                    dim_out, train_config['dropout']))
         
@@ -123,18 +128,15 @@ class TGNN(torch.nn.Module):
                 root_node_feature = block.root_node_feature
             else:
                 root_node_memory = self.memory.get_memory(block.root_nid, updated_memory) if self.memory is not None else torch.tensor([]).to(self.device)
-                # import pdb; pdb.set_trace()
                 neighbor_node_memory = self.memory.get_memory(block.neighbor_nid, updated_memory).reshape(-1, self.memory.dim_memory) \
                 if self.memory is not None else torch.tensor([]).to(self.device)
                 if h_in is None:
-                    # import pdb; pdb.set_trace()
                     if neighbor_node_feature.shape[1] > 0:
                         neighbor_node_feature = neighbor_node_memory + self.memory_mapper(neighbor_node_feature)
                         root_node_feature = root_node_memory + self.memory_mapper(block.root_node_feature)
                     else:
                         neighbor_node_feature = neighbor_node_memory
                         root_node_feature = root_node_memory
-                    # root_node_feature = block.root_node_feature + root_node_memory if block.root_node_feature.shape[1]> 0 else root_node_memory
                 else:
                     root_node_feature = block.root_node_feature
                     

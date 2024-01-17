@@ -7,13 +7,13 @@ train:
     dropout: 0.1
 eval:
   - batch_size: 100
-    val_epoch: 100  # the training epoch that start evaluation on the validation set
+    val_epoch: 0  # the training epoch that start evaluation on the validation set
 scope:
   - layer: 1
     neighbor:
       - 20
       # - 20
-    strategy: 'recent'
+    strategy: 'uniform'
 gnn:
   - arch: 'transformer'
     layer: 2

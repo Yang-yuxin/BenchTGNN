@@ -15,13 +15,13 @@ scope:
       # - 20
     strategy: 'uniform'
 gnn:
-  - arch: 'mixer'
-    layer: 2
+  - arch: 'transformer'
+    layer: 1
     att_head: 2
     time_enc: 'learnable'
     dim_time: 100
     dim_out: 100
-    memory_type: 'gru'
+    memory_type: 'embedding'
     dim_memory: 100
     msg_reducer: 'last'
     memory_update_use_embed: False

@@ -13,7 +13,7 @@ scope:
     neighbor:
       - 20
       # - 20
-    strategy: 'recent'
+    strategy: 'uniform'
 gnn:
   - arch: 'transformer'
     layer: 2

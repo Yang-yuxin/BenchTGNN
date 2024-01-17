@@ -24,4 +24,4 @@ gnn:
     memory_type: 'embedding'
     dim_memory: 100
     msg_reducer: 'last'
-    memory_update_use_embed: True
+    memory_update_use_embed: False

@@ -202,10 +202,10 @@ class MixerAggregator(nn.Module):
         self.dim_out = dim_out
 
         # import pdb; pdb.set_trace()
-        self.mixer = MixerBlock(num_neighbor, dim_node_feat + dim_edge_feat + dim_time + dim_memory,
+        self.mixer = MixerBlock(num_neighbor, dim_node_feat + dim_edge_feat + dim_time,
                                 dropout=dropout,)
-        self.layer_norm = nn.LayerNorm(dim_node_feat + dim_edge_feat + dim_time + dim_memory)
-        self.mlp_out = nn.Linear(dim_node_feat + dim_edge_feat + dim_time + dim_memory, dim_out)
+        self.layer_norm = nn.LayerNorm(dim_node_feat + dim_edge_feat + dim_time)
+        self.mlp_out = nn.Linear(dim_node_feat + dim_edge_feat + dim_time, dim_out)
 
     def sample_loss(self, log_prob):
         return self.mixer.sample_loss(log_prob)
