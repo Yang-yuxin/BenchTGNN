@@ -277,8 +277,8 @@ with torch.profiler.profile(
                 # if config['gnn'][0]['memory_type'] == 'gru':
                 #     param_dict['memory'] = model.memory.memory
                 torch.save(param_dict, path_saver_prefix + 'best.pkl')
-            if e % config['train'][0]['save_every'] == 0:
-                torch.save(param_dict, path_saver_prefix + '{}.pkl'.format(e))
+            # if e % config['train'][0]['save_every'] == 0:
+            #     torch.save(param_dict, path_saver_prefix + '{}.pkl'.format(e))
 
         if args.tb_log_prefix != '':
             writer.add_scalar(tag='Loss/Train', scalar_value=total_loss, global_step=e)
