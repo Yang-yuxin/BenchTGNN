@@ -181,7 +181,7 @@ class DataLoader:
 
             blocks.insert(0, block)
             if self.mode == 'train': globals.timer.end_scope_sample()
-        if self.use_memory:
+        if self.use_memory and self.efeat is not None:
             if self.mode == 'train':
                 efeat = self.efeat[:self.train_edge_end]
             elif self.mode == 'val':

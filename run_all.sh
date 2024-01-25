@@ -33,13 +33,24 @@
 # bash run_parallel_sutlej.sh MOOC TGAT_1l_fixed config
 
 # 0122
-bash run_parallel_sutlej.sh WIKI scan_5 config
-bash run_parallel_sutlej.sh WIKI scan_10 config
-bash run_parallel_sutlej.sh WIKI scan_50 config
-bash run_parallel_sutlej.sh WIKI scan_100 config
-bash run_parallel_sutlej.sh WIKI scan_200 config
-bash run_parallel_sutlej.sh REDDIT scan_5 config
-bash run_parallel_sutlej.sh REDDIT scan_10 config
-bash run_parallel_sutlej.sh REDDIT scan_50 config
-bash run_parallel_sutlej.sh REDDIT scan_100 config
-bash run_parallel_sutlej.sh REDDIT scan_200 config
+# bash run_parallel_sutlej.sh LASTFM scan_5 config
+# bash run_parallel_sutlej.sh LASTFM scan_10 config
+# bash run_parallel_sutlej.sh LASTFM scan_50 config
+# bash run_parallel_sutlej.sh LASTFM scan_100 config
+# bash run_parallel_sutlej.sh LASTFM scan_200 config
+
+# 0125
+# bash run_parallel_sutlej.sh Flights test_time config
+# bash run_parallel_sutlej.sh mooc test_time config
+# bash run_parallel_sutlej.sh LASTFM test_time config
+# bash run_parallel_sutlej.sh WIKI test_time config
+# bash run_parallel_sutlej.sh REDDIT test_time config
+# bash run_parallel_sutlej.sh CollegeMsg test_time config
+# bash run_parallel_sutlej.sh uci test_time config
+
+bash run_parallel_sutlej.sh Flights scan_5 config
+bash run_parallel_sutlej.sh Flights scan_10 config
+bash run_parallel_sutlej.sh Flights scan_20 config
+bash run_parallel_sutlej.sh Flights scan_50 config
+bash run_parallel_sutlej.sh Flights scan_100 config
+# bash run_parallel_sutlej.sh Flights scan_200 config

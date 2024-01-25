@@ -142,7 +142,11 @@ if model.memory is not None:
 criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
 train_edge_end = len(edges['train_src'])
 val_edge_end = len(edges['train_src']) + len(edges['val_src'])
-
+# import pdb; pdb.set_trace()
+if nfeat is not None:
+    nfeat = nfeat.float()
+if efeat is not None:
+    efeat = efeat.float()
 """Loader"""
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
@@ -173,9 +177,11 @@ test_loader = DataLoader(g, config['scope'][0]['neighbor'],
 if args.edge_feature_access_fn != '':
     efeat_access_freq = list()
 # import pdb; pdb.set_trace()
-best_ap = 0
+best_mrr = 0
 best_e = 0
 use_memory = (config['gnn'][0]['memory_type'] != 'none')
+early_stop = config['train'][0]['early_stop']
+no_improve = 0
 with torch.profiler.profile(
         schedule=torch.profiler.schedule(wait=50, warmup=50, active=20, skip_first=100, repeat=1),
         on_trace_ready=torch.profiler.tensorboard_trace_handler(profile_path_saver)
@@ -270,16 +276,14 @@ with torch.profiler.profile(
             globals.timer.start_val()
             ap, mrr = eval(model, val_loader)
             globals.timer.end_val()
-            if ap > best_ap:
+            if mrr > best_mrr:
                 best_e = e
-                best_ap = ap
+                best_mrr = mrr
                 param_dict = {'model': model.state_dict()}
                 # if config['gnn'][0]['memory_type'] == 'gru':
                 #     param_dict['memory'] = model.memory.memory
                 torch.save(param_dict, path_saver_prefix + 'best.pkl')
-            # if e % config['train'][0]['save_every'] == 0:
-            #     torch.save(param_dict, path_saver_prefix + '{}.pkl'.format(e))
-
+                no_improve = 0
         if args.tb_log_prefix != '':
             writer.add_scalar(tag='Loss/Train', scalar_value=total_loss, global_step=e)
             writer.add_scalar(tag='AP/Val', scalar_value=ap, global_step=e)
@@ -294,6 +298,9 @@ with torch.profiler.profile(
         else:
             globals.timer.print(prefix='\t')
             globals.timer.reset()
+        no_improve += 1
+        if no_improve > 5 and e > 20:
+            break
 
 if args.tb_log_prefix != '':
     writer.close()
@@ -301,7 +308,7 @@ if args.tb_log_prefix != '':
 if args.edge_feature_access_fn != '':
     torch.save(efeat_access_freq, efeat_access_path_saver)
 
-print('Loading model at epoch {} with val AP {:4f}...'.format(best_e, best_ap))
+print('Loading model at epoch {} with val mrr {:4f}...'.format(best_e, best_mrr))
 param_dict = torch.load(path_saver_prefix + 'best.pkl')
 model.load_state_dict(param_dict['model'])
 if isinstance(model.memory, GRUMemory):

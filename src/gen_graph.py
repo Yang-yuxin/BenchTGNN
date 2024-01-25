@@ -13,7 +13,10 @@ args = parser.parse_args()
 print(args)
 
 df = pd.read_csv('DATA/{}/edges.csv'.format(args.data))
-num_nodes = max(int(df['src'].max()), int(df['dst'].max())) + 1
+s = 'src' if 'src' in df.columns else 'u'
+d = 'dst' if 'dst' in df.columns else 'i'
+t = 'time' if 'time' in df.columns else 'ts'
+num_nodes = max(int(df[s].max()), int(df[d].max())) + 1
 print('num_nodes: ', num_nodes)
 
 ext_full_indptr = np.zeros(num_nodes + 1, dtype=np.int32)
@@ -22,16 +25,16 @@ ext_full_ts = [[] for _ in range(num_nodes)]
 ext_full_eid = [[] for _ in range(num_nodes)]
 
 for idx, row in tqdm(df.iterrows(), total=len(df)):
-    src = int(row['src'])
-    dst = int(row['dst'])
+    src = int(row[s])
+    dst = int(row[d])
     
     ext_full_indices[src].append(dst)
-    ext_full_ts[src].append(row['time'])
+    ext_full_ts[src].append(row[t])
     ext_full_eid[src].append(idx)
     
     if args.add_reverse:
         ext_full_indices[dst].append(src)
-        ext_full_ts[dst].append(row['time'])
+        ext_full_ts[dst].append(row[t])
         ext_full_eid[dst].append(idx)
 
 for i in tqdm(range(num_nodes)):

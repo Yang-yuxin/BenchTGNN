@@ -4,7 +4,7 @@
 # Run small datasets WIKI / REDDIT on ganges
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID;
-gpus=(2 3 4 5)
+gpus=(0 1 2 3)
 #echo "Enter a list of device numbers separated by commas:"
 #IFS=',' read -ra gpus
 #echo -n 'Schedule tasks on GPUs: '
@@ -74,8 +74,8 @@ do
     done
   done
 done
-wait
-python -u src/collect_logs.py --trial "${trial}" \
-                              --log_dir "${log_dir}" \
-                              --config_dir "${3}"\
-      | tee -a "${log_dir}"/result
+# wait
+# python -u src/collect_logs.py --trial "${trial}" \
+#                               --log_dir "${log_dir}" \
+#                               --config_dir "${3}"\
+#       | tee -a "${log_dir}"/result

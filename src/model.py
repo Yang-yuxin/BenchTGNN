@@ -77,7 +77,7 @@ class TGNN(torch.nn.Module):
         #     )
         self.layers = torch.nn.ModuleList()
         if gnn_config['arch'] == 'transformer':
-            self.layers.append(TransformerAggregator(dim_node_feat, dim_time, dim_edge_feat,dim_memory, dim_out, gnn_config['att_head'], 
+            self.layers.append(TransformerAggregator(dim_node_feat, dim_time, dim_edge_feat, dim_memory, dim_out, gnn_config['att_head'], 
                                                     train_config['dropout'],))
         elif gnn_config['arch'] == 'mixer':
             if self.memory:
