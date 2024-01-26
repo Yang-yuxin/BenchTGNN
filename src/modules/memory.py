@@ -106,8 +106,12 @@ class GRUMemory(Memory):
         #                         dim=1)
         # source_time_delta = edge_times - self.get_last_update(src_nodes)
         # source_time_delta_encoding = self.time_encoder(source_time_delta.unsqueeze(dim=1)).view(len(src_nodes), -1)
-        src_message = torch.cat([src_memory, dst_memory, edge_features], dim=1)
-        dst_message = torch.cat([dst_memory, src_memory, edge_features], dim=1)
+        if edge_features is not None:
+            src_message = torch.cat([src_memory, dst_memory, edge_features], dim=1)
+            dst_message = torch.cat([dst_memory, src_memory, edge_features], dim=1)
+        else:
+            src_message = torch.cat([src_memory, dst_memory], dim=1)
+            dst_message = torch.cat([dst_memory, src_memory], dim=1)
         nid = torch.cat([src_nodes.unsqueeze(1), dst_nodes.unsqueeze(1)], dim=1).reshape(-1)
         mail = torch.cat([src_message, dst_message], dim=1).reshape(-1, src_message.shape[1])
         # tgn mailbox
