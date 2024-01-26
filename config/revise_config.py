@@ -11,7 +11,7 @@ for root, dirs, files in os.walk(".", topdown=False):
             if 'save_every' in config['train'][0].keys():
                 del config['train'][0]['save_every']
             config['train'][0]['early_stop'] = 5
-            if 'uni' in file:
+            if 'embed' in file:
                 config['train'][0]['order'] = 'uniform_random'
             with open(config_path, 'w') as outfile:
                 yaml.dump(config, outfile)
