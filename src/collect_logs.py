@@ -23,8 +23,8 @@ args = parser.parse_args()
 log_dir = args.log_dir
 config_dir = args.config_dir + '/{}'.format(args.trial)
 
-orders = ['chorno', 'gradient']
-datasets = ['WIKI', 'REDDIT', 'Flight', 'MovieLens', 'sGDELT', 'GDELT', 'MOOC', 'LASTFM']
+datasets = ['WIKI', 'REDDIT', 'Flight', 'MovieLens', 'sGDELT', 'GDELT', 'MOOC', 'LASTFM', 
+            'mooc', 'CollegeMsg', 'uci', 'Flights']
 configs = [f for f in os.listdir(config_dir) if f.endswith('.yml')]
 configs.sort()
 
@@ -42,20 +42,19 @@ def get_test_mrr(file_path, results):
 
 all_mrrs = []
 all_stds = []
-for order in orders:
-    for dataset in datasets:
-        for config in configs:
-            config_name = '.'.join(config.split('.')[:-1])
-            mrrs = list()
-            for i in range(1, args.runs+1):
-                get_test_mrr(log_dir + '/{}_{}_{}_{}.out'.format(order, dataset, config_name, i), mrrs)
+for dataset in datasets:
+    for config in configs:
+        config_name = '.'.join(config.split('.')[:-1])
+        mrrs = list()
+        for i in range(1, args.runs+1):
+            get_test_mrr(log_dir + '/{}_{}_{}.out'.format(dataset, config_name, i), mrrs)
 
-            if len(mrrs) > 0:
-                mrrs = np.array(mrrs)
-                print('{}_{}_{}:{:.4f}+-{:.4f}'.format(order, dataset, config_name, np.mean(mrrs), np.std(mrrs)))
-                all_mrrs.append(np.mean(mrrs))
-                all_stds.append(np.std(mrrs))
-                print(mrrs)
-                print()
+        if len(mrrs) > 0:
+            mrrs = np.array(mrrs)
+            print('{}_{}:{:.4f}+-{:.4f}'.format(dataset, config_name, np.mean(mrrs), np.std(mrrs)))
+            all_mrrs.append(np.mean(mrrs))
+            all_stds.append(np.std(mrrs))
+            print(mrrs)
+            print()
 print(all_mrrs)
 print(all_stds)
