@@ -55,7 +55,7 @@ parser.add_argument('--no_time', action='store_true', help='do not record time (
 args = parser.parse_args()
 
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-bin_size = 1
+# bin_size = 1
 
 if not args.no_time:
     globals.timer.set_enable()
@@ -117,7 +117,8 @@ def eval_degree(model, dataloader, n_neg_dst):
     return ap, mrr, (aps, mrrs), real_neighs
 
 scans = ['5', '10', '20', '50', '100']
-datasets = ['WIKI', 'REDDIT', 'Flights', 'LASTFM', 'mooc', 'uci', 'CollegeMsg']
+# datasets = ['WIKI', 'REDDIT', 'Flights', 'LASTFM', 'mooc', 'uci', 'CollegeMsg']
+datasets = ['WIKI', 'REDDIT', 'uci', 'CollegeMsg']
 aggrs = ['GraphMixer', 'TGAT']
 samplings = ['re', 'uni']
 memorys = ['gru', 'embed']
@@ -219,10 +220,11 @@ for dataset in datasets:
             for memory in memorys:
                 fig, axes = plt.subplots(1, len(scans), figsize=(20,4))  # 1 row, 5 columns
                 for i_s, scan in enumerate(scans):
+                    bin_size = int(np.sqrt(int(scan)))
                     tmp_file = f'degree_analysis/{dataset}_scan{scan}_{aggr}_{sampling}_{memory}_pos.pkl'
                     if os.path.isfile(tmp_file):
                         with open(tmp_file, 'rb') as file:
-                            histogram = pickle.load(file)
+                            statistics_data = pickle.load(file)
                     else:
                         path = osp.join(config_dir, f'scan_{scan}', f'{aggr}_{sampling}_{memory}.yml')
                         config = yaml.safe_load(open(path, 'r'))
@@ -256,7 +258,7 @@ for dataset in datasets:
                         if not len(all_data[dataset][scan][aggr][sampling][memory]):
                             continue
                         all_info = {'mrr': []}
-                        histogram = {}
+                        statistics_data = {}
                         for rep in range(1):
                             param_dict = torch.load(osp.join(all_data[dataset][scan][aggr][sampling][memory][rep][1]))
                             model.load_state_dict(param_dict['model'])
@@ -265,19 +267,20 @@ for dataset in datasets:
                                 _ = eval(model, train_loader)
                                 _ = eval(model, val_loader)
                             ap, mrr, (aps, mrrs), real_neigh = eval_degree(model, test_loader, args.eval_neg_samples)
-                            for i_mrr, i_real_neigh in zip(mrrs, real_neigh):
-                                for i in range(len(i_mrr)):
-                                    b = i_real_neigh[i].item() // bin_size
-                                    if b not in histogram.keys():
-                                        histogram[b] = []
-                                    histogram[b].append(i_mrr[i].item())
-                            # import pdb; pdb.set_trace()
-                            # all_info['mrr'].append(mrr)
-                        # import pdb; pdb.set_trace()
-                        for k in histogram.keys():
-                            histogram[k] = np.mean(histogram[k])
+                            statistics_data[rep] = {'mrr': mrrs, 'neigh': real_neigh}
                         with open(tmp_file, 'wb') as file:
-                            pickle.dump(histogram, file)
+                            pickle.dump(statistics_data, file)
+                    histogram = {}
+                    for rep in range(1):
+                        mrrs, real_neigh = statistics_data[rep]['mrr'], statistics_data[rep]['neigh']
+                        for i_mrr, i_real_neigh in zip(mrrs, real_neigh):
+                            for i in range(len(i_mrr)):
+                                b = (i_real_neigh[i].item()+1) // bin_size
+                                if b not in histogram.keys():
+                                    histogram[b] = []
+                                histogram[b].append(i_mrr[i].item())
+                    for k in histogram.keys():
+                        histogram[k] = np.mean(histogram[k])
                     bins = [int(_) for _ in histogram.keys()]
                     bins = sorted(bins)
                     values = [histogram[k] for k in bins]
