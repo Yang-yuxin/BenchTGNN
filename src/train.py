@@ -66,8 +66,10 @@ def eval(model, dataloader):
         y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
         aps.append(average_precision_score(y_true, y_pred))
         mrrs.append(torch.reciprocal(
-            torch.sum(pred_pos.squeeze() < pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) + 1).type(
+            torch.sum(pred_pos.squeeze() < pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) + torch.sum(pred_pos.squeeze() == \
+            pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) // 2 + 1).type(
             torch.float))
+    # import pdb; pdb.set_trace()
     dataloader.reset()
     ap = float(torch.tensor(aps).mean())
     mrr = float(torch.cat(mrrs).mean())
@@ -173,7 +175,7 @@ test_loader = DataLoader(g, config['scope'][0]['neighbor'],
                          type_sample=config['scope'][0]['strategy'],
                          memory=config['gnn'][0]['memory_type'],
                          enable_cache=False, pure_gpu=args.pure_gpu)
-
+# import pdb; pdb.set_trace()
 if args.edge_feature_access_fn != '':
     efeat_access_freq = list()
 # import pdb; pdb.set_trace()
@@ -279,7 +281,7 @@ with torch.profiler.profile(
             if mrr > best_mrr:
                 best_e = e
                 best_mrr = mrr
-                param_dict = {'model': model.state_dict()}
+                param_dict = {'model': model.state_dict(), 'best epoch': best_e, 'config': config}
                 # if config['gnn'][0]['memory_type'] == 'gru':
                 #     param_dict['memory'] = model.memory.memory
                 torch.save(param_dict, path_saver_prefix + 'best.pkl')
