@@ -16,7 +16,7 @@ scope:
   strategy: recent
 gnn:
 - arch: mixer
-  layer: 1
+  layer: 2
   att_head: 2
   time_enc: fixed
   dim_time: 100
