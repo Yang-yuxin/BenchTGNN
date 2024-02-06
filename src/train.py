@@ -301,7 +301,7 @@ with torch.profiler.profile(
             globals.timer.print(prefix='\t')
             globals.timer.reset()
         no_improve += 1
-        if no_improve > 5 and e > 20:
+        if no_improve > 5 and e > 30:
             break
 
 if args.tb_log_prefix != '':

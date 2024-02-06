@@ -148,6 +148,8 @@ class DataLoader:
                 num_sample, self.type_sample,
                 self.dummy_nid, self.dummy_eid
             )
+            # if (sum(sum(neigh_nid == self.dummy_nid)) < (neigh_nid.shape[0] * neigh_nid.shape[1]) - 2000).item():
+            #     import pdb; pdb.set_trace()
             block = DenseTemporalBlock(root_nid, root_ts, neigh_nid, neigh_eid, neigh_ts,
                                        self.dummy_nid, self.dummy_eid)
             if self.mode == 'train': globals.timer.end_scope_sample()

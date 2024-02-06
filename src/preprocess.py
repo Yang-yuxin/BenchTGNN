@@ -14,7 +14,7 @@ parser.add_argument('--num_test_neg_dst', type=int, default=49)
 args = parser.parse_args()
 
 is_bipartite = True if args.data in [
-    'WIKI', 'REDDIT', 'MOOC', 'LASTFM', 'Taobao', 'sTaobao', 'MovieLens'] else False
+    'WIKI', 'REDDIT', 'MOOC','mooc', 'LASTFM', 'Taobao', 'sTaobao', 'MovieLens'] else False
 
 df = pd.read_csv('DATA/{}/edges.csv'.format(args.data))
 

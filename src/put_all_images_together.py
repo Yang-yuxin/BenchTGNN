@@ -9,7 +9,7 @@ n_images = 8
 fig, axs = plt.subplots(n_images, 1, figsize=(10, 20))
 
 
-datasets = ['CollegeMsg', 'REDDIT', 'uci']
+datasets = ['Flights', 'mooc', 'LASTFM']
 settings = ['GraphMixer_re_embed',
             'GraphMixer_re_gru',
             'GraphMixer_uni_embed',
