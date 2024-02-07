@@ -18,7 +18,7 @@ d = 'dst' if 'dst' in df.columns else 'i'
 t = 'time' if 'time' in df.columns else 'ts'
 num_nodes = max(int(df[s].max()), int(df[d].max())) + 1
 print('num_nodes: ', num_nodes)
-
+# import pdb; pdb.set_trace()
 ext_full_indptr = np.zeros(num_nodes + 1, dtype=np.int32)
 ext_full_indices = [[] for _ in range(num_nodes)]
 ext_full_ts = [[] for _ in range(num_nodes)]

@@ -55,7 +55,7 @@ parser.add_argument('--no_time', action='store_true', help='do not record time (
 args = parser.parse_args()
 
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-# bin_size = 1
+bin_size = 10
 
 if not args.no_time:
     globals.timer.set_enable()
@@ -108,7 +108,6 @@ def eval_degree(model, dataloader, n_neg_dst):
             torch.sum(pred_pos.squeeze() < pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) + 1).type(
             torch.float))
         real_neigh_count = torch.sum(blocks[0].neighbor_nid == dataloader.dummy_nid, 1).reshape(-1, (n_neg_dst+2))
-        real_neigh_count = real_neigh_count[:, :2]
         real_neigh_count = torch.sum(real_neigh_count, 1)
         real_neighs.append(real_neigh_count)
     dataloader.reset()
@@ -117,8 +116,8 @@ def eval_degree(model, dataloader, n_neg_dst):
     return ap, mrr, (aps, mrrs), real_neighs
 
 scans = ['5', '10', '20', '50', '100']
+# datasets = ['WIKI', 'REDDIT', 'Flights', 'LASTFM', 'mooc', 'uci', 'CollegeMsg']
 datasets = ['Flights', 'LASTFM', 'mooc']
-# datasets = ['WIKI', 'REDDIT', 'uci', 'CollegeMsg']
 aggrs = ['GraphMixer', 'TGAT']
 samplings = ['re', 'uni']
 memorys = ['gru', 'embed']
@@ -206,10 +205,10 @@ for root, dirs, files in os.walk(config_dir):
 for dataset in datasets:
     """Data"""
     g, edges, nfeat, efeat = load_data(dataset, args.root_path)
-    if nfeat is not None:
-        nfeat = nfeat.float()
-    if efeat is not None:
-        efeat = efeat.float()
+    if efeat is not None and efeat.dtype == torch.bool:
+        efeat = efeat.to(torch.int8)
+    if nfeat is not None and nfeat.dtype == torch.bool:
+        nfeat = nfeat.to(torch.int8)
     dim_edge_feat = efeat.shape[-1] if efeat is not None else 0
     dim_node_feat = nfeat.shape[-1] if nfeat is not None else 0
     n_node = g[0].shape[0]
@@ -220,11 +219,10 @@ for dataset in datasets:
             for memory in memorys:
                 fig, axes = plt.subplots(1, len(scans), figsize=(20,4))  # 1 row, 5 columns
                 for i_s, scan in enumerate(scans):
-                    bin_size = int(np.sqrt(int(scan)))
-                    tmp_file = f'degree_analysis/{dataset}_scan{scan}_{aggr}_{sampling}_{memory}_pos.pkl'
+                    tmp_file = f'degree_analysis/{dataset}_scan{scan}_{aggr}_{sampling}_{memory}.pkl'
                     if os.path.isfile(tmp_file):
                         with open(tmp_file, 'rb') as file:
-                            statistics_data = pickle.load(file)
+                            histogram = pickle.load(file)
                     else:
                         path = osp.join(config_dir, f'scan_{scan}', f'{aggr}_{sampling}_{memory}.yml')
                         config = yaml.safe_load(open(path, 'r'))
@@ -258,7 +256,7 @@ for dataset in datasets:
                         if not len(all_data[dataset][scan][aggr][sampling][memory]):
                             continue
                         all_info = {'mrr': []}
-                        statistics_data = {}
+                        histogram = {}
                         for rep in range(1):
                             param_dict = torch.load(osp.join(all_data[dataset][scan][aggr][sampling][memory][rep][1]))
                             model.load_state_dict(param_dict['model'])
@@ -267,26 +265,24 @@ for dataset in datasets:
                                 _ = eval(model, train_loader)
                                 _ = eval(model, val_loader)
                             ap, mrr, (aps, mrrs), real_neigh = eval_degree(model, test_loader, args.eval_neg_samples)
-                            statistics_data[rep] = {'mrr': mrrs, 'neigh': real_neigh}
+                            for i_mrr, i_real_neigh in zip(mrrs, real_neigh):
+                                for i in range(len(i_mrr)):
+                                    b = i_real_neigh[i].item() // bin_size
+                                    if b not in histogram.keys():
+                                        histogram[b] = []
+                                    histogram[b].append(i_mrr[i].item())
+                            # import pdb; pdb.set_trace()
+                            # all_info['mrr'].append(mrr)
+                        # import pdb; pdb.set_trace()
+                        for k in histogram.keys():
+                            histogram[k] = np.mean(histogram[k])
                         with open(tmp_file, 'wb') as file:
-                            pickle.dump(statistics_data, file)
-                    histogram = {}
-                    for rep in range(1):
-                        mrrs, real_neigh = statistics_data[rep]['mrr'], statistics_data[rep]['neigh']
-                        for i_mrr, i_real_neigh in zip(mrrs, real_neigh):
-                            for i in range(len(i_mrr)):
-                                b = (i_real_neigh[i].item()+1) // bin_size
-                                if b not in histogram.keys():
-                                    histogram[b] = []
-                                histogram[b].append(i_mrr[i].item())
-                    for k in histogram.keys():
-                        histogram[k] = np.mean(histogram[k])
+                            pickle.dump(histogram, file)
                     bins = [int(_) for _ in histogram.keys()]
-                    bins = sorted(bins)
+                    bins = sorted(bins) * bin_size
                     values = [histogram[k] for k in bins]
-                    bins = [k * bin_size for k in bins]
-                    axes[i_s].plot(bins, values)
+                    axes[i_s].plot(bins, values, label=f'scan{scan}_{aggr}_{sampling}_{memory}')
                     axes[i_s].set_title(f'scan {scan}')
-                plt.suptitle(f'{aggr}_{sampling}_{memory}')
-                plt.savefig(f'{dataset}_node_degree_plot_pos_{aggr}_{sampling}_{memory}.png')
+                    axes[i_s].legend()
+                plt.savefig(f'{dataset}_node_degree_plot.png')
                 plt.close()
