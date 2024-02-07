@@ -4,7 +4,7 @@
 # Run small datasets WIKI / REDDIT on ganges
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID;
-gpus=(0)
+gpus=(2 3 4 5)
 #echo "Enter a list of device numbers separated by commas:"
 #IFS=',' read -ra gpus
 #echo -n 'Schedule tasks on GPUs: '
@@ -15,8 +15,8 @@ gpus=(0)
 #printf "\n\n"
 
 datasets=("${1}")
-orders=("gradient")
-runs=1
+orders=("chorno")
+runs=5
 
 trial="${2}"
 trial_dir="$(date +%Y-%m-%d)"_"${trial}"
@@ -49,6 +49,7 @@ do
                 for gpu in "${gpus[@]}";
                 do
                     if [ "$(nvidia-smi -i "${gpu}" --query-compute-apps=pid --format=csv,noheader | wc -l)" -eq 0 ]; then
+                    # if [ "$(nvidia-smi -i "${gpu}" --query-compute-apps=pid --format=csv,noheader | wc -l)" -le 1 ]; then
                         scheduled=true
                         break
                     fi
@@ -63,7 +64,9 @@ do
                                               --data "${dataset}" \
                                               --override_order "${order}" \
                                               --gpu "${gpu}" \
+                                              --tb_log_prefix "log_tb" \
                                               --pure_gpu \
+                                              --profile \
             | tee "${log_dir}"/"${order}"_"${dataset}"_"${config%.*}"_"${i}".out &
             sleep 10
       done
@@ -71,8 +74,8 @@ do
     done
   done
 done
-wait
-python -u src/collect_logs.py --trial "${trial}" \
-                              --log_dir "${log_dir}" \
-                              --config_dir "${3}"\
-      | tee -a "${log_dir}"/result
+# wait
+# python -u src/collect_logs.py --trial "${trial}" \
+#                               --log_dir "${log_dir}" \
+#                               --config_dir "${3}"\
+#       | tee -a "${log_dir}"/result
