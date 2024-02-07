@@ -32,7 +32,7 @@ class TGNN(torch.nn.Module):
             self.time_encoder = None
         else:
             raise NotImplementedError
-        num_neighbors = config['scope'][0]['neighbor'][0]
+        num_neighbors = config['scope'][0]['neighbor']
 
         # Memory
         memory_type = gnn_config['memory_type']
@@ -81,11 +81,11 @@ class TGNN(torch.nn.Module):
                                                     train_config['dropout'],))
         elif gnn_config['arch'] == 'mixer':
             if self.memory:
-                self.layers.append(MixerAggregator(num_neighbors, dim_memory, dim_edge_feat,
+                self.layers.append(MixerAggregator(num_neighbors[-1], dim_memory, dim_edge_feat,
                                                gnn_config['dim_time'], dim_memory, 
                                                dim_out, train_config['dropout'], ))
             else:
-                self.layers.append(MixerAggregator(num_neighbors, dim_node_feat, dim_edge_feat,
+                self.layers.append(MixerAggregator(num_neighbors[0], dim_node_feat, dim_edge_feat,
                                                gnn_config['dim_time'], dim_memory, 
                                                dim_out, train_config['dropout'], ))
         else:
@@ -95,10 +95,9 @@ class TGNN(torch.nn.Module):
                 self.layers.append(TransformerAggregator(dim_out, dim_time, dim_edge_feat, dim_memory, dim_out, gnn_config['att_head'], 
                                                     train_config['dropout'],))
             elif gnn_config['arch'] == 'mixer':
-                self.layers.append(MixerAggregator(num_neighbors, dim_out,
+                self.layers.append(MixerAggregator(num_neighbors[-i-1], dim_out,
                                                    dim_edge_feat, gnn_config['dim_time'], dim_memory,
                                                    dim_out, train_config['dropout']))
-        
         self.edge_predictor = EdgePredictor(dim_out)
         self.to(device)
     
@@ -113,7 +112,6 @@ class TGNN(torch.nn.Module):
         h_in = None
         # 
         for block, layer in zip(blocks, self.layers):
-                
             if h_in is not None:
                 block.slice_hidden_node_features(h_in)    
             neighbor_node_feature = block.neighbor_node_feature.view(
@@ -148,7 +146,6 @@ class TGNN(torch.nn.Module):
                                 neighbor_node_feature,
                                 neighbor_edge_feature,
                                 edge_time_feat)
-
         if isinstance(self.memory, GRUMemory):
             block = blocks[-1]
             src_nids = block.root_nid[:block.pos_dst_size]
@@ -156,7 +153,7 @@ class TGNN(torch.nn.Module):
             positives = torch.cat([src_nids, dst_nids])
             pos_edge_times = block.root_ts[:2 * block.pos_dst_size]
             self.memory.update_memory(positives, root_node_memory[:2 * block.pos_dst_size])
-            if not torch.allclose(updated_memory[positives], self.memory.get_memory(positives, self.memory.memory), atol=2e-5): 
+            if not torch.allclose(updated_memory[positives], self.memory.get_memory(positives, self.memory.memory), atol=1e-5): 
                 print("Something wrong in how the memory was updated")
                 import pdb; pdb.set_trace()
             # self.memory.clear_mailbox(positives)
