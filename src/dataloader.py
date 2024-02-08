@@ -6,7 +6,7 @@ from torch.profiler import profile, record_function, ProfilerActivity
 
 from temporal_sampling import sample_with_pad
 from utils import DenseTemporalBlock
-
+import numpy as np
 
 class DataLoader:
     """
@@ -89,6 +89,7 @@ class DataLoader:
             self.cached_efeat = None
 
         self.batch_size = batch_size
+        self.original_batch_size = batch_size
         self.device = device
 
         assert mode in ['train', 'val', 'test']
@@ -212,6 +213,11 @@ class DataLoader:
             self.edge_idx = torch.randperm(self.src_nid.shape[0], device=self.device)
         elif self.order == 'chorno':
             self.edge_idx = torch.arange(self.src_nid.shape[0], device=self.device)
+        elif self.order == 'chorno_random':
+            self.edge_idx = torch.arange(self.src_nid.shape[0], device=self.device)
+            if self.mode == 'train':
+                rand_noise = np.random.normal(loc=0.0, scale=5.0, size=None)
+                self.batch_size = self.original_batch_size + int(rand_noise)
         elif self.order == 'edge_inv' or self.order == 'edge_noneinv':
             self.edge_idx = torch.multinomial(self.root_prob, self.src_nid.shape[0], replacement=True)
         elif self.order.startswith('gradient'):
