@@ -200,7 +200,7 @@ class DataLoader:
         self.gradient[idx] = gradient.squeeze()
         return
 
-    def reset(self, log_cache_hit_miss=False):
+    def reset(self, is_eval=False, log_cache_hit_miss=False):
         globals.timer.start_cache_reset()
         if self.enable_cache:
             if log_cache_hit_miss:
@@ -215,7 +215,7 @@ class DataLoader:
             self.edge_idx = torch.arange(self.src_nid.shape[0], device=self.device)
         elif self.order == 'chorno_random':
             self.edge_idx = torch.arange(self.src_nid.shape[0], device=self.device)
-            if self.mode == 'train':
+            if self.mode == 'train' and not is_eval:
                 rand_noise = np.random.normal(loc=0.0, scale=5.0, size=None)
                 self.batch_size = self.original_batch_size + int(rand_noise)
         elif self.order == 'edge_inv' or self.order == 'edge_noneinv':

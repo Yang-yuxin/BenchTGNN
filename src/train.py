@@ -55,7 +55,7 @@ if not args.no_time:
 torch.autograd.set_detect_anomaly(True)
 
 @torch.no_grad()
-def eval(model, dataloader):
+def eval(model, dataloader, is_eval=True):
     model.eval()
     aps = list()
     mrrs = list()
@@ -70,7 +70,7 @@ def eval(model, dataloader):
             pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) // 2 + 1).type(
             torch.float))
     # import pdb; pdb.set_trace()
-    dataloader.reset()
+    dataloader.reset(is_eval)
     ap = float(torch.tensor(aps).mean())
     mrr = float(torch.cat(mrrs).mean())
     return ap, mrr
@@ -315,7 +315,7 @@ param_dict = torch.load(path_saver_prefix + 'best.pkl')
 model.load_state_dict(param_dict['model'])
 if isinstance(model.memory, GRUMemory):
     model.memory.__init_memory__(True)
-    _ = eval(model, train_loader)
-    _ = eval(model, val_loader)
-ap, mrr = eval(model, test_loader)
+    _ = eval(model, train_loader, True)
+    _ = eval(model, val_loader, True)
+ap, mrr = eval(model, test_loader, True)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))
