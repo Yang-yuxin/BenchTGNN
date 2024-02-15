@@ -152,7 +152,10 @@ def load_data(dataset, root_path='DATA'):
     g = np.load(os.path.join(data_path, 'ext_full_clipped.npz'))
     g = [torch.as_tensor(g['indptr']), torch.as_tensor(g['indices']), 
          torch.as_tensor(g['eid']), torch.as_tensor(g['ts'], dtype=torch.float32)]
-    
+    # indptr: set the endpoint of every node's neighbors in the edge list
+    # indices: destination node list
+    # eid: edge id
+    # ts: not sorted
     edge_split = torch.load(os.path.join(data_path, 'edges.pt'))
 
     nfeat, efeat = None, None

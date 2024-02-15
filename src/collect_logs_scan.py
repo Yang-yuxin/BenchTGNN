@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
+import openpyxl
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trial', type=str, help='trial name')
@@ -94,7 +95,7 @@ for root, dirs, files in os.walk(log_dir):
 
 # import pdb; pdb.set_trace()
 if args.all_in_one:
-    path_unifile = 'all_mrrs.xlsx'
+    path_unifile = f'all_datasets.xlsx'
     writer = pd.ExcelWriter(path_unifile)
 
 for dataset in datasets:
@@ -134,7 +135,10 @@ for dataset in datasets:
     
     if args.target == 'epoch':
         plt.savefig(f'{dataset}_best_epoch_plot.png')
-        df_all.to_excel(f'{dataset}_best_epoch.xlsx')
+        if args.all_in_one:
+            df_all.to_excel(writer, sheet_name=f'{dataset}_epoch')
+        else:
+            df_all.to_excel(f'{dataset}_best_epoch.xlsx')
     else:
         plt.savefig(f'{dataset}_mrr_plot.png')
         if args.all_in_one:
