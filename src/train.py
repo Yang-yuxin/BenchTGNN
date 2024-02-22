@@ -233,8 +233,10 @@ with torch.profiler.profile(
             #         loss.backward()
             #     with record_function("optimizer_step"):
             #         optimizer.step()
-            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))    
+            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))  
+            # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:  
             pred_pos, pred_neg = model(blocks, messages)
+            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))  
             loss_pos = criterion(pred_pos, torch.ones_like(pred_pos))
             
             loss = loss_pos.mean()

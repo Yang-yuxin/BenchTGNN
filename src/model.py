@@ -141,6 +141,7 @@ class TGNN(torch.nn.Module):
             zero_time_feat = self.time_encoder(torch.zeros(block.n, dtype=torch.float32, device=self.device))
             edge_time_feat = self.time_encoder((block.root_ts.unsqueeze(-1) - block.neighbor_ts).flatten()) \
             if self.time_encoder is not None else torch.tensor([])
+            # with record_function('FORWARD PASS'):
             h_in = layer.forward(root_node_feature,
                                 zero_time_feat,
                                 neighbor_node_feature,
