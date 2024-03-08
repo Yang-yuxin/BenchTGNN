@@ -7,6 +7,29 @@ from torch.profiler import profile, record_function, ProfilerActivity
 from temporal_sampling import sample_with_pad
 from utils import DenseTemporalBlock
 import numpy as np
+import random
+
+def reconstruct(g, test_only_nodes):
+    indptr, indices, eid, ts = g
+    # for i in range(indptr.shape[0]-1):
+    #     neighs, neigh_ts, neigh_eid=indices[indptr[i]:indptr[i+1]], ts[indptr[i]:indptr[i+1]], eid[indptr[i]:indptr[i+1]]
+    #     try:
+    #         assert(torch.all(torch.diff(neigh_ts) >= 0))
+    #     except AssertionError:
+    #         import pdb; pdb.set_trace()
+    binary_mask = torch.zeros(indptr.shape[0], dtype=torch.bool, device=indptr.device)
+    binary_mask[test_only_nodes] = True
+    mask = binary_mask[indices]
+    indices, ts, eid = indices[~mask], ts[~mask], eid[~mask]
+    indptr_subtract = [0] + [torch.sum(mask[0:indptr[i+1]]) for i in range(len(indptr) - 1)]
+    indptr = indptr - torch.tensor(indptr_subtract, device=indptr.device)
+    for i in range(indptr.shape[0]-1):
+        neighs, neigh_ts, neigh_eid=indices[indptr[i]:indptr[i+1]], ts[indptr[i]:indptr[i+1]], eid[indptr[i]:indptr[i+1]]
+        try:
+            assert(torch.all(torch.diff(neigh_ts) >= 0))
+        except AssertionError:
+            import pdb; pdb.set_trace()
+    return [indptr, indices, eid, ts]
 
 class DataLoader:
     """
@@ -25,7 +48,7 @@ class DataLoader:
     def __init__(self, g, fanout,
                  src_nid, dst_nid, timestamp, neg_dst_nid,
                  nfeat, efeat, train_edge_end, val_edge_end, batch_size,
-                 device='cuda', mode='train',
+                 device='cuda', mode='train', ind=False, inductive_mask=None, ind_ratio=0.1,
                  eval_neg_dst_nid=None,
                  type_sample='uniform',
                  unique_frontier=False,
@@ -43,8 +66,10 @@ class DataLoader:
         self.src_nid = src_nid.to(device)
         self.dst_nid = dst_nid.to(device)
         self.timestamp = timestamp.to(device)
-        self.neg_dst_nid = neg_dst_nid.to(device)
+        self.neg_dst_nid = neg_dst_nid.to(device)         
         self.order = order
+        self.inductive = ind
+        self.inductive_mask = inductive_mask
         self.use_memory = False if memory == 'none' else True
 
         if edge_deg is not None:
@@ -112,6 +137,12 @@ class DataLoader:
         self.start = None
         self.end = None
         self.epoch_end = None
+        
+        if self.mode == 'test':
+            self.inductive_mask = self.get_masked_nodes(ind_ratio)
+        if self.inductive_mask is not None and self.inductive and self.mode == 'train':
+            self.g = reconstruct(self.g, inductive_mask)
+        self.inductive_boolean_mask = None
         self.reset()
 
     def _collate(self, batch_idx, log_cache_hit_miss=False):
@@ -143,14 +174,17 @@ class DataLoader:
 
         for i, num_sample in enumerate(self.fanout):
             if self.mode == 'train': globals.timer.start_scope_sample()
+
             neigh_nid, neigh_eid, neigh_ts = sample_with_pad(
                 root_nid, root_ts,
                 self.g[0], self.g[1], self.g[2], self.g[3],
                 num_sample, self.type_sample,
                 self.dummy_nid, self.dummy_eid
             )
+            # import pdb; pdb.set_trace()
+
             # if (sum(sum(neigh_nid == self.dummy_nid)) < (neigh_nid.shape[0] * neigh_nid.shape[1]) - 2000).item():
-            #     import pdb; pdb.set_trace()
+
             block = DenseTemporalBlock(root_nid, root_ts, neigh_nid, neigh_eid, neigh_ts,
                                        self.dummy_nid, self.dummy_eid)
             if self.mode == 'train': globals.timer.end_scope_sample()
@@ -158,6 +192,7 @@ class DataLoader:
             # slice feature
             if self.mode == 'train': globals.timer.start_slice()
             block.slice_input_node_features(self.nfeat)
+
             cached_mask, cache_idx = None, None
             if self.enable_cache:
                 cached_mask = self.cache.get_cached_mask(neigh_eid)
@@ -200,7 +235,7 @@ class DataLoader:
         self.gradient[idx] = gradient.squeeze()
         return
 
-    def reset(self, is_eval=False, log_cache_hit_miss=False):
+    def reset(self, log_cache_hit_miss=False):
         globals.timer.start_cache_reset()
         if self.enable_cache:
             if log_cache_hit_miss:
@@ -208,16 +243,27 @@ class DataLoader:
             is_update, cached_eid = self.cache.next_epoch()
             if is_update:
                 self.cached_efeat = dgl.utils.gather_pinned_tensor_rows(self.efeat, cached_eid)
+        
+        if self.inductive and self.inductive_boolean_mask is None:
+            trans_src_mask, trans_dst_mask = torch.zeros(self.src_nid.shape, dtype=torch.bool, device=self.device), \
+                torch.zeros(self.src_nid.shape, dtype=torch.bool, device=self.device)
+            max_index = self.g[0].shape[0] 
+            inductive_boolean_mask = torch.zeros(max_index, dtype=torch.bool, device=self.device)
+            inductive_boolean_mask[self.inductive_mask] = True
+            trans_src_mask[self.edge_idx] = inductive_boolean_mask[self.src_nid[self.edge_idx]]
+            trans_dst_mask[self.edge_idx] = inductive_boolean_mask[self.dst_nid[self.edge_idx]]
+            trans_neg_dst_mask = inductive_boolean_mask[self.neg_dst_nid]
+            trans_edge_mask = torch.logical_and(~(trans_src_mask.bool()), ~(trans_dst_mask.bool()))
+            self.inductive_boolean_mask = inductive_boolean_mask
+            if self.mode == 'train':
+                self.src_nid = self.src_nid[trans_edge_mask]
+                self.dst_nid = self.dst_nid[trans_edge_mask]
+                self.neg_dst_nid = self.neg_dst_nid[~trans_neg_dst_mask]
 
         if self.order == 'uniform_random':
             self.edge_idx = torch.randperm(self.src_nid.shape[0], device=self.device)
         elif self.order == 'chorno':
             self.edge_idx = torch.arange(self.src_nid.shape[0], device=self.device)
-        elif self.order == 'chorno_random':
-            self.edge_idx = torch.arange(self.src_nid.shape[0], device=self.device)
-            if self.mode == 'train' and not is_eval:
-                rand_noise = np.random.normal(loc=0.0, scale=5.0, size=None)
-                self.batch_size = self.original_batch_size + int(rand_noise)
         elif self.order == 'edge_inv' or self.order == 'edge_noneinv':
             self.edge_idx = torch.multinomial(self.root_prob, self.src_nid.shape[0], replacement=True)
         elif self.order.startswith('gradient'):
@@ -232,6 +278,28 @@ class DataLoader:
         else:
             raise NotImplementedError
 
+        
+            # trans_edge_mask = torch.logical_and(~(trans_src_mask.bool()), ~(trans_dst_mask.bool()))
+            # ind_new_old_mask = torch.logical_and(trans_src_mask.bool(), ~(trans_dst_mask.bool()))
+            # ind_old_new_mask = torch.logical_and(~trans_src_mask.bool(), trans_dst_mask.bool())
+            # ind_new_old_mask = torch.logical_or(ind_new_old_mask, ind_old_new_mask)
+            # ind_new_new_mask = torch.logical_and(trans_src_mask.bool(), trans_dst_mask.bool())
+            
+            # self.sep_edge_idx = {
+            #     'trans': self.edge_idx[trans_edge_mask],
+            #     'ind_new_old': self.edge_idx[ind_new_old_mask],
+            #     'ind_new_new':self.edge_idx[ind_new_new_mask],
+            # }
+            # self.start = {'trans': 0,
+            #              'ind_new_old': 0,
+            #              'ind_new_new': 0}
+            # self.end = {'trans': min(self.batch_size, torch.sum(trans_edge_mask)),
+            #             'ind_new_old': min(self.batch_size, torch.sum(ind_new_old_mask)),
+            #             'ind_new_new': min(self.batch_size, torch.sum(ind_new_new_mask)),
+            # }
+            # self.epoch_end = {'trans': False,
+            #              'ind_new_old': False,
+            #              'ind_new_new': False}
         self.start = 0
         self.end = self.batch_size
         self.epoch_end = False
@@ -241,7 +309,24 @@ class DataLoader:
         else:
             return
 
-    def get_blocks(self, log_cache_hit_miss=False):
+    # def get_blocks(self, log_cache_hit_miss=False, mode='trans'):
+    #     if self.inductive:
+    #         if self.end[mode] == self.sep_edge_idx[mode].shape[0]:
+    #             self.epoch_end[mode] = True
+            
+    #         blocks, messages = self._collate(self.sep_edge_idx[mode][self.start[mode]:self.end[mode]], log_cache_hit_miss=log_cache_hit_miss)
+
+    #         self.start[mode] = self.end[mode]
+    #         self.end[mode] = min(self.sep_edge_idx[mode].shape[0], self.start[mode] + self.batch_size)
+    #     else:
+    #         if self.end == self.src_nid.shape[0]:
+    #             self.epoch_end = True
+    #         blocks, messages = self._collate(self.edge_idx[self.start:self.end], log_cache_hit_miss=log_cache_hit_miss)
+    #         self.start = self.end
+    #         self.end = min(self.src_nid.shape[0], self.start + self.batch_size)
+    #     return blocks, messages
+    
+    def get_blocks(self, log_cache_hit_miss=False, mode='trans'):
         if self.end == self.src_nid.shape[0]:
             self.epoch_end = True
         blocks, messages = self._collate(self.edge_idx[self.start:self.end], log_cache_hit_miss=log_cache_hit_miss)
@@ -249,3 +334,11 @@ class DataLoader:
         self.end = min(self.src_nid.shape[0], self.start + self.batch_size)
         return blocks, messages
 
+
+    def get_masked_nodes(self, ratio):
+        assert self.mode == 'test'
+        n_nodes = self.g[0].shape[0] - 1
+        unique_node_set = set(self.src_nid.tolist()).union(set(self.dst_nid.tolist()))
+        masked_node = set(random.sample(unique_node_set, int(ratio * n_nodes)))
+        self.inductive_mask = masked_node
+        return list(masked_node)

@@ -1,5 +1,6 @@
 import os
 import argparse
+import itertools
 import torch
 from torch.profiler import profile, record_function, ProfilerActivity
 import time
@@ -11,7 +12,8 @@ parser.add_argument('--root_path', type=str, default='DATA', help='dataset root 
 parser.add_argument('--config', type=str, help='path to config file')
 parser.add_argument('--gpu', type=str, default="0", help='which GPU to use')
 parser.add_argument('--eval_neg_samples', type=int, default=49, help='how many negative samples to use at inference.')
-
+parser.add_argument('--test_inductive', action='store_true')
+parser.add_argument('--ind_ratio', type=float, default=0.1)
 parser.add_argument('--cached_ratio', type=float, default=0.3, help='the ratio of gpu cached edge feature')
 parser.add_argument('--cache', action='store_true', help='cache edge features on device')
 parser.add_argument('--pure_gpu', action='store_true', help='put all edge features on device, disable cache')
@@ -55,25 +57,79 @@ if not args.no_time:
 torch.autograd.set_detect_anomaly(True)
 
 @torch.no_grad()
-def eval(model, dataloader, is_eval=True):
+def eval(model, dataloader, isinductive=False):
     model.eval()
-    aps = list()
-    mrrs = list()
-    while not dataloader.epoch_end:
-        blocks, msgs = dataloader.get_blocks()
-        pred_pos, pred_neg = model(blocks, msgs)
-        y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
-        y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
-        aps.append(average_precision_score(y_true, y_pred))
-        mrrs.append(torch.reciprocal(
-            torch.sum(pred_pos.squeeze() < pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) + torch.sum(pred_pos.squeeze() == \
-            pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) // 2 + 1).type(
-            torch.float))
-    # import pdb; pdb.set_trace()
-    dataloader.reset(is_eval)
-    ap = float(torch.tensor(aps).mean())
-    mrr = float(torch.cat(mrrs).mean())
-    return ap, mrr
+    if isinductive:
+        aps = [[list(), list()] for _ in range(3)]
+        mrrs = [list() for _ in range(3)]
+
+        while not dataloader.epoch_end:
+            blocks, msgs = dataloader.get_blocks()
+            pred_pos, pred_neg = model(blocks, msgs)
+            y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
+            y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
+
+            src_nids = blocks[-1].root_nid[:blocks[-1].src_size]
+            dst_nids = blocks[-1].root_nid[blocks[-1].src_size : blocks[-1].src_size * 2]
+            num_neg_dst = blocks[-1].num_neg_dst
+            assert src_nids.shape[0] == pred_pos.shape[0]
+            trans_mask = torch.logical_and(~dataloader.inductive_boolean_mask[src_nids].bool(), \
+                                           ~dataloader.inductive_boolean_mask[dst_nids].bool())
+            ind_new_old_mask = torch.logical_and(dataloader.inductive_boolean_mask[src_nids].bool(),\
+                                                 ~dataloader.inductive_boolean_mask[dst_nids].bool())
+            ind_old_new_mask = torch.logical_and(~dataloader.inductive_boolean_mask[src_nids].bool(),\
+                                                 dataloader.inductive_boolean_mask[dst_nids].bool())
+            ind_new_old_mask = torch.logical_or(ind_new_old_mask, ind_old_new_mask)
+            ind_new_new_mask = torch.logical_and(dataloader.inductive_boolean_mask[src_nids].bool(), \
+                                           dataloader.inductive_boolean_mask[dst_nids].bool())
+            mrrs[0].append(torch.reciprocal(torch.sum(pred_pos[trans_mask].squeeze() < \
+                pred_neg[trans_mask.repeat(num_neg_dst)].squeeze().reshape(num_neg_dst, -1), dim=0) \
+                    + torch.sum(pred_pos[trans_mask].squeeze() == pred_neg[trans_mask.repeat(num_neg_dst)].squeeze().reshape(
+                        num_neg_dst, -1), dim=0) // 2 + 1).type(torch.float))
+            mrrs[1].append(torch.reciprocal(torch.sum(pred_pos[ind_new_old_mask].squeeze() < \
+                pred_neg[ind_new_old_mask.repeat(num_neg_dst)].squeeze().reshape(num_neg_dst, -1), dim=0) \
+                    + torch.sum(pred_pos[ind_new_old_mask].squeeze() == pred_neg[ind_new_old_mask.repeat(num_neg_dst)].squeeze().reshape(
+                        num_neg_dst, -1), dim=0) // 2 + 1).type(torch.float))
+            mrrs[2].append(torch.reciprocal(torch.sum(pred_pos[ind_new_new_mask].squeeze() < \
+                pred_neg[ind_new_new_mask.repeat(num_neg_dst)].squeeze().reshape(num_neg_dst, -1), dim=0) \
+                    + torch.sum(pred_pos[ind_new_new_mask].squeeze() == pred_neg[ind_new_new_mask.repeat(num_neg_dst)].squeeze().reshape(
+                        num_neg_dst, -1), dim=0) // 2 + 1).type(torch.float))
+            trans_mask = trans_mask.repeat(num_neg_dst + 1).cpu()
+            ind_new_old_mask = ind_new_old_mask.repeat(num_neg_dst + 1).cpu()
+            ind_new_new_mask = ind_new_new_mask.repeat(num_neg_dst + 1).cpu()
+            for i, m in enumerate([trans_mask, ind_new_old_mask, ind_new_new_mask]):
+                aps[i][0].append(y_true[m])
+                aps[i][1].append(y_pred[m])
+        dataloader.reset()
+
+        for i in range(3):
+            for j in range(2):
+                aps[i][j] = torch.cat(aps[i][j])
+        ap_mean = average_precision_score(torch.cat((aps[0][0], aps[1][0], aps[2][0])), 
+                                          torch.cat((aps[0][1], aps[1][1], aps[2][1])))
+        mrr_mean = torch.mean(torch.cat(list(itertools.chain(*mrrs))))
+        if dataloader.mode == 'train':
+            return ap_mean, mrr_mean, None, None
+        ap_all = [average_precision_score(aps[i][0], aps[i][1]) for i in range(3)]
+        mrr_all = [float(torch.cat(mrrs[i]).mean()) for i in range(3)]
+        return ap_mean, mrr_mean, ap_all, mrr_all
+    else:
+        aps = list()
+        mrrs = list()
+        while not dataloader.epoch_end:
+            blocks, msgs = dataloader.get_blocks()
+            pred_pos, pred_neg = model(blocks, msgs)
+            y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
+            y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
+            aps.append(average_precision_score(y_true, y_pred))
+            mrrs.append(torch.reciprocal(
+                torch.sum(pred_pos.squeeze() < pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) + torch.sum(pred_pos.squeeze() == \
+                pred_neg.squeeze().reshape(blocks[-1].num_neg_dst, -1), dim=0) // 2 + 1).type(
+                torch.float))
+        dataloader.reset()
+        ap = float(torch.tensor(aps).mean())
+        mrr = float(torch.cat(mrrs).mean())
+        return ap, mrr, None, None
 
 
 config = yaml.safe_load(open(args.config, 'r'))
@@ -149,11 +205,21 @@ if nfeat is not None:
     nfeat = nfeat.float()
 if efeat is not None:
     efeat = efeat.float()
+
 """Loader"""
+test_loader = DataLoader(g, config['scope'][0]['neighbor'],
+                        edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
+                        nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
+                        device=device, mode='test', ind=args.test_inductive, ind_ratio=args.ind_ratio,
+                        eval_neg_dst_nid=edges['test_neg_dst'],
+                        type_sample=config['scope'][0]['strategy'],
+                        memory=config['gnn'][0]['memory_type'],
+                        enable_cache=False, pure_gpu=args.pure_gpu)
+masked_nodes = test_loader.inductive_mask
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
                           nfeat, efeat, train_edge_end, val_edge_end, config['train'][0]['batch_size'],
-                          device=device, mode='train',
+                          device=device, mode='train', ind=args.test_inductive, inductive_mask=masked_nodes,
                           type_sample=config['scope'][0]['strategy'],
                           order=config['train'][0]['order'],
                           memory=config['gnn'][0]['memory_type'],
@@ -162,20 +228,12 @@ train_loader = DataLoader(g, config['scope'][0]['neighbor'],
 val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['val_src'], edges['val_dst'], edges['val_time'], edges['neg_dst'],
                         nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
-                        device=device, mode='val',
+                        device=device, mode='val', ind=args.test_inductive, inductive_mask=masked_nodes,
                         eval_neg_dst_nid=edges['val_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
                         memory=config['gnn'][0]['memory_type'],
                         enable_cache=False, pure_gpu=args.pure_gpu)
-test_loader = DataLoader(g, config['scope'][0]['neighbor'],
-                         edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
-                         nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
-                         device=device, mode='test',
-                         eval_neg_dst_nid=edges['test_neg_dst'],
-                         type_sample=config['scope'][0]['strategy'],
-                         memory=config['gnn'][0]['memory_type'],
-                         enable_cache=False, pure_gpu=args.pure_gpu)
-# import pdb; pdb.set_trace()
+
 if args.edge_feature_access_fn != '':
     efeat_access_freq = list()
 # import pdb; pdb.set_trace()
@@ -208,7 +266,8 @@ with torch.profiler.profile(
         aps = []
         mrrs = []
         while not train_loader.epoch_end:
-            blocks, messages = train_loader.get_blocks(log_cache_hit_miss=args.print_cache_hit_rate)
+            blocks, messages = train_loader.get_blocks(log_cache_hit_miss=args.print_cache_hit_rate, mode='trans')
+            
             if args.print_cache_hit_rate:
                 for block in blocks:
                     hit_count += block.cache_hit_count
@@ -223,26 +282,15 @@ with torch.profiler.profile(
 
             globals.timer.start_train()
             optimizer.zero_grad()
-            # with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof:
-            #     with record_function("model_prop_forward"):        
-            #         pred_pos, pred_neg = model(blocks, messages)
-            #     loss_pos = criterion(pred_pos, torch.ones_like(pred_pos))
-            #     loss = loss_pos.mean()
-            #     loss += criterion(pred_neg, torch.zeros_like(pred_neg)).mean()
-            #     with record_function("loss_backward"):
-            #         loss.backward()
-            #     with record_function("optimizer_step"):
-            #         optimizer.step()
-            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))  
-            # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:  
+
             pred_pos, pred_neg = model(blocks, messages)
-            # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=20))  
             loss_pos = criterion(pred_pos, torch.ones_like(pred_pos))
             
             loss = loss_pos.mean()
             loss += criterion(pred_neg, torch.zeros_like(pred_neg)).mean()
             loss.backward()
             optimizer.step()
+
             with torch.no_grad():
                 y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
                 y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
@@ -254,7 +302,6 @@ with torch.profiler.profile(
                 model.memory.detach_memory()
             globals.timer.end_train()
             
-
             if args.profile:
                 profiler.step()
                 
@@ -263,9 +310,10 @@ with torch.profiler.profile(
                 if config['train'][0]['order'].startswith('gradient'):
                     weights = torch.special.expit(pred_pos)
                     train_loader.update_gradient(blocks[-1].gradient_idx, weights)
+            
+
         train_ap = float(torch.tensor(aps).mean())
         train_mrr = float(torch.cat(mrrs).mean())
-        # print(ap, mrr)
         if args.print_cache_hit_rate:
             oracle_cache_hit_rate = train_loader.reset(log_cache_hit_miss=True)
         else:
@@ -278,7 +326,7 @@ with torch.profiler.profile(
         time_val = 0.
         if e >= config['eval'][0]['val_epoch']:
             globals.timer.start_val()
-            ap, mrr = eval(model, val_loader)
+            ap, mrr, aps, mrrs = eval(model, val_loader, args.test_inductive)
             globals.timer.end_val()
             if mrr > best_mrr:
                 best_e = e
@@ -295,6 +343,9 @@ with torch.profiler.profile(
             writer.add_scalar(tag='MRR/Train', scalar_value=train_mrr, global_step=e)
             writer.add_scalar(tag='AP/Train', scalar_value=train_ap, global_step=e)
         print('\ttrain loss:{:.4f} train ap:{:4f} train mrr:{:4f} val ap:{:4f}  val mrr:{:4f}'.format(total_loss, train_ap, train_mrr, ap, mrr))
+        if args.test_inductive:
+            print('\ttrans val ap:{:4f} ind new old ap:{:4f} ind new new ap:{:4f}'.format(aps[0], aps[1], aps[2]))
+            print('\ttrans val mrr:{:4f} ind new old mrr:{:4f} ind new new mrr:{:4f}'.format(mrrs[0], mrrs[1], mrrs[2]))
         if args.no_time:
             print('\trough train time: {:.2f}s'.format(t_rough))
         if args.print_cache_hit_rate:
@@ -303,7 +354,7 @@ with torch.profiler.profile(
             globals.timer.print(prefix='\t')
             globals.timer.reset()
         no_improve += 1
-        if no_improve > early_stop and e > 30:
+        if no_improve > early_stop:
             break
 
 if args.tb_log_prefix != '':
@@ -317,7 +368,10 @@ param_dict = torch.load(path_saver_prefix + 'best.pkl')
 model.load_state_dict(param_dict['model'])
 if isinstance(model.memory, GRUMemory):
     model.memory.__init_memory__(True)
-    _ = eval(model, train_loader, True)
-    _ = eval(model, val_loader, True)
-ap, mrr = eval(model, test_loader, True)
+    _ = eval(model, train_loader, args.test_inductive)
+    _ = eval(model, val_loader, args.test_inductive)
+ap, mrr, aps, mrrs = eval(model, test_loader, args.test_inductive)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))
+if args.test_inductive:
+    print('\ttrans test ap:{:4f} ind new old ap:{:4f} ind new new ap:{:4f}'.format(aps[0], aps[1], aps[2]))
+    print('\ttrans test mrr:{:4f} ind new old mrr:{:4f} ind new new mrr:{:4f}'.format(mrrs[0], mrrs[1], mrrs[2]))

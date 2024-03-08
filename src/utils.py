@@ -152,6 +152,13 @@ def load_data(dataset, root_path='DATA'):
     g = np.load(os.path.join(data_path, 'ext_full_clipped.npz'))
     g = [torch.as_tensor(g['indptr']), torch.as_tensor(g['indices']), 
          torch.as_tensor(g['eid']), torch.as_tensor(g['ts'], dtype=torch.float32)]
+    indptr, indices, eid, ts = g
+    for i in range(indptr.shape[0]-1):
+        neighs, neigh_ts, neigh_eid=indices[indptr[i]:indptr[i+1]], ts[indptr[i]:indptr[i+1]], eid[indptr[i]:indptr[i+1]]
+        try:
+            assert(torch.all(torch.diff(neigh_ts) >= 0))
+        except AssertionError:
+            import pdb; pdb.set_trace()
     # indptr: set the endpoint of every node's neighbors in the edge list
     # indices: destination node list
     # eid: edge id

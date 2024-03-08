@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import openpyxl
+import pickle
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trial', type=str, help='trial name')
@@ -28,6 +29,9 @@ memorys = ['gru', 'embed']
 green_colors = ['#98FB98', '#6B8E23', '#008080', '#00441b']  # Shades of green
 red_colors = ['#FF9999', '#fb6a4a', '#cb181d', '#990000']  # Shades of red
 colors = green_colors + red_colors
+
+
+            
 
 def get_test_mrr(file_path):
     try:
@@ -54,46 +58,68 @@ def get_best_epoch(file_path):
         pass
 
 all_data = {}
-for dataset in datasets:
-    all_data[dataset] = {}
-    for scan in scans:
-        all_data[dataset][scan] = {}
-        for aggr in aggrs:
-            all_data[dataset][scan][aggr] = {}
-            for sampling in samplings:
-                all_data[dataset][scan][aggr][sampling] = {}
-                for memory in memorys:
-                    all_data[dataset][scan][aggr][sampling][memory] = []
-all_results = []
-all_stds = []
-for root, dirs, files in os.walk(log_dir):
-    try:
-        if (int(root.split('-')[1]) >= 1 and int(root.split('_')[0].split('-')[2]) >= 25 and 'scan' in root):
-            print(root)
-        elif (int(root.split('-')[1]) >= 2 and int(root.split('_')[0].split('-')[2]) >= 3 and 'scan' in root):
-            print(root)
-        else:
-            continue
-        for file in files:
-            path = os.path.join(root, file)
-            if 'result' in file:
-                continue
-            scan = root.split('_')[-1] if 'mixer' not in root else root.split('_')[-2]
-            if 'chorno' in file:
-                dataset, aggr, sampling, memory = file.split('_')[1:5]
-            else:
-                dataset, aggr, sampling, memory = file.split('_')[0:4]
-            result = get_test_mrr(path) if args.target == 'mrr' else get_best_epoch(path)
-            # if len(results) > 0:
-            #     results = np.array(results)
-            #     # print('{}_{}_{}_{}_{}:{:.4f}+-{:.4f}'.format(dataset, scan, aggr, sampling, memory, np.mean(mrrs), np.std(mrrs)))
-            #     all_results.append(np.mean(results))
-            #     all_stds.append(np.std(results))
-            all_data[dataset][scan][aggr][sampling][memory].append(result)
-    except IndexError:
-        pass
 
-# import pdb; pdb.set_trace()
+# load data
+if os.path.exists(f'all_{args.target}.pkl'):
+    with open(f'all_{args.target}.pkl', 'rb') as f:
+        all_data = pickle.load(f)
+else:
+    for dataset in datasets:
+        all_data[dataset] = {}
+        for scan in scans:
+            all_data[dataset][scan] = {}
+            for aggr in aggrs:
+                all_data[dataset][scan][aggr] = {}
+                for sampling in samplings:
+                    all_data[dataset][scan][aggr][sampling] = {}
+                    for memory in memorys:
+                        all_data[dataset][scan][aggr][sampling][memory] = []
+    all_results = []
+    all_stds = []
+    for root, dirs, files in os.walk(log_dir):
+        try:
+            if (int(root.split('-')[1]) >= 1 and int(root.split('_')[0].split('-')[2]) >= 25 and 'scan' in root):
+                print(root)
+            elif (int(root.split('-')[1]) >= 2 and int(root.split('_')[0].split('-')[2]) >= 3 and 'scan' in root):
+                print(root)
+            else:
+                continue
+            for file in files:
+                path = os.path.join(root, file)
+                if 'result' in file:
+                    continue
+                scan = root.split('_')[-1] if 'mixer' not in root else root.split('_')[-2]
+                if 'chorno' in file:
+                    dataset, aggr, sampling, memory = file.split('_')[1:5]
+                else:
+                    dataset, aggr, sampling, memory = file.split('_')[0:4]
+                result = get_test_mrr(path) if args.target == 'mrr' else get_best_epoch(path)
+                # if len(results) > 0:
+                #     results = np.array(results)
+                #     # print('{}_{}_{}_{}_{}:{:.4f}+-{:.4f}'.format(dataset, scan, aggr, sampling, memory, np.mean(mrrs), np.std(mrrs)))
+                #     all_results.append(np.mean(results))
+                #     all_stds.append(np.std(results))
+                all_data[dataset][scan][aggr][sampling][memory].append(result)
+        except IndexError:
+            pass
+    for dataset in datasets:
+        for aggr in aggrs:
+            for sampling in samplings:
+                for memory in memorys:
+                    means = []
+                    stds = []
+                    for scan in scans:
+                        results = all_data[dataset][scan][aggr][sampling][memory]
+                        results = [x for x in results if x is not None]
+                        if len(results) > args.runs:
+                            results = results[:args.runs]
+                        all_data[dataset][scan][aggr][sampling][memory] = results
+
+# save data
+if not os.path.exists(f'all_{args.target}.pkl'):
+    with open(f'all_{args.target}.pkl', 'wb') as f:
+        pickle.dump(all_data, f)
+
 if args.all_in_one:
     path_unifile = f'all_datasets.xlsx'
     writer = pd.ExcelWriter(path_unifile)
@@ -109,11 +135,8 @@ for dataset in datasets:
                 stds = []
                 for scan in scans:
                     results = all_data[dataset][scan][aggr][sampling][memory]
-                    results = [x for x in results if x is not None]
-                    if len(results) > args.runs:
-                        results = results[:args.runs]
                     if len(results) == args.runs:
-                        print(f"{dataset}\t{scan}\t{aggr}\t{sampling}\t{memory}\t{np.mean(results)}")
+                        # print(f"{dataset}\t{scan}\t{aggr}\t{sampling}\t{memory}\t{np.mean(results)}")
                         means.append(np.mean(results))
                         stds.append(np.std(results))
                 if len(means) == len(scans):
@@ -148,23 +171,3 @@ for dataset in datasets:
     
 if args.all_in_one:
     writer.close()
-# green_colors = ['#98FB98', '#6B8E23', '#008080', '#00441b']  # Shades of green
-# red_colors = ['#FF9999', '#fb6a4a', '#cb181d', '#990000']  # Shades of red
-# colors = green_colors + red_colors
-
-
-# print(all_data)
-# for dataset in datasets:
-#     for config in configs:
-#         config_name = '.'.join(config.split('.')[:-1])
-#         mrrs = list()
-#         for i in range(1, args.runs+1):
-#             get_test_mrr(log_dir + '/{}_{}_{}_{}_{}.out'.format(args.num_scope, args.num_neighbor,
-#                                                                 dataset, config_name, i), mrrs)
-
-#         if len(mrrs) > 0:
-#             mrrs = np.array(mrrs)
-#             print('{}_{}_{}_{}:{:.4f}+-{:.4f}'.format(args.num_scope, args.num_neighbor,
-#                                                    dataset, config_name, np.mean(mrrs), np.std(mrrs)))
-#             print(mrrs)
-#             print()

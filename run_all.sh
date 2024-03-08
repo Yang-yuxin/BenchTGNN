@@ -48,9 +48,35 @@
 # bash run_parallel_sutlej.sh CollegeMsg test_time config
 # bash run_parallel_sutlej.sh uci test_time config
 
-bash run_parallel_sutlej.sh Flights scan_5 config
-bash run_parallel_sutlej.sh Flights scan_10 config
-bash run_parallel_sutlej.sh Flights scan_20 config
-bash run_parallel_sutlej.sh Flights scan_50 config
-bash run_parallel_sutlej.sh Flights scan_100 config
+# bash run_parallel_sutlej.sh Flights scan_5 config
+# bash run_parallel_sutlej.sh Flights scan_10 config
+# bash run_parallel_sutlej.sh Flights scan_20 config
+# bash run_parallel_sutlej.sh Flights scan_50 config
+# bash run_parallel_sutlej.sh Flights scan_100 config
 # bash run_parallel_sutlej.sh Flights scan_200 config
+
+# bash run_parallel_ganges.sh uci scan_5x10_mixer config
+# bash run_parallel_ganges.sh WIKI scan_10x5_mixer config
+
+# bash run_parallel_ganges.sh REDDIT scan_5x10_mixer config
+# bash run_parallel_ganges.sh REDDIT scan_10x5_mixer config
+
+# bash run_parallel_ganges.sh LASTFM scan_5x10_mixer config
+# bash run_parallel_ganges.sh LASTFM scan_10x5_mixer config
+
+# bash run_parallel_ganges.sh uci scan_5x5 config
+# bash run_parallel_ganges.sh uci scan_10x10 config
+# bash run_parallel_ganges.sh CollegeMsg scan_5x5 config
+# bash run_parallel_ganges.sh CollegeMsg scan_10x10 config
+
+bash run_parallel_ganges.sh WIKI scan_5_none config
+bash run_parallel_ganges.sh WIKI scan_10_none config
+bash run_parallel_ganges.sh WIKI scan_20_none config
+bash run_parallel_ganges.sh WIKI scan_50_none config
+bash run_parallel_ganges.sh WIKI scan_100_none config
+bash run_parallel_ganges.sh WIKI scan_5x5_none config
+bash run_parallel_ganges.sh WIKI scan_5x10_none config
+bash run_parallel_ganges.sh WIKI scan_10x5_none config
+bash run_parallel_ganges.sh WIKI scan_10x10_none config
+
+
