@@ -2,15 +2,14 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import argparse
-import openpyxl
 import pickle
 
 # Set the font globally
 # plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.family'] = 'Times New Roman'
-# Optionally, you can set the font size as well
-plt.rcParams['font.size'] = 12
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trial', type=str, help='trial name')
@@ -20,13 +19,20 @@ parser.add_argument('--target', type=str, default='mrr', choices=['mrr', 'epoch'
 parser.add_argument('--num_scope', type=int, default=25, help='trial name')
 parser.add_argument('--num_neighbor', type=int, default=10, help='trial name')
 parser.add_argument('--runs', type=int, default=5, help='trial name')
+parser.add_argument('--layers', type=int, default=1, help='layer number')
+parser.add_argument('--fontsize', type=int, default=32, help='font size')
+parser.add_argument('--no_title', action='store_true')
+parser.add_argument('--save_legends', action='store_true')
+
 args = parser.parse_args()
 log_dir = args.log_dir
 config_dir = 'config' + '/{}'.format(args.trial)
-
-
-scans = ['5', '10', '20', '50', '100']
-# scans = ['5', '10', '20', '50', '100', '5x5', '5x10', '10x5', '10x10']
+# Optionally, you can set the font size as well
+plt.rcParams['font.size'] = args.fontsize
+if args.layers == 1:
+    scans = ['5', '10', '20', '50', '100']
+else:
+    scans = ['5x5', '5x10', '10x5', '10x10']
 datasets = ['WIKI', 'REDDIT', 'Flights', 'LASTFM', 'mooc', 'uci', 'CollegeMsg']
 aggrs = ['TGAT', 'GraphMixer']
 show_aggrs = {
@@ -109,29 +115,56 @@ for dataset in datasets:
                     means.append(np.mean(results))
                     stds.append(np.std(results))
                 else:
-                    import pdb; pdb.set_trace()
+                    print(dataset, scan, aggr, memory)
             if len(means) == len(scans):
                 df_mean[f"{show_aggrs[aggr]}+{show_memorys[memory]}"] = means
                 df_std[f"{show_aggrs[aggr]}+{show_memorys[memory]}"] = stds
                 df_all[f"{show_aggrs[aggr]}+{show_memorys[memory]}"] = [(str(round(mean, 4)) + '+-' + str(round(std, 4))) for (mean, std) in zip(means, stds)]
     if df_mean.empty:
         continue
-    plt.figure(figsize=(14, 8))
+    plt.figure(figsize=(10, 8))
+    handles = []
     for i, col in enumerate(df_mean.columns):
         # plt.plot(np.arange(len(scans)), df_mean[col], label=col, color=colors[i])
         try:
-            plt.errorbar(x=range(len(scans)), y=df_mean[col], yerr=df_std[col], fmt='-o', capsize=5, label=col, color=colors[i])
+            handles.append(plt.errorbar(x=range(len(scans)), y=df_mean[col], yerr=df_std[col], fmt='-o', capsize=5, label=col, color=colors[i]))
         except IndexError:
             import pdb; pdb.set_trace()
     if dataset == 'mooc':
-        plt.title(f'{dataset.upper()}')
+        title_str = f'{dataset.upper()}'
     else:
-        plt.title(f'{dataset}')
+        title_str = f'{dataset}'
+    plt.axhline(0, color='r', linestyle='--')
+    if not args.no_title:
+        plt.title(title_str, x=0.5, y=1.05)
     x_labels = scans
     plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
-    plt.legend()
+    plt.xlabel(f'# of Neighbors')
+    plt.ylabel(f'Mean Reciprocal Rank (MRR)')
+    # plt.legend(loc='upper right', ncol=2)
+    plt.tight_layout()
     df_all = df_all.T
     df_all.columns = scans
     
-    plt.savefig(f'figures/{dataset}_mrr_spl_strategy.png')
+    plt.savefig(f'figures/{dataset}_mrr_spl_strategy_{args.layers}l.pdf')
 
+if args.save_legends:
+    # Step 1: Create dummy figure and axes
+    fig, ax = plt.subplots()
+
+    # Step 2: Define your handles and labels
+    
+    # handles = []
+    # for i,col in enumerate(df_mean.columns):
+    #     handles.append(mpatches.Patch(color=colors[i], label=col))
+        
+    # Step 3: Create the legend
+    legend = ax.legend(handles=handles, loc='center', ncol=len(handles)/3)
+
+    # Step 4: Remove the axes
+    ax.axis('off')
+
+    # Step 5: Save the legend to a PDF file
+    fig.canvas.draw()
+    bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    fig.savefig('figures/legend.pdf', bbox_inches=bbox)
