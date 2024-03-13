@@ -4,7 +4,7 @@
 # Run small datasets WIKI / REDDIT on ganges
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID;
-gpus=(0 1 2 3 4 5)
+gpus=(2 3 4 5)
 #echo "Enter a list of device numbers separated by commas:"
 #IFS=',' read -ra gpus
 #echo -n 'Schedule tasks on GPUs: '
@@ -15,7 +15,7 @@ gpus=(0 1 2 3 4 5)
 #printf "\n\n"
 
 datasets=("${1}")
-orders=("chorno")
+neighbors=(2 3 4)
 runs=5
 
 trial="${2}"
@@ -33,12 +33,12 @@ cp -r src "${src_dir}"
 config_dir="${3}"/"${trial}"
 mapfile -t configs < <(ls "${config_dir}")
 
-# Loop through each dataset and order
+# Loop through each dataset and neighbor
 for config in "${configs[@]}"
 do
   for dataset in "${datasets[@]}"
   do
-    for order in "${orders[@]}"
+    for neighbor in "${neighbors[@]}"
     do
         for i in $(seq 1 $runs)
         do
@@ -62,12 +62,12 @@ do
 
             python -u "${src_dir}"/train.py --config "${config_dir}"/"${config}" \
                                               --data "${dataset}" \
-                                              --override_order "${order}" \
+                                              --override_neighbor ${neighbor} \
                                               --gpu "${gpu}" \
                                               --tb_log_prefix "log_tb" \
                                               --pure_gpu \
                                               --profile \
-            | tee "${log_dir}"/"${order}"_"${dataset}"_"${config%.*}"_"${i}".out &
+            | tee "${log_dir}"/"${neighbor}"_"${dataset}"_"${config%.*}"_"${i}".out &
             sleep 10
       done
       # collect output
@@ -79,3 +79,4 @@ done
 #                               --log_dir "${log_dir}" \
 #                               --config_dir "${3}"\
 #       | tee -a "${log_dir}"/result
+

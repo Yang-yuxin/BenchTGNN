@@ -59,22 +59,7 @@ class TGNN(torch.nn.Module):
             raise NotImplementedError
         
         dim_out = gnn_config['dim_out']
-        # self.mlp_q0 = nn.Sequential(
-        #     nn.Linear(dim_node_feat + dim_time + dim_memory, dim_out),
-        #     nn.ReLU(),
-        #     )
-        # self.mlp_q = nn.Sequential(
-        #     nn.Linear(dim_out + dim_time + dim_memory, dim_out),
-        #     nn.ReLU(),
-        #     )
-        # self.mlp_k0 = nn.Sequential(
-        #     nn.Linear(dim_node_feat + dim_edge_feat + dim_time + dim_memory, dim_out),
-        #     nn.ReLU(),
-        #     )
-        # self.mlp_k = nn.Sequential(
-        #     nn.Linear(dim_out + dim_edge_feat + dim_time + dim_memory, dim_out),
-        #     nn.ReLU(),
-        #     )
+
         self.layers = torch.nn.ModuleList()
         if gnn_config['arch'] == 'transformer':
             self.layers.append(TransformerAggregator(dim_node_feat, dim_time, dim_edge_feat, dim_memory, dim_out, gnn_config['att_head'], 
@@ -85,7 +70,7 @@ class TGNN(torch.nn.Module):
                                                gnn_config['dim_time'], dim_memory, 
                                                dim_out, train_config['dropout'], ))
             else:
-                self.layers.append(MixerAggregator(num_neighbors[0], dim_node_feat, dim_edge_feat,
+                self.layers.append(MixerAggregator(num_neighbors[-1], dim_node_feat, dim_edge_feat,
                                                gnn_config['dim_time'], dim_memory, 
                                                dim_out, train_config['dropout'], ))
         else:

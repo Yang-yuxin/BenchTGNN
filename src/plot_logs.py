@@ -9,7 +9,7 @@ import pickle
 parser = argparse.ArgumentParser()
 parser.add_argument('--trial', type=str, help='trial name')
 parser.add_argument('--log_dir', type=str, default='log', help='log file directory')
-parser.add_argument('--all_in_one', action='store_true')
+parser.add_argument('--import', type=str, default='')
 parser.add_argument('--target', type=str, default='mrr', choices=['mrr', 'epoch'])
 parser.add_argument('--num_scope', type=int, default=25, help='trial name')
 parser.add_argument('--num_neighbor', type=int, default=10, help='trial name')

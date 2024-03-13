@@ -260,7 +260,7 @@ class DataLoader:
                 self.dst_nid = self.dst_nid[trans_edge_mask]
                 self.neg_dst_nid = self.neg_dst_nid[~trans_neg_dst_mask]
 
-        if self.order == 'uniform_random':
+        if self.order == 'uniform':
             self.edge_idx = torch.randperm(self.src_nid.shape[0], device=self.device)
         elif self.order == 'chorno':
             self.edge_idx = torch.arange(self.src_nid.shape[0], device=self.device)

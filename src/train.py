@@ -133,7 +133,10 @@ def eval(model, dataloader, isinductive=False):
 
 
 config = yaml.safe_load(open(args.config, 'r'))
-
+"""Overriding"""
+if args.override_neighbor > 0:
+    config['scope'][0]['neighbor'][0] = int(args.override_neighbor)
+    # import pdb; pdb.set_trace()
 if args.override_epoch > 0:
     config['train'][0]['epoch'] = args.override_epoch
 if args.override_valepoch > -1:  # todel
