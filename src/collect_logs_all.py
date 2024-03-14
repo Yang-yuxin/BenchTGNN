@@ -21,7 +21,7 @@ config_dir = 'config' + '/{}'.format(args.trial)
 
 
 # scans = ['5', '10', '20', '50', '100']
-scans = ['2', '3', '4', '5', '10', '20', '50', '100', '5x5', '5x10', '10x5', '10x10']
+scans = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '20', '50', '100', '5x5', '5x10', '10x5', '10x10']
 datasets = ['WIKI', 'REDDIT', 'Flights', 'LASTFM', 'mooc', 'uci', 'CollegeMsg']
 aggrs = ['TGAT', 'GraphMixer']
 samplings = ['re', 'uni']

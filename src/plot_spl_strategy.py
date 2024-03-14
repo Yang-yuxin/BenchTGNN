@@ -30,7 +30,7 @@ config_dir = 'config' + '/{}'.format(args.trial)
 # Optionally, you can set the font size as well
 plt.rcParams['font.size'] = args.fontsize
 if args.layers == 1:
-    scans = ['5', '10', '20', '50', '100']
+    scans = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '20', '50', '100']
 else:
     scans = ['5x5', '5x10', '10x5', '10x10']
 datasets = ['WIKI', 'REDDIT', 'Flights', 'LASTFM', 'mooc', 'uci', 'CollegeMsg']
@@ -146,7 +146,7 @@ for dataset in datasets:
     df_all = df_all.T
     df_all.columns = scans
     
-    plt.savefig(f'figures/{dataset}_mrr_spl_strategy_{args.layers}l.pdf')
+    plt.savefig(f'figures/1{dataset}_mrr_spl_strategy_{args.layers}l.pdf')
 
 if args.save_legends:
     # Step 1: Create dummy figure and axes

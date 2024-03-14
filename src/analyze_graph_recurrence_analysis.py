@@ -11,7 +11,7 @@ import random
 from scipy.optimize import minimize
 from scipy.stats import norm
 
-plt.rcParams['font.family'] = 'Times New Roman'
+# plt.rcParams['font.family'] = 'Times New Roman'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, help='dataset name')
@@ -21,7 +21,6 @@ parser.add_argument('--use_real_time', action='store_true')
 parser.add_argument('--bins', type=int, default=-1)
 parser.add_argument('--file_path', type=str, default='')
 args = parser.parse_args()
-
 print(args)
 
 df = pd.read_csv('DATA/{}/edges.csv'.format(args.data))
