@@ -29,7 +29,6 @@ class TransformerAggregator(nn.Module):
         self.w_k = nn.Linear(self.dim_node_feat + dim_edge_feat + dim_time, dim_out)
         self.w_v = nn.Linear(self.dim_node_feat + dim_edge_feat + dim_time, dim_out)
         self.w_out = nn.Linear(self.dim_node_feat + dim_out, dim_out)
-        # import pdb; pdb.set_trace()
 
         self.layer_norm = nn.LayerNorm(dim_out)
 
@@ -85,9 +84,9 @@ class FeedForward(nn.Module):
             self.linear_0 = nn.Linear(dims, out_dims)
             self.detached_linear_0 = nn.Linear(dims, out_dims)
         else:
-            self.linear_0 = nn.Linear(dims, int(expansion_factor * dims))
-            self.detached_linear_0 = nn.Linear(dims, int(expansion_factor * dims))
-            self.linear_1 = nn.Linear(int(expansion_factor * dims), out_dims)
+            self.linear_0 = nn.Linear(dims, max(int(expansion_factor * dims), 1))
+            self.detached_linear_0 = nn.Linear(dims, max(int(expansion_factor * dims), 1))
+            self.linear_1 = nn.Linear(max(int(expansion_factor * dims), 1), out_dims)
 
         self.reset_parameters()
 
@@ -163,6 +162,7 @@ class MixerBlock(nn.Module):
         self.channel_layernorm = nn.LayerNorm(dim_feat)
         self.channel_forward = FeedForward(dim_feat, channel_expansion_factor, dropout)
 
+
     def reset_parameters(self, init_type='model', gain=1.0):
         self.token_layernorm.reset_parameters()
         self.token_forward.reset_parameters(init_type, gain)
@@ -201,7 +201,6 @@ class MixerAggregator(nn.Module):
         self.dim_memory = dim_memory
         self.dim_out = dim_out
 
-        # import pdb; pdb.set_trace()
         self.mixer = MixerBlock(num_neighbor, dim_node_feat + dim_edge_feat + dim_time,
                                 dropout=dropout,)
         self.layer_norm = nn.LayerNorm(dim_node_feat + dim_edge_feat + dim_time)

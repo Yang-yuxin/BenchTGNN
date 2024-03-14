@@ -9,14 +9,15 @@ eval:
 - batch_size: 100
   val_epoch: 0    # the training epoch that start evaluation on the validation set
 scope:
-- layer: 1
+- layer: 2
   neighbor:
   - 10
+  - 5
       # - 20
   strategy: recent
 gnn:
 - arch: transformer
-  layer: 1
+  layer: 2
   att_head: 2
   time_enc: fixed
   dim_time: 100

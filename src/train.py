@@ -270,7 +270,6 @@ with torch.profiler.profile(
         mrrs = []
         while not train_loader.epoch_end:
             blocks, messages = train_loader.get_blocks(log_cache_hit_miss=args.print_cache_hit_rate, mode='trans')
-            
             if args.print_cache_hit_rate:
                 for block in blocks:
                     hit_count += block.cache_hit_count
