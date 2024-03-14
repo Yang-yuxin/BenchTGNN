@@ -4,11 +4,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import os.path as osp
+import pickle
 from tqdm import tqdm
 import random
 from scipy.optimize import minimize
 from scipy.stats import norm
 
+plt.rcParams['font.family'] = 'Times New Roman'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, help='dataset name')
@@ -16,6 +19,7 @@ parser.add_argument('--add_reverse', default=False, action='store_true')
 parser.add_argument('--total', action='store_true')
 parser.add_argument('--use_real_time', action='store_true')
 parser.add_argument('--bins', type=int, default=-1)
+parser.add_argument('--file_path', type=str, default='')
 args = parser.parse_args()
 
 print(args)
@@ -26,7 +30,7 @@ d = 'dst' if 'dst' in df.columns else 'i'
 t = 'time' if 'time' in df.columns else 'ts'
 num_nodes = max(int(df[s].max()), int(df[d].max())) + 1
 print('num_nodes: ', num_nodes)
-# import pdb; pdb.set_trace()
+
 ext_full_indptr = np.zeros(num_nodes + 1, dtype=np.int32)
 ext_full_indices = [[] for _ in range(num_nodes)]
 ext_full_ts = [[] for _ in range(num_nodes)]
@@ -94,23 +98,30 @@ def tsort_original(i, indices, ts, eid):
     except TypeError:
         import pdb; pdb.set_trace()
 
-print('sorting and analyzing...')
-recur_matrices = []
-color_dict = {}
-recur_matrix = np.zeros((BINS+1, BINS+1))
-for i in tqdm(range(num_nodes)):
-    tsort_original(i, ext_full_indices[i], ext_full_ts[i], ext_full_eid[i])
-    # import pdb; pdb.set_trace()
-    if args.use_real_time:
-        get_recurrence_quantification(i, args.use_real_time, min_ts, step, recur_matrix, color_dict)
-    else:
-        recur_matrix, s_recur = get_recurrence_quantification(i, args.use_real_time, min_ts, step, color_dict)
-        recur_matrices.append(recur_matrix)
-    if args.total:
-        continue
-    if s_recur > 20 and i > 4:
-        plt.matshow(recur_matrices[-1])
-        break
+if osp.exists(args.file_path):
+    print('loding...')
+    with open(args.file_path, 'rb') as f:
+        recur_matrix = pickle.load(f)
+else:
+    print('sorting and analyzing...')
+    recur_matrices = []
+    color_dict = {}
+    recur_matrix = np.zeros((BINS+1, BINS+1))
+    for i in tqdm(range(num_nodes)):
+        tsort_original(i, ext_full_indices[i], ext_full_ts[i], ext_full_eid[i])
+        # import pdb; pdb.set_trace()
+        if args.use_real_time:
+            get_recurrence_quantification(i, args.use_real_time, min_ts, step, recur_matrix, color_dict)
+        else:
+            recur_matrix, s_recur = get_recurrence_quantification(i, args.use_real_time, min_ts, step, color_dict)
+            recur_matrices.append(recur_matrix)
+        if args.total:
+            continue
+        if s_recur > 20 and i > 4:
+            plt.matshow(recur_matrices[-1])
+            break
+    with open(args.file_path, 'wb') as f:
+        pickle.dump(recur_matrix, f)
 
 if args.use_real_time:
     total_matrix = recur_matrix
@@ -128,15 +139,7 @@ scalar = p95 - p5
 
 total_matrix[(total_matrix > p95)] = p95 - 0.1
 total_matrix[(total_matrix < p5) & (total_matrix > 1e-6)] = p5 + 0.1
-    # for i in range(total_matrix.shape[0]):
-    #     for j in range(total_matrix.shape[1]):
-    #         if total_matrix[i][j] == 0:
-    #             continue
-    #         if total_matrix[i][j] > p95:
-    #             total_matrix[i][j] = p95 - 0.1
-    #         if total_matrix[i][j] < p5:
-    #             total_matrix[i][j] = p5 + 0.1
-import pdb; pdb.set_trace()
+
 total_matrix /= scalar
 plt.matshow(total_matrix)
 if args.total and args.use_real_time:
@@ -146,5 +149,5 @@ elif args.total:
 else:
     plt.suptitle(f'{args.data} recurrence distribution of node {i}')
 # plt.tight_layout()
-plt.savefig(f'{args.data}_total_recurrence_analysis_{args.use_real_time}.png')
+plt.savefig(f'figures/recurrence/{args.data}_total_recurrence_analysis_{args.use_real_time}.png')
 # import pdb; pdb.set_trace()
