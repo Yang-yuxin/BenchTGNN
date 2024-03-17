@@ -8,7 +8,7 @@ import pickle
 
 # Set the font globally
 # plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.family'] = 'Times New Roman'
+# plt.rcParams['font.family'] = 'Times New Roman'
 
 
 parser = argparse.ArgumentParser()

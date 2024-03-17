@@ -110,6 +110,7 @@
 # bash run_parallel_ganges.sh CollegeMsg scan_10x5_none config
 # bash run_parallel_ganges.sh CollegeMsg scan_10x10_none config
 
+# Run gru and embedding memory for all datasets
 bash run_parallel_ganges.sh WIKI scan_lt5 config
 bash run_parallel_ganges.sh REDDIT scan_lt5 config
 bash run_parallel_ganges.sh mooc scan_lt5 config
@@ -118,6 +119,7 @@ bash run_parallel_ganges_scan10.sh Flights scan_lt5 config
 bash run_parallel_ganges_scan10.sh uci scan_lt5 config
 bash run_parallel_ganges_scan10.sh CollegeMsg scan_lt5 config
 
+# Run no memory for all datasets
 # bash run_parallel_ganges_scan10.sh WIKI scan_lt5_none config
 # bash run_parallel_ganges_scan10.sh REDDIT scan_lt5_none config
 # bash run_parallel_ganges_scan10.sh mooc scan_lt5_none config
