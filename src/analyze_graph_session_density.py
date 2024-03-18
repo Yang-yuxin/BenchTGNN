@@ -111,4 +111,4 @@ xlabel = f'cumulative neighbor count'
 # plt.legend()
 plt.suptitle(f'{args.data} session length distribution')
 plt.tight_layout()
-plt.savefig(f'{args.data}_session_activity_density.png')
+plt.savefig(f'figures/session/{args.data}_session_activity_density.pdf')
