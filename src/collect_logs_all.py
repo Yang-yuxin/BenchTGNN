@@ -11,7 +11,7 @@ parser.add_argument('--trial', type=str, help='trial name')
 parser.add_argument('--log_dir', type=str, default='log', help='log file directory')
 parser.add_argument('--all_in_one', type=bool, default=True)
 parser.add_argument('--export', type=str, default='')
-parser.add_argument('--target', type=str, default='mrr', choices=['mrr', 'epoch'])
+parser.add_argument('--target', type=str, default='mrr', choices=['mrr', 'epoch', 'time'])
 parser.add_argument('--num_scope', type=int, default=25, help='trial name')
 parser.add_argument('--num_neighbor', type=int, default=10, help='trial name')
 parser.add_argument('--runs', type=int, default=5, help='trial name')
@@ -60,12 +60,14 @@ def get_best_epoch(file_path):
 
 def get_epoch_time(file_path):
     try:
-        # with open(file_path, 'r') as f:
-        #     epoch = None
-        #     for lines in f:
-        #         if lines.startswith('Loading'):
-        #             epoch = int(lines.split(' ')[4])
-        #             return epoch
+        with open(file_path, 'r') as f:
+            t = 0
+            nt = 0
+            for lines in f:
+                if lines.startswith('\ttrain time:'):
+                    t += int(lines.split(':')[1].split('s')[0])
+                    nt+=1
+            return t / nt
         pass
     except FileNotFoundError:
         import pdb; pdb.set_trace()
@@ -116,7 +118,12 @@ for root, dirs, files in os.walk(log_dir):
                 dataset, aggr, sampling, memory = file.split('_')[1:5]
             else:
                 dataset, aggr, sampling, memory = file.split('_')[0:4]
-            result = get_test_mrr(path) if args.target == 'mrr' else get_best_epoch(path)
+            if args.target == 'mrr':
+                result = get_test_mrr(path)
+            elif args.target == 'time':
+                result = get_epoch_time(path)
+            else:
+                result = get_best_epoch(path)
             # if len(results) > 0:
             #     results = np.array(results)
             #     # print('{}_{}_{}_{}_{}:{:.4f}+-{:.4f}'.format(dataset, scan, aggr, sampling, memory, np.mean(mrrs), np.std(mrrs)))
