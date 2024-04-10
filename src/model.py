@@ -12,13 +12,17 @@ from copy import deepcopy, copy
 
 class TGNN(torch.nn.Module):
 
-    def __init__(self, config, device, n_nodes, dim_node_feat, dim_edge_feat):
+    def __init__(self, args, config, device, n_nodes, dim_node_feat, dim_edge_feat):
         super(TGNN, self).__init__()
 
         gnn_config = config['gnn'][0]
         train_config = config['train'][0]
         self.device = device
         self.n_nodes = n_nodes
+        try:
+            self.ind_embed = config['gnn'][0]['ind']
+        except KeyError:
+            self.ind_embed = args.ind_embed
 
         # Time encoding
         time_encoder_type = gnn_config['time_enc']
@@ -41,14 +45,15 @@ class TGNN(torch.nn.Module):
             dim_memory = gnn_config['dim_memory']
             dim_time = gnn_config['dim_time']
             dim_msg = dim_memory * 2 + dim_edge_feat
-            self.memory = GRUMemory(device, n_nodes, dim_memory, dim_node_feat, dim_msg, dim_time, 
+            len_msg = 1
+            self.memory = GRUMemory(device, n_nodes, dim_memory, dim_node_feat, dim_msg, len_msg, dim_time, 
                                     gnn_config['msg_reducer'], time_encoder_type, use_embedding_in_message)
             dim_memory = gnn_config['dim_memory']
             if dim_node_feat > 0:
                 self.memory_mapper = nn.Linear(dim_node_feat, dim_memory)
         elif memory_type == 'embedding':
             dim_memory = gnn_config['dim_memory']
-            self.memory = EmbeddingTableMemory(device, n_nodes, dim_memory)
+            self.memory = EmbeddingTableMemory(device, n_nodes, dim_memory, len_msg=2, ind_embed=self.ind_embed)
             dim_memory = gnn_config['dim_memory']
             if dim_node_feat > 0:
                 self.memory_mapper = nn.Linear(dim_node_feat, dim_memory)
@@ -86,12 +91,14 @@ class TGNN(torch.nn.Module):
         self.edge_predictor = EdgePredictor(dim_out)
         self.to(device)
     
-    def aggregate_messages_and_update_memory(self, blocks, pos_edge_feats):
+    def aggregate_messages_and_update_memory(self, blocks, pos_edge_feats, mode):
         if isinstance(self.memory, GRUMemory):
             updated_memory, last_update = self.memory.get_updated_memory(torch.arange(self.n_nodes).to(self.device))
         elif isinstance(self.memory, EmbeddingTableMemory):
-            updated_memory, last_update = self.memory.get_memory(torch.arange(self.n_nodes).to(self.device), self.memory.memory), \
-            self.memory.get_last_update(torch.arange(self.n_nodes).to(self.device))
+            if mode != 'train':
+                self.memory.update_memory(torch.arange(self.n_nodes))
+            updated_memory = self.memory.get_memory(torch.arange(self.n_nodes).to(self.device), self.memory.memory)
+            # self.memory.get_last_update(torch.arange(self.n_nodes).to(self.device))
         else:
             updated_memory = None
         h_in = None
@@ -142,15 +149,19 @@ class TGNN(torch.nn.Module):
             if not torch.allclose(updated_memory[positives], self.memory.get_memory(positives, self.memory.memory), atol=1e-5): 
                 print("Something wrong in how the memory was updated")
                 import pdb; pdb.set_trace()
-            # self.memory.clear_mailbox(positives)
             self.memory.store_raw_messages(src_nids, None, dst_nids, None, pos_edge_times, pos_edge_feats)
-            # self.memory.store_raw_messages(dst_nids, None, src_nids, None, pos_edge_times, pos_edge_feats)
-            # import pdb; pdb.set_trace()
-
+        elif isinstance(self.memory, EmbeddingTableMemory) and self.ind_embed and mode != 'train':
+            block = blocks[-1]
+            src_nids = block.root_nid[:block.pos_dst_size]
+            dst_neighs = block.neighbor_nid[block.pos_dst_size:block.pos_dst_size*2]
+            self.memory.store_raw_messages(src_nids, dst_neighs)
+            dst_nids = block.root_nid[block.pos_dst_size:block.pos_dst_size*2]
+            src_neighs = block.neighbor_nid[:block.pos_dst_size]
+            self.memory.store_raw_messages(dst_nids, src_neighs)
         return h_in
     
 
-    def forward(self, blocks, messages):
-        h_in = self.aggregate_messages_and_update_memory(blocks, messages)
+    def forward(self, blocks, messages, mode='train'):
+        h_in = self.aggregate_messages_and_update_memory(blocks, messages, mode)
         return self.edge_predictor(h_in, blocks[-1].num_neg_dst)
 

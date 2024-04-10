@@ -1,5 +1,5 @@
 train:
-- order: chorno        # chorno means training mini-batches are formed in chronological order
+- order: uniform        # chorno means training mini-batches are formed in chronological order
   epoch: 200
   batch_size: 600
   lr: 0.0001
@@ -13,7 +13,7 @@ scope:
   neighbor:
   - 5
       # - 20
-  strategy: recent
+  strategy: uniform
 gnn:
 - arch: transformer
   layer: 1
@@ -21,7 +21,7 @@ gnn:
   time_enc: fixed
   dim_time: 100
   dim_out: 100
-  memory_type: gru
+  memory_type: none
   dim_memory: 100
   msg_reducer: last
   memory_update_use_embed: false

@@ -13,6 +13,7 @@ parser.add_argument('--config', type=str, help='path to config file')
 parser.add_argument('--gpu', type=str, default="0", help='which GPU to use')
 parser.add_argument('--eval_neg_samples', type=int, default=49, help='how many negative samples to use at inference.')
 parser.add_argument('--test_inductive', action='store_true')
+parser.add_argument('--ind_embed', type=bool, default=True)
 parser.add_argument('--ind_ratio', type=float, default=0.1)
 parser.add_argument('--cached_ratio', type=float, default=0.3, help='the ratio of gpu cached edge feature')
 parser.add_argument('--cache', action='store_true', help='cache edge features on device')
@@ -65,7 +66,7 @@ def eval(model, dataloader, isinductive=False):
 
         while not dataloader.epoch_end:
             blocks, msgs = dataloader.get_blocks()
-            pred_pos, pred_neg = model(blocks, msgs)
+            pred_pos, pred_neg = model(blocks, msgs, dataloader.mode)
             y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
             y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
 
@@ -118,7 +119,7 @@ def eval(model, dataloader, isinductive=False):
         mrrs = list()
         while not dataloader.epoch_end:
             blocks, msgs = dataloader.get_blocks()
-            pred_pos, pred_neg = model(blocks, msgs)
+            pred_pos, pred_neg = model(blocks, msgs, dataloader.mode)
             y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
             y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
             aps.append(average_precision_score(y_true, y_pred))
@@ -192,7 +193,7 @@ n_node = g[0].shape[0]
 """Model"""
 device = 'cuda'
 params = []
-model = TGNN(config, device, n_node, dim_node_feat, dim_edge_feat)
+model = TGNN(args, config, device, n_node, dim_node_feat, dim_edge_feat)
 params.append({
     'params': model.parameters(),
     'lr': config['train'][0]['lr']

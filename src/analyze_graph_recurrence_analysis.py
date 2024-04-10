@@ -50,6 +50,7 @@ parser.add_argument('--add_reverse', default=False, action='store_true')
 parser.add_argument('--use_real_time', action='store_true')
 parser.add_argument('--bins', type=int, default=-1)
 parser.add_argument('--file_path', type=str, default='')
+parser.add_argument('--replace', action='store_true')
 args = parser.parse_args()
 print(args)
 
@@ -64,7 +65,7 @@ show_datasets = {
     'CollegeMsg': 'CollegeMsg'
 }
 if not args.all_data:
-    assert args.data in datasets
+    # assert args.data in datasets
     datasets = [args.data,]
 else:
     datasets = ['WIKI', 'uci']
@@ -80,8 +81,9 @@ for data in datasets:
     # BINS = 1000 if data in ['uci', 'CollegeMsg'] else 10000
     BINS = int(min(10 ** int(np.log10(len(df)) - 1), 1e4)) if (args.bins == -1) else args.bins
 
-    file_path = f'figures/data/{data}_recur_time.pkl'
-    if osp.exists(file_path):
+    # file_path = f'figures/data/{data}_recur_time.pkl'
+    file_path = args.file_path
+    if osp.exists(file_path) and not args.replace:
         print('loading...')
         with open(file_path, 'rb') as f:
             all_data = pickle.load(f)
@@ -135,28 +137,28 @@ for data in datasets:
             }
             pickle.dump(all_data, f)
 
-    total_matrix = recur_matrix
+#     total_matrix = recur_matrix
 
-    ma, mi, me = np.max(total_matrix[total_matrix > 1e-6]), np.min(total_matrix[total_matrix > 1e-6]), np.mean(total_matrix[total_matrix > 1e-6])
-    p5 = np.percentile(total_matrix[total_matrix > 1e-6], 5)
-    p95 = np.percentile(total_matrix[total_matrix > 1e-6], 95)
-    print(ma, mi, me, p5, p95)
-    scalar = p95 - p5
+#     ma, mi, me = np.max(total_matrix[total_matrix > 1e-6]), np.min(total_matrix[total_matrix > 1e-6]), np.mean(total_matrix[total_matrix > 1e-6])
+#     p5 = np.percentile(total_matrix[total_matrix > 1e-6], 5)
+#     p95 = np.percentile(total_matrix[total_matrix > 1e-6], 95)
+#     print(ma, mi, me, p5, p95)
+#     scalar = p95 - p5
 
-    total_matrix[(total_matrix > p95)] = p95 - 0.1
-    total_matrix[(total_matrix < p5) & (total_matrix > 1e-6)] = p5 + 0.1
+#     total_matrix[(total_matrix > p95)] = p95 - 0.1
+#     total_matrix[(total_matrix < p5) & (total_matrix > 1e-6)] = p5 + 0.1
 
-    total_matrices.append(total_matrix / scalar)
+#     total_matrices.append(total_matrix / scalar)
 
-fig, axes = plt.subplots(1, len(datasets), sharex=True, sharey=True)
-cbar_ax = fig.add_axes([.91, .3, .03, .4])
-print('Plotting heatmap...')
-for i, ax in enumerate(axes.flat):
-    # sns.heatmap(total_matrices[i], vmin=0, vmax=1, ax=ax, cbar=(i==0), xticklabels=int(BINS/5), 
-    #             yticklabels=int(BINS/5),square=True, cbar_ax=None if i else cbar_ax)
-    im = ax.matshow(total_matrices[i], vmin=0, vmax=1, cmap='rocket')
-    ax.set_title(f'{show_datasets[datasets[i]]}')
-fig.colorbar(im, cax=cbar_ax,)
-print('Saving...')
-fig.tight_layout()
-plt.savefig(f'figures/recurrence/all_recurrence_analysis.png')
+# fig, axes = plt.subplots(1, len(datasets), sharex=True, sharey=True)
+# cbar_ax = fig.add_axes([.91, .3, .03, .4])
+# print('Plotting heatmap...')
+# for i, ax in enumerate(axes.flat):
+#     # sns.heatmap(total_matrices[i], vmin=0, vmax=1, ax=ax, cbar=(i==0), xticklabels=int(BINS/5), 
+#     #             yticklabels=int(BINS/5),square=True, cbar_ax=None if i else cbar_ax)
+#     im = ax.matshow(total_matrices[i], vmin=0, vmax=1, cmap='rocket')
+#     ax.set_title(f'{show_datasets[datasets[i]]}')
+# fig.colorbar(im, cax=cbar_ax,)
+# print('Saving...')
+# fig.tight_layout()
+# plt.savefig(f'figures/recurrence/all_recurrence_analysis.png')

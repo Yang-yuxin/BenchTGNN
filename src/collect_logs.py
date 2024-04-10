@@ -23,8 +23,9 @@ args = parser.parse_args()
 log_dir = args.log_dir
 config_dir = args.config_dir + '/{}'.format(args.trial)
 
-datasets = ['WIKI', 'REDDIT', 'Flight', 'MovieLens', 'sGDELT', 'GDELT', 'MOOC', 'LASTFM', 
-            'mooc', 'CollegeMsg', 'uci', 'Flights']
+# datasets = ['WIKI', 'REDDIT', 'Flight', 'MovieLens', 'sGDELT', 'GDELT', 'MOOC', 'LASTFM', 
+#             'mooc', 'CollegeMsg', 'uci', 'Flights']
+datasets = ['_syn_0.6_0.6', '_syn_1_0.6']
 configs = [f for f in os.listdir(config_dir) if f.endswith('.yml')]
 configs.sort()
 
