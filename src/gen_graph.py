@@ -71,7 +71,6 @@ for i in tqdm(range(ext_full_indptr.shape[0] - 1)):
 #     except AssertionError:
 #         import pdb; pdb.set_trace()
 
-import pdb; pdb.set_trace()
 print('saving...')
 
 np.savez('DATA/{}/ext_full.npz'.format(args.data), indptr=ext_full_indptr,

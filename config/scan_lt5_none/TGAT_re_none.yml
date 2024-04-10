@@ -13,7 +13,7 @@ scope:
   neighbor:
   - 5
       # - 20
-  strategy: uniform
+  strategy: recent
 gnn:
 - arch: transformer
   layer: 1
@@ -21,7 +21,7 @@ gnn:
   time_enc: fixed
   dim_time: 100
   dim_out: 100
-  memory_type: embedding
+  memory_type: none
   dim_memory: 100
   msg_reducer: last
   memory_update_use_embed: false
