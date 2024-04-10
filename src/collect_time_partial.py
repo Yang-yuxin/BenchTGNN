@@ -70,6 +70,7 @@ def get_epoch_time(file_path):
             if nt == 0:
                 print(file_path)
                 return None
+            print(file_path, t, nt)
             return t / nt
         pass
     except FileNotFoundError:
@@ -81,23 +82,11 @@ all_data = {}
 
 for dataset in datasets:
     all_data[dataset] = {}
-    for scan in scans:
-        all_data[dataset][scan] = {}
-        for aggr in aggrs:
-            all_data[dataset][scan][aggr] = {}
-            for sampling in samplings:
-                all_data[dataset][scan][aggr][sampling] = {}
-                for memory in memorys:
-                    all_data[dataset][scan][aggr][sampling][memory] = []
 all_results = []
 all_stds = []
 for root, dirs, files in os.walk(log_dir):
     try:
-        if (int(root.split('-')[1]) >= 1 and int(root.split('_')[0].split('-')[2]) >= 25 and 'scan' in root):
-            print(root)
-        elif (int(root.split('-')[1]) >= 2 and int(root.split('_')[0].split('-')[2]) >= 3 and 'scan' in root):
-            print(root)
-        elif (int(root.split('-')[1]) >= 3 and 'scan' in root):
+        if (int(root.split('-')[1]) >= 3 and int(root.split('_')[0].split('-')[2]) >= 19 and 'scan' in root):
             print(root)
         else:
             continue
@@ -113,14 +102,7 @@ for root, dirs, files in os.walk(log_dir):
             else:
                 scan = root.split('_')[-2]
 
-            if 'lt5' in root and 'chorno' not in file:
-                scan, dataset, aggr, sampling, memory = file.split('_')[0:5]
-            elif 'lt5' in root and 'chorno' in file:
-                scan, dataset, aggr, sampling, memory = file.split('_')[1:6]
-            elif 'chorno' in file:
-                dataset, aggr, sampling, memory = file.split('_')[1:5]
-            else:
-                dataset, aggr, sampling, memory = file.split('_')[0:4]
+            scan, dataset = file.split('_')[0:2]
             if args.target == 'mrr':
                 result = get_test_mrr(path)
             elif args.target == 'time':
@@ -135,76 +117,25 @@ for root, dirs, files in os.walk(log_dir):
             if result is None:
                 continue
             try:
-                all_data[dataset][scan][aggr][sampling][memory].append(result)
+                all_data[dataset][scan] = result
             except KeyError:
                 import pdb; pdb.set_trace()
     except IndexError:
         pass
-for dataset in datasets:
-    for aggr in aggrs:
-        for sampling in samplings:
-            for memory in memorys:
-                means = []
-                stds = []
-                for scan in scans:
-                    results = all_data[dataset][scan][aggr][sampling][memory]
-                    results = [x for x in results if x is not None]
-                    if len(results) > args.runs:
-                        results = results[:args.runs]
-                    all_data[dataset][scan][aggr][sampling][memory] = results
+# for dataset in datasets:
+#     for aggr in aggrs:
+#         for sampling in samplings:
+#             for memory in memorys:
+#                 means = []
+#                 stds = []
+#                 for scan in scans:
+#                     results = all_data[dataset][scan][aggr][sampling][memory]
+#                     results = [x for x in results if x is not None]
+#                     if len(results) > args.runs:
+#                         results = results[:args.runs]
+#                     all_data[dataset][scan][aggr][sampling][memory] = results
 
 # save data
 with open(args.export, 'wb') as f:
     pickle.dump(all_data, f)
 
-if args.all_in_one:
-    path_unifile = f'all_datasets.xlsx'
-    writer = pd.ExcelWriter(path_unifile)
-
-for dataset in datasets:
-    df_mean = pd.DataFrame()
-    df_std = pd.DataFrame()
-    df_all = pd.DataFrame()
-    for aggr in aggrs:
-        for sampling in samplings:
-            for memory in memorys:
-                means = []
-                stds = []
-                for scan in scans:
-                    results = all_data[dataset][scan][aggr][sampling][memory]
-                    if len(results) == args.runs:
-                        # print(f"{dataset}\t{scan}\t{aggr}\t{sampling}\t{memory}\t{np.mean(results)}")
-                        means.append(np.mean(results))
-                        stds.append(np.std(results))
-                if len(means) == len(scans):
-                    df_mean[f"{aggr}+{sampling}+{memory}"] = means
-                    df_std[f"{aggr}+{sampling}+{memory}"] = stds
-                    df_all[f"{aggr}+{sampling}+{memory}"] = [(str(round(mean, 4)) + '+-' + str(round(std, 4))) for (mean, std) in zip(means, stds)]
-    if df_mean.empty:
-        continue
-    # plt.figure(figsize=(14, 8))
-    # for i, col in enumerate(df_mean.columns):
-    #     # plt.plot(np.arange(len(scans)), df_mean[col], label=col, color=colors[i])
-    #     plt.errorbar(x=range(len(scans)), y=df_mean[col], yerr=df_std[col], fmt='-o', capsize=5, label=col, color=colors[i])
-    # plt.title(f'{dataset} best {args.target} with Different Neighbor Count')
-    # x_labels = scans
-    # plt.xticks(ticks=np.arange(len(x_labels)), labels=x_labels)
-    # plt.legend()
-    df_all = df_all.T
-    df_all.columns = scans
-    
-    if args.target == 'epoch':
-        # plt.savefig(f'{dataset}_best_epoch_plot.png')
-        if args.all_in_one:
-            df_all.to_excel(writer, sheet_name=f'{dataset}_epoch')
-        else:
-            df_all.to_excel(f'{dataset}_best_epoch.xlsx')
-    else:
-        # plt.savefig(f'{dataset}_mrr_plot.png')
-        if args.all_in_one:
-            df_all.to_excel(writer, sheet_name=f'{dataset}_mrr')
-        else:
-            df_all.to_excel(f'{dataset}_mrr.xlsx')
-    
-if args.all_in_one:
-    writer.close()

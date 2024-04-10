@@ -16,7 +16,7 @@ gpus=(2 3 4 5)
 
 datasets=("${1}")
 # neighbors=(2 3 4)
-# neighbors=(1 6 7 8 9)
+neighbors=(1 2 3 4 6 7 8 9)
 runs=5
 
 trial="${2}"
@@ -39,8 +39,8 @@ for config in "${configs[@]}"
 do
   for dataset in "${datasets[@]}"
   do
-    # for neighbor in "${neighbors[@]}"
-    # do
+    for neighbor in "${neighbors[@]}"
+    do
         for i in $(seq 1 $runs)
         do
             # schedule GPU
@@ -63,16 +63,16 @@ do
 
             python -u "${src_dir}"/train.py --config "${config_dir}"/"${config}" \
                                               --data "${dataset}" \
+                                              --override_neighbor ${neighbor} \
                                               --gpu "${gpu}" \
                                               --tb_log_prefix "log_tb" \
                                               --pure_gpu \
-                                              --test_inductive \
                                               --profile \
             | tee "${log_dir}"/"${neighbor}"_"${dataset}"_"${config%.*}"_"${i}".out &
             sleep 10
       done
       # collect output
-    # done
+    done
   done
 done
 # wait

@@ -1,5 +1,5 @@
 train:
-- order: chorno        # chorno means training mini-batches are formed in chronological order
+- order: chorno     # chorno means training mini-batches are formed in chronological order
   epoch: 200
   batch_size: 600
   lr: 0.0001
@@ -11,12 +11,11 @@ eval:
 scope:
 - layer: 1
   neighbor:
-  - 5
-      # - 20
+  - 10
   strategy: recent
 gnn:
 - arch: transformer
-  layer: 1
+  layer: 2
   att_head: 2
   time_enc: fixed
   dim_time: 100

@@ -1,5 +1,5 @@
 train:
-- order: uniform_random # chorno means training mini-batches are formed in chronological order
+- order: uniform # chorno means training mini-batches are formed in chronological order
   epoch: 200
   batch_size: 600
   lr: 0.0001
@@ -9,10 +9,10 @@ eval:
 - batch_size: 100
   val_epoch: 0    # the training epoch that start evaluation on the validation set
 scope:
-- layer: 2
+- layer: 1
   neighbor:
-  - 5
-  - 5
+  - 10
+  # - 5
       # - 20
   strategy: recent
 gnn:
