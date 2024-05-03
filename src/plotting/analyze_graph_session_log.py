@@ -203,9 +203,6 @@ else:
 print(result.x)
 plt.hist(x_log, BINS, density=True, stacked=True)
 
-# plt.xscale('log')
-# import pdb; pdb.set_trace()
-# plt.xlim(0, 60)
 if args.data == 'Flights':
     xlabel = f'log time (day)'
 else:
@@ -218,29 +215,3 @@ if args.high_freq:
     plt.savefig(f'figures/session/{args.data}_session_3.pdf')
 else:
     plt.savefig(f'figures/session/{args.data}_session.pdf')
-# import pdb; pdb.set_trace()
-
-
-# ext_full_indices = np.array(list(itertools.chain(*ext_full_indices)))
-# ext_full_ts = np.array(list(itertools.chain(*ext_full_ts)))
-# ext_full_eid = np.array(list(itertools.chain(*ext_full_eid)))
-
-# print('Sorting...')
-
-# def tsort(i, indptr, indices, t, eid):
-#     beg = indptr[i]
-#     end = indptr[i + 1]
-#     sidx = np.argsort(t[beg:end])
-#     indices[beg:end] = indices[beg:end][sidx]
-#     t[beg:end] = t[beg:end][sidx]
-#     eid[beg:end] = eid[beg:end][sidx]
-
-
-
-# for i in tqdm(range(ext_full_indptr.shape[0] - 1)):
-#     tsort(i, ext_full_indptr, ext_full_indices, ext_full_ts, ext_full_eid)
-
-# print('saving...')
-
-# np.savez('DATA/{}/ext_full.npz'.format(args.data), indptr=ext_full_indptr,
-#          indices=ext_full_indices, ts=ext_full_ts, eid=ext_full_eid)

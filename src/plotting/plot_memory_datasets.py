@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import argparse
 import pickle
-
+from constants import *
 # Set the font globally
 # plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.family'] = 'Times New Roman'
@@ -29,7 +29,7 @@ config_dir = 'config' + '/{}'.format(args.trial)
 # Optionally, you can set the font size as well
 plt.rcParams['font.size'] = args.fontsize
 scans = ['5', '10', '20', '50', '100']
-datasets = ['WIKI', 'REDDIT', 'Flights', 'LASTFM', 'mooc', 'uci', 'CollegeMsg']
+datasets = ['WIKI', 'REDDIT','uci', 'CollegeMsg', 'mooc','LASTFM', 'Flights',  ]
 show_datasets = {
     'WIKI': 'Wikipedia',
     'REDDIT': 'REDDIT',
@@ -39,7 +39,10 @@ show_datasets = {
     'uci': 'UCI',
     'CollegeMsg': 'CollegeMsg'
 }
-aggrs = ['TGAT', 'GraphMixer']
+
+
+# aggrs = ['TGAT', 'GraphMixer']
+aggrs = ['TGAT',]
 show_aggrs = {
     'TGAT': 'atten',
     'GraphMixer': 'mixer'
@@ -55,24 +58,6 @@ show_memorys = {
     'embed': 'emb',
     '': 'None'
 }
-# configs = [f for f in os.listdir(config_dir) if f.endswith('.yml')]
-# green_colors = ['#98FB98', '#DAF7A6', '#2FB617', '#6B8E23', '#008080', '#00441b']  # Shades of green
-# red_colors = ['#FF9999', '#FFC300', '#fb6a4a', '#cb181d', '#990000', '#581845']  # Shades of red
-# red_colors = ['#FF5733', 
-#             '#FFC300',
-#             '#DAF7A6',
-#             '#C70039',
-#             '#900C3F',
-#             ]
-
-# colors = [
-# '#ff8a65',
-# '#ffd54f',
-# '#aed581',
-# '#4db6ac',
-# '#4fc3f7',
-# '#7986cb'
-# ]
 
 colors = [
     '#e74c3c',
@@ -98,10 +83,12 @@ else:
 fig, ax=plt.subplots(1, 1, figsize=(14, 8))
 handles = []
 # ax = axs[0]
+# df_all = pd.DataFrame()
+all_points_x = []
+all_points_y = []
+all_points_lbl = []
+
 for i, dataset in enumerate(datasets):
-    df_mean = pd.DataFrame()
-    df_std = pd.DataFrame()
-    df_all = pd.DataFrame()
     aggr = 'TGAT'
     sampling = 're'
     points = [list(), list()]
@@ -118,20 +105,33 @@ for i, dataset in enumerate(datasets):
                 else:
                     print(dataset, scan, aggr)
     # import pdb; pdb.set_trace()
-    handles.append(ax.scatter(x=points[0], y=points[1], s=150, marker=format,label=lbl, color=colors[i]))
+    handles.append(ax.scatter(x=points[0], y=points[1], s=150, marker=format,label=lbl, color=dataset_colors[dataset]))
+    all_points_x = all_points_x + points[0]
+    all_points_y = all_points_y + points[1]
+    all_points_lbl = all_points_lbl + [f'{dataset}' for _ in range(len(points[1]))]
 
+df_all = pd.DataFrame(
+    {
+        'x': all_points_x,
+        'y': all_points_y,
+        'label': all_points_lbl,
+    }
+)
 # title_str = f'{show_samplings[sampling]}-*-{show_aggrs[aggr]}'
 title_str = f'1-layer, 5-100'
 if not args.no_title:
     ax.set_title(title_str, x=0.5, y=1.05)
 ax.set_xlabel(f'MRR (RNN)')
 ax.set_xlim(0, 1)
+ax.set_xticks([0,0.2, 0.4, 0.6, 0.8, 1])
+ax.set_yticks([0,0.2, 0.4, 0.6, 0.8, 1])
 ax.set_ylabel(f'MRR (emb)')
 ax.set_ylim(0, 1)
 ax.plot([0, 1], [0, 1], '--', transform=ax.transAxes,color='r')
 plt.legend(frameon=False, bbox_to_anchor=(1.6, 0.5), loc='center right', borderaxespad=0, handlelength=0., fontsize='small')
 plt.tight_layout()
 plt.savefig(f'figures/mrr_memory_strategy.pdf',bbox_inches='tight')
+df_all.to_csv(f'./tikz_data/mrr_2mem.csv', index=False)
 
 if args.save_legends:
     # Step 1: Create dummy figure and axes
