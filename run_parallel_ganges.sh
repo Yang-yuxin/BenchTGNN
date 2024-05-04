@@ -15,8 +15,6 @@ gpus=(2 3 4 5)
 #printf "\n\n"
 
 datasets=("${1}")
-# neighbors=(2 3 4)
-# neighbors=(1 6 7 8 9)
 runs=5
 
 trial="${2}"

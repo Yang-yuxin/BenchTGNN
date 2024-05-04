@@ -25,8 +25,6 @@ parser.add_argument('--profile_prefix', default='log_profile/', help='prefix for
 
 parser.add_argument('--edge_feature_access_fn', default='', help='prefix to store the edge feature access pattern per epoch')
 
-parser.add_argument('--gradient_option', type=str, default='none', choices=["none", "unbiased"])
-
 parser.add_argument('--no_time', action='store_true', help='do not record time (avoid extra cuda synchronization cost).')
 
 args = parser.parse_args()

@@ -19,10 +19,7 @@ class TGNN(torch.nn.Module):
         train_config = config['train'][0]
         self.device = device
         self.n_nodes = n_nodes
-        try:
-            self.ind_embed = config['gnn'][0]['ind']
-        except KeyError:
-            self.ind_embed = args.ind_embed
+        self.init_trick = gnn_config['init_trick']
 
         # Time encoding
         time_encoder_type = gnn_config['time_enc']
@@ -53,7 +50,7 @@ class TGNN(torch.nn.Module):
                 self.memory_mapper = nn.Linear(dim_node_feat, dim_memory)
         elif memory_type == 'embedding':
             dim_memory = gnn_config['dim_memory']
-            self.memory = EmbeddingTableMemory(device, n_nodes, dim_memory, len_msg=2, ind_embed=self.ind_embed)
+            self.memory = EmbeddingTableMemory(device, n_nodes, dim_memory, len_msg=2, init_trick=self.init_trick)
             dim_memory = gnn_config['dim_memory']
             if dim_node_feat > 0:
                 self.memory_mapper = nn.Linear(dim_node_feat, dim_memory)
@@ -150,7 +147,7 @@ class TGNN(torch.nn.Module):
                 print("Something wrong in how the memory was updated")
                 import pdb; pdb.set_trace()
             self.memory.store_raw_messages(src_nids, None, dst_nids, None, pos_edge_times, pos_edge_feats)
-        elif isinstance(self.memory, EmbeddingTableMemory) and self.ind_embed and mode != 'train':
+        elif isinstance(self.memory, EmbeddingTableMemory) and self.init_trick and mode != 'train':
             block = blocks[-1]
             src_nids = block.root_nid[:block.pos_dst_size]
             dst_neighs = block.neighbor_nid[block.pos_dst_size:block.pos_dst_size*2]
