@@ -14,14 +14,17 @@ parser.add_argument('--num_test_neg_dst', type=int, default=49)
 args = parser.parse_args()
 
 is_bipartite = True if args.data in [
-    'WIKI', 'REDDIT', 'MOOC','mooc', 'LASTFM', 'Taobao', 'sTaobao', 'MovieLens'] else False
+    'WIKI', 'REDDIT', 'MOOC', 'LASTFM', 'Taobao', 'sTaobao', 'MovieLens'] else False
 
 df = pd.read_csv('DATA/{}/edges.csv'.format(args.data))
-
-src = torch.as_tensor(df['src'].to_numpy(dtype=np.int64))
-dst = torch.as_tensor(df['dst'].to_numpy(dtype=np.int64))
-time = torch.as_tensor(df['time'].to_numpy(dtype=np.float32))
-
+if 'src' in df.columns:
+    src = torch.as_tensor(df['src'].to_numpy(dtype=np.int64))
+    dst = torch.as_tensor(df['dst'].to_numpy(dtype=np.int64))
+    time = torch.as_tensor(df['time'].to_numpy(dtype=np.float32))
+else:
+    src = torch.as_tensor(df['u'].to_numpy(dtype=np.int64))
+    dst = torch.as_tensor(df['i'].to_numpy(dtype=np.int64))
+    time = torch.as_tensor(df['ts'].to_numpy(dtype=np.float32))
 pt_edge = dict()
 
 # neg dst set
@@ -60,19 +63,6 @@ test_neg_idx = torch.randint(low=0, high=pt_edge['neg_dst'].shape[0],
                              size=(args.num_test_neg_dst * pt_edge['test_src'].shape[0],))
 pt_edge['val_neg_dst'] = pt_edge['neg_dst'][val_neg_idx]
 pt_edge['test_neg_dst'] = pt_edge['neg_dst'][test_neg_idx]
-
-# compute degrees for each training edge (for edge_inv batch node sampling only)
-# deg = torch.zeros(max(src.max(), dst.max()) + 1, dtype=torch.int64)
-# train_edge_src_deg = torch.zeros_like(pt_edge['train_src'], dtype=torch.int64)
-# train_edge_dst_deg = torch.zeros_like(pt_edge['train_dst'], dtype=torch.int64)
-# for idx in tqdm(range(pt_edge['train_src'].shape[0])):
-#     train_edge_src_deg[idx] = deg[pt_edge['train_src'][idx]]
-#     train_edge_dst_deg[idx] = deg[pt_edge['train_dst'][idx]]
-#     deg[pt_edge['train_src'][idx]] += 1
-#     deg[pt_edge['train_dst'][idx]] += 1
-# pt_edge['train_src_deg'] = train_edge_src_deg
-# pt_edge['train_dst_deg'] = train_edge_dst_deg
-# pt_edge['train_deg'] = train_edge_src_deg + train_edge_dst_deg
 
 torch.save(pt_edge, 'DATA/{}/edges.pt'.format(args.data))
 
@@ -117,4 +107,4 @@ ts = ts[keep]
 np.savez('DATA/{}/ext_full_clipped.npz'.format(args.data), indptr=indptr,
          indices=indices, ts=ts, eid=eid)
 
-# os.system('chgrp -R atgnn DATA')
+

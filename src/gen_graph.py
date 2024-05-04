@@ -38,10 +38,6 @@ for idx, row in tqdm(df.iterrows(), total=len(df)):
         ext_full_ts[dst].append(row[t])
         ext_full_eid[dst].append(idx)
 
-if args.data == 'WIKI2':
-    for i in range(len(ext_full_ts)):
-        random.shuffle(ext_full_ts[i])
-
 for i in tqdm(range(num_nodes)):
     ext_full_indptr[i + 1] = ext_full_indptr[i] + len(ext_full_indices[i])
 
@@ -63,13 +59,6 @@ def tsort(i, indptr, indices, t, eid):
 for i in tqdm(range(ext_full_indptr.shape[0] - 1)):
     tsort(i, ext_full_indptr, ext_full_indices, ext_full_ts, ext_full_eid)
 
-# indptr = ext_full_indptr
-# for i in range(indptr.shape[0]-1):
-#     neighs, neigh_ts, neigh_eid=ext_full_indices[indptr[i]:indptr[i+1]], ext_full_ts[indptr[i]:indptr[i+1]], ext_full_eid[indptr[i]:indptr[i+1]]
-#     try:
-#         assert(np.all(np.diff(neigh_ts) >= 0))
-#     except AssertionError:
-#         import pdb; pdb.set_trace()
 
 print('saving...')
 
