@@ -11,12 +11,6 @@ import random
 
 def reconstruct(g, test_only_nodes):
     indptr, indices, eid, ts = g
-    # for i in range(indptr.shape[0]-1):
-    #     neighs, neigh_ts, neigh_eid=indices[indptr[i]:indptr[i+1]], ts[indptr[i]:indptr[i+1]], eid[indptr[i]:indptr[i+1]]
-    #     try:
-    #         assert(torch.all(torch.diff(neigh_ts) >= 0))
-    #     except AssertionError:
-    #         import pdb; pdb.set_trace()
     binary_mask = torch.zeros(indptr.shape[0], dtype=torch.bool, device=indptr.device)
     binary_mask[test_only_nodes] = True
     mask = binary_mask[indices]

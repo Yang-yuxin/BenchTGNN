@@ -2,7 +2,6 @@ import os
 import argparse
 import itertools
 import torch
-from torch.profiler import profile, record_function, ProfilerActivity
 import time
 import pandas as pd
 
@@ -12,8 +11,7 @@ parser.add_argument('--root_path', type=str, default='DATA', help='dataset root 
 parser.add_argument('--config', type=str, help='path to config file')
 parser.add_argument('--gpu', type=str, default="0", help='which GPU to use')
 parser.add_argument('--eval_neg_samples', type=int, default=49, help='how many negative samples to use at inference.')
-parser.add_argument('--test_inductive', action='store_true')
-parser.add_argument('--ind_embed', type=bool, default=True)
+parser.add_argument('--inductive', action='store_true')
 parser.add_argument('--ind_ratio', type=float, default=0.1)
 parser.add_argument('--cached_ratio', type=float, default=0.3, help='the ratio of gpu cached edge feature')
 parser.add_argument('--cache', action='store_true', help='cache edge features on device')
@@ -26,15 +24,6 @@ parser.add_argument('--profile', action='store_true', help='whether to profile.'
 parser.add_argument('--profile_prefix', default='log_profile/', help='prefix for the profiling data.')
 
 parser.add_argument('--edge_feature_access_fn', default='', help='prefix to store the edge feature access pattern per epoch')
-
-parser.add_argument('--override_epoch', type=int, default=0, help='override epoch in config.')
-parser.add_argument('--override_valepoch', type=int, default=-1, help='override eval epoch in config.') # todel
-parser.add_argument('--override_lr', type=float, default=-1, help='override learning rate in config.')
-parser.add_argument('--override_order', type=str, default='', help='override training order in config.')
-parser.add_argument('--override_scope', type=int, default=0, help='override sampling scope in config.')
-parser.add_argument('--override_neighbor', type=int, default=0, help='override sampling neighbors in config.')
-
-parser.add_argument('--gradient_option', type=str, default='none', choices=["none", "unbiased"])
 
 parser.add_argument('--no_time', action='store_true', help='do not record time (avoid extra cuda synchronization cost).')
 
@@ -134,22 +123,6 @@ def eval(model, dataloader, isinductive=False):
 
 
 config = yaml.safe_load(open(args.config, 'r'))
-"""Overriding"""
-if args.override_neighbor > 0:
-    config['scope'][0]['neighbor'][0] = int(args.override_neighbor)
-    # import pdb; pdb.set_trace()
-if args.override_epoch > 0:
-    config['train'][0]['epoch'] = args.override_epoch
-if args.override_valepoch > -1:  # todel
-    config['eval'][0]['val_epoch'] = args.override_valepoch  # todel
-if args.override_lr > 0:
-    config['train'][0]['lr'] = args.override_lr
-if args.override_order != '':
-    config['train'][0]['order'] = args.override_order
-if args.override_scope > 0:
-    fanout = config['scope'][0]['neighbor']
-    for i in range(len(fanout)):
-        fanout[i] = args.override_scope
 
 """Logger"""
 # path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[1].split('.')[0],
@@ -214,7 +187,7 @@ if efeat is not None:
 test_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
                         nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
-                        device=device, mode='test', ind=args.test_inductive, ind_ratio=args.ind_ratio,
+                        device=device, mode='test', ind=args.inductive, ind_ratio=args.ind_ratio,
                         eval_neg_dst_nid=edges['test_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
                         memory=config['gnn'][0]['memory_type'],
@@ -223,7 +196,7 @@ masked_nodes = test_loader.inductive_mask
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
                           nfeat, efeat, train_edge_end, val_edge_end, config['train'][0]['batch_size'],
-                          device=device, mode='train', ind=args.test_inductive, inductive_mask=masked_nodes,
+                          device=device, mode='train', ind=args.inductive, inductive_mask=masked_nodes,
                           type_sample=config['scope'][0]['strategy'],
                           order=config['train'][0]['order'],
                           memory=config['gnn'][0]['memory_type'],
@@ -232,7 +205,7 @@ train_loader = DataLoader(g, config['scope'][0]['neighbor'],
 val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['val_src'], edges['val_dst'], edges['val_time'], edges['neg_dst'],
                         nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
-                        device=device, mode='val', ind=args.test_inductive, inductive_mask=masked_nodes,
+                        device=device, mode='val', ind=args.inductive, inductive_mask=masked_nodes,
                         eval_neg_dst_nid=edges['val_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
                         memory=config['gnn'][0]['memory_type'],
@@ -329,7 +302,7 @@ with torch.profiler.profile(
         time_val = 0.
         if e >= config['eval'][0]['val_epoch']:
             globals.timer.start_val()
-            ap, mrr, aps, mrrs = eval(model, val_loader, args.test_inductive)
+            ap, mrr, aps, mrrs = eval(model, val_loader, args.inductive)
             globals.timer.end_val()
             if mrr > best_mrr:
                 best_e = e
@@ -346,7 +319,7 @@ with torch.profiler.profile(
             writer.add_scalar(tag='MRR/Train', scalar_value=train_mrr, global_step=e)
             writer.add_scalar(tag='AP/Train', scalar_value=train_ap, global_step=e)
         print('\ttrain loss:{:.4f} train ap:{:4f} train mrr:{:4f} val ap:{:4f}  val mrr:{:4f}'.format(total_loss, train_ap, train_mrr, ap, mrr))
-        if args.test_inductive:
+        if args.inductive:
             print('\ttrans val ap:{:4f} ind new old ap:{:4f} ind new new ap:{:4f}'.format(aps[0], aps[1], aps[2]))
             print('\ttrans val mrr:{:4f} ind new old mrr:{:4f} ind new new mrr:{:4f}'.format(mrrs[0], mrrs[1], mrrs[2]))
         if args.no_time:
@@ -371,10 +344,10 @@ param_dict = torch.load(path_saver_prefix + 'best.pkl')
 model.load_state_dict(param_dict['model'])
 if isinstance(model.memory, GRUMemory):
     model.memory.__init_memory__(True)
-    _ = eval(model, train_loader, args.test_inductive)
-    _ = eval(model, val_loader, args.test_inductive)
-ap, mrr, aps, mrrs = eval(model, test_loader, args.test_inductive)
+    _ = eval(model, train_loader, args.inductive)
+    _ = eval(model, val_loader, args.inductive)
+ap, mrr, aps, mrrs = eval(model, test_loader, args.inductive)
 print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))
-if args.test_inductive:
+if args.inductive:
     print('\ttrans test ap:{:4f} ind new old ap:{:4f} ind new new ap:{:4f}'.format(aps[0], aps[1], aps[2]))
     print('\ttrans test mrr:{:4f} ind new old mrr:{:4f} ind new new mrr:{:4f}'.format(mrrs[0], mrrs[1], mrrs[2]))

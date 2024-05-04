@@ -1,4 +1,3 @@
-import benchtemp as bt
 import torch
 import os
 import os.path as osp
