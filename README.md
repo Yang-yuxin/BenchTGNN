@@ -37,10 +37,15 @@ python setup.py build_ext --inplace
 
 
 ### Real-world datasets
-We provide a script to download to `DATA/` (by default) and preprocess all the seven datasets used in our work:
+We provide a script to download four of the datasets to `DATA/` (by default), *Wikipedia*, *REDDIT*, *LASTFM* and *MOOC*:
+```bash
+bash download.sh
+```
+*UCI*, *College*, and *Flights* can be downloaded [here](https://github.com/qianghuangwhu/benchtemp?tab=readme-ov-file).
+Preprocess all the seven datasets used in our work:
 
 ```bash
-bash down.sh
+bash preprocess.sh
 ```
 
 ### Synthetic Dataset Generation

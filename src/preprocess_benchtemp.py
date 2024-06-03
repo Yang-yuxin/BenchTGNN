@@ -20,11 +20,11 @@ if not os.path.exists('DATA/{}/'.format(args.data)):
     os.makedirs('DATA/{}/'.format(args.data))
 prefix = 'DATA_BenchTemp/benchtemp_datasets/{}/'.format(args.data)
 df = pd.read_csv('{}/ml_{}.csv'.format(prefix, args.data))
-efeat = np.load('{}/ml_{}.npy'.format(prefix, args.data))
-num_edge = efeat.shape[0]
-has_efeat = ~(np.sum(efeat, 1) == 0).all()
-if not has_efeat:
-    efeat = None
+# efeat = np.load('{}/ml_{}.npy'.format(prefix, args.data))
+# num_edge = efeat.shape[0]
+# has_efeat = ~(np.sum(efeat, 1) == 0).all()
+# if not has_efeat:
+#     efeat = None
 nfeat = np.load('{}/ml_{}_node.npy'.format(prefix, args.data))
 has_nfeat = ~(np.sum(nfeat, 1) == 0).all()
 if not has_nfeat:
