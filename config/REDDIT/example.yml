@@ -22,6 +22,7 @@ gnn:
   dim_time: 100
   dim_out: 100
   memory_type: embedding
+  init_trick: false
   dim_memory: 100
   msg_reducer: last
   memory_update_use_embed: false
