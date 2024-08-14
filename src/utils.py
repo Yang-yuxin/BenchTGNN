@@ -1,9 +1,10 @@
 import os
 import time
-
+import yaml
 import dgl
 import torch
 import numpy as np
+import pandas as pd
 
 import torch
 from torch import nan
@@ -145,6 +146,43 @@ class Categorical(Distribution):
             values = values.expand((-1,) + self._batch_shape)
         return values
 
+def load_feat(d, rand_de=0, rand_dn=0):
+    node_feats = None
+    if os.path.exists('DATA/{}/node_features.pt'.format(d)):
+        node_feats = torch.load('DATA/{}/node_features.pt'.format(d))
+        if node_feats.dtype == torch.bool:
+            node_feats = node_feats.type(torch.float32)
+    edge_feats = None
+    if os.path.exists('DATA/{}/edge_features.pt'.format(d)):
+        edge_feats = torch.load('DATA/{}/edge_features.pt'.format(d))
+        if edge_feats.dtype == torch.bool:
+            edge_feats = edge_feats.type(torch.float32)
+    if rand_de > 0:
+        if d == 'LASTFM':
+            edge_feats = torch.randn(1293103, rand_de)
+        elif d == 'MOOC':
+            edge_feats = torch.randn(411749, rand_de)
+    if rand_dn > 0:
+        if d == 'LASTFM':
+            node_feats = torch.randn(1980, rand_dn)
+        elif d == 'MOOC':
+            edge_feats = torch.randn(7144, rand_dn)
+    return node_feats, edge_feats
+
+def load_graph(d):
+    df = pd.read_csv('DATA/{}/edges.csv'.format(d))
+    g = np.load('DATA/{}/ext_full_clipped.npz'.format(d))
+    g = [torch.as_tensor(g['indptr']), torch.as_tensor(g['indices']), 
+         torch.as_tensor(g['eid']), torch.as_tensor(g['ts'], dtype=torch.float32)]
+    return g, df
+
+def parse_config(f):
+    conf = yaml.safe_load(open(f, 'r'))
+    train_param = conf['train'][0]
+    eval_param = conf['eval'][0]
+    sample_param = conf['scope'][0]
+    gnn_param = conf['gnn'][0]
+    return train_param, eval_param, sample_param, gnn_param 
 
 def load_data(dataset, root_path='DATA'):
     data_path = os.path.join(root_path, dataset)

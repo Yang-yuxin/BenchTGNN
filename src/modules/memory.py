@@ -21,7 +21,9 @@ class Memory(nn.Module):
         self.mailbox_ts = torch.zeros((n_nodes), dtype=torch.float32).to(self.device)
         self.last_update = torch.zeros(n_nodes).to(self.device)
        
-    def get_memory(self, nids, memory):
+    def get_memory(self, nids, memory=None):
+        if memory == None:
+            memory = self.memory
         return memory[nids, :]
     
     def set_memory(self, nids, memory):
@@ -42,7 +44,10 @@ class Memory(nn.Module):
     
     def set_last_update(self, nids, last_update):
         assert len(nids) == last_update.shape[0]
-        assert (self.last_update[nids] <= last_update).all()
+        try:
+            assert (self.last_update[nids] <= last_update).all()
+        except AssertionError:
+            import pdb; pdb.set_trace()
         self.last_update[nids] = last_update
 
     def update_memory(self):

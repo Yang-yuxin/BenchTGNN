@@ -87,8 +87,8 @@ class TGNN(torch.nn.Module):
                                                    dim_out, train_config['dropout']))
         self.edge_predictor = EdgePredictor(dim_out)
         self.to(device)
-    
-    def aggregate_messages_and_update_memory(self, blocks, pos_edge_feats, mode):
+
+    def aggregate_messages_and_update_memory(self, blocks, pos_edge_feats, mode='train'):
         if isinstance(self.memory, GRUMemory):
             updated_memory, last_update = self.memory.get_updated_memory(torch.arange(self.n_nodes).to(self.device))
         elif isinstance(self.memory, EmbeddingTableMemory):
@@ -125,7 +125,7 @@ class TGNN(torch.nn.Module):
                         neighbor_node_feature = neighbor_node_memory
                         root_node_feature = root_node_memory
                 else:
-                    root_node_feature = block.root_node_feature
+                    root_node_feature = self.memory_mapper(block.root_node_feature)
                     
             zero_time_feat = self.time_encoder(torch.zeros(block.n, dtype=torch.float32, device=self.device))
             edge_time_feat = self.time_encoder((block.root_ts.unsqueeze(-1) - block.neighbor_ts).flatten()) \
@@ -157,6 +157,55 @@ class TGNN(torch.nn.Module):
             self.memory.store_raw_messages(dst_nids, src_neighs)
         return h_in
     
+    def aggregate_messages(self, blocks, mode='train'):
+        if isinstance(self.memory, GRUMemory):
+            updated_memory = self.memory.get_memory(torch.arange(self.n_nodes).to(self.device))
+        elif isinstance(self.memory, EmbeddingTableMemory):
+            updated_memory = self.memory.get_memory(torch.arange(self.n_nodes).to(self.device), self.memory.memory)
+            # self.memory.get_last_update(torch.arange(self.n_nodes).to(self.device))
+        else:
+            updated_memory = None
+        h_in = None
+        # 
+        for block, layer in zip(blocks, self.layers):
+            if h_in is not None:
+                block.slice_hidden_node_features(h_in)    
+            neighbor_node_feature = block.neighbor_node_feature.view(
+                block.neighbor_node_feature.shape[0] * block.neighbor_node_feature.shape[1],
+                block.neighbor_node_feature.shape[2]
+            )
+            neighbor_edge_feature = block.neighbor_edge_feature.view(
+                block.neighbor_edge_feature.shape[0] * block.neighbor_edge_feature.shape[1],
+                block.neighbor_edge_feature.shape[2]
+            )
+            if self.memory is None:
+                root_node_feature = block.root_node_feature
+            else:
+                root_node_memory = self.memory.get_memory(block.root_nid, updated_memory) if self.memory is not None else torch.tensor([]).to(self.device)
+                neighbor_node_memory = self.memory.get_memory(block.neighbor_nid, updated_memory).reshape(-1, self.memory.dim_memory) \
+                if self.memory is not None else torch.tensor([]).to(self.device)
+                if h_in is None:
+                    if neighbor_node_feature.shape[1] > 0:
+                        neighbor_node_feature = neighbor_node_memory + self.memory_mapper(neighbor_node_feature)
+                        root_node_feature = root_node_memory + self.memory_mapper(block.root_node_feature)
+                    else:
+                        neighbor_node_feature = neighbor_node_memory
+                        root_node_feature = root_node_memory
+                else:
+                    root_node_feature = self.memory_mapper(block.root_node_feature)
+                    
+            zero_time_feat = self.time_encoder(torch.zeros(block.n, dtype=torch.float32, device=self.device))
+            edge_time_feat = self.time_encoder((block.root_ts.unsqueeze(-1) - block.neighbor_ts).flatten()) \
+            if self.time_encoder is not None else torch.tensor([])
+            # with record_function('FORWARD PASS'):
+            h_in = layer.forward(root_node_feature,
+                                zero_time_feat,
+                                neighbor_node_feature,
+                                neighbor_edge_feature,
+                                edge_time_feat)
+        return h_in
+    
+
 
     def forward(self, blocks, messages, mode='train'):
         h_in = self.aggregate_messages_and_update_memory(blocks, messages, mode)

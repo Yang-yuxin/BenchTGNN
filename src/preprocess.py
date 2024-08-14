@@ -34,8 +34,12 @@ else:
     pt_edge['neg_dst'] = torch.arange(max(src.max(), dst.max()) + 1)
 
 # idx split
-train_edge_end = df[df['ext_roll'].gt(0)].index[0]
-val_edge_end = df[df['ext_roll'].gt(1)].index[0]
+if 'ext_roll' in df.columns:
+    train_edge_end = df[df['ext_roll'].gt(0)].index[0]
+    val_edge_end = df[df['ext_roll'].gt(1)].index[0]
+else:
+    train_edge_end = int(df.shape[0]*0.7)
+    val_edge_end = int(df.shape[0]*0.85)
 
 if args.clip_root_set:
     max_num_set = int(1e6)
@@ -78,10 +82,10 @@ if os.path.isfile('DATA/{}/edge_features.pt'.format(args.data)):
         feat = torch.cat([feat, torch.zeros_like(feat[0]).unsqueeze(0)], dim=0)
         torch.save(feat, 'DATA/{}/edge_features_pad.pt'.format(args.data))
 
-# add randomized features for LASTFM and MOOC
-if not os.path.isfile('DATA/{}/node_features.pt'.format(args.data)) and args.data in ['LASTFM', 'MOOC']:
-    if not os.path.isfile('DATA/{}/node_features_pad.pt'.format(args.data)):
-        feat = torch.randn(128, )
+# add randomized features for LASTFM, MOOC, and superuser
+if not os.path.isfile('DATA/{}/node_features.pt'.format(args.data)) and args.data in ['LASTFM', 'MOOC', 'superuser']:
+    if not os.path.isfile('DATA/{}/node_features_pad.pt'.format(args.data)) or True:
+        feat = torch.randn(max(src.max(), dst.max()), 128)
         feat = torch.cat([feat, torch.zeros_like(feat[0]).unsqueeze(0)], dim=0)
         torch.save(feat, 'DATA/{}/node_features_pad.pt'.format(args.data))
 

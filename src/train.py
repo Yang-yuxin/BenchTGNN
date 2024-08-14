@@ -161,7 +161,7 @@ if nfeat is not None and nfeat.dtype == torch.bool:
     nfeat = nfeat.to(torch.int8)
 dim_edge_feat = efeat.shape[-1] if efeat is not None else 0
 dim_node_feat = nfeat.shape[-1] if nfeat is not None else 0
-n_node = g[0].shape[0]
+n_node = nfeat.shape[0] if nfeat is not None else g[0].shape[0]
 
 """Model"""
 device = 'cuda'

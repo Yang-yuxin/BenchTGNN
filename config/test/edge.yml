@@ -1,5 +1,5 @@
 train:
-- order: uniform
+- order: chorno
   epoch: 200
   batch_size: 600
   lr: 0.0001
@@ -9,10 +9,10 @@ eval:
 - batch_size: 100
   val_epoch: 0    # the training epoch that start evaluation on the validation set
 scope:
-- layer: 2
+- layer: 1
   neighbor:
-  - 10
-  - 10
+  - 5
+  # - 10
   strategy: recent
 gnn:
 - arch: transformer
@@ -21,8 +21,9 @@ gnn:
   time_enc: fixed
   dim_time: 100
   dim_out: 100
-  memory_type: embedding
+  memory_type: gru
   init_trick: false
   dim_memory: 100
   msg_reducer: last
-  memory_update_use_embed: false
+  memory_update_use_embed: edge
+# idx edge edgemem idxedge idxmem

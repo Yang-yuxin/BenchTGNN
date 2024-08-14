@@ -13,7 +13,8 @@ class TransformerAggregator(nn.Module):
         self.h_exp_a = None
         self.h_neigh = None
 
-        self.dim_node_feat = dim_node_feat if dim_node_feat > 0 else dim_memory
+        # self.dim_node_feat = dim_node_feat if dim_node_feat > 0 else dim_memory
+        self.dim_node_feat = dim_memory if dim_memory > 0 else dim_node_feat
         
         self.dim_edge_feat = dim_edge_feat
         self.dim_time = dim_time
@@ -42,7 +43,6 @@ class TransformerAggregator(nn.Module):
                 neighbor_node_feature,
                 neighbor_edge_feature,
                 edge_time_feat):
-        
         h_q = self.w_q(torch.cat([root_node_feature, zero_time_feat], dim=1))
         h_k = self.w_k(torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat], dim=1))
         h_v = self.w_v(torch.cat([neighbor_node_feature, neighbor_edge_feature, edge_time_feat], dim=1))

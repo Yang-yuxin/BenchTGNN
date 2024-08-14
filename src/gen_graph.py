@@ -59,7 +59,7 @@ def tsort(i, indptr, indices, t, eid):
 for i in tqdm(range(ext_full_indptr.shape[0] - 1)):
     tsort(i, ext_full_indptr, ext_full_indices, ext_full_ts, ext_full_eid)
 
-
+import pdb; pdb.set_trace()
 print('saving...')
 
 np.savez('DATA/{}/ext_full.npz'.format(args.data), indptr=ext_full_indptr,

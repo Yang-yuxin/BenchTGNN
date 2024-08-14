@@ -90,13 +90,11 @@ class DataLoader:
 
         self.pure_gpu = pure_gpu  # whole edge feature on device
         self.enable_cache = False if pure_gpu or efeat is None else enable_cache
-
         self.nfeat = nfeat.to(device) if nfeat is not None else None
         if pure_gpu:
             self.efeat = efeat.to(device) if efeat is not None else None
         else:
             self.efeat = efeat.pin_memory() if efeat is not None else None
-
         self.train_edge_end = train_edge_end
         self.val_edge_end = val_edge_end
 
@@ -111,14 +109,24 @@ class DataLoader:
         self.original_batch_size = batch_size
         self.device = device
 
-        assert mode in ['train', 'val', 'test']
+        assert mode in ['train', 'val', 'test', 'all']
         self.mode = mode
         if mode == 'train':
             self.num_neg_dst = 1
-        else:
-            self.num_neg_dst = 9 if mode == 'val' else 49
+        elif mode == 'val':
+            self.num_neg_dst = 9
             assert eval_neg_dst_nid is not None
             self.eval_neg_dst_nid = eval_neg_dst_nid.to(device)
+        elif mode == 'test':
+            self.num_neg_dst = 49
+            assert eval_neg_dst_nid is not None
+            self.eval_neg_dst_nid = eval_neg_dst_nid.to(device)
+        elif mode == 'all':
+            self.num_neg_dst = 0
+            assert eval_neg_dst_nid is not None
+            self.eval_neg_dst_nid = eval_neg_dst_nid.to(device)
+        else:
+            raise NotImplementedError
         assert type_sample in ['uniform', 'recent']
         self.type_sample = type_sample
 
@@ -139,20 +147,7 @@ class DataLoader:
         self.inductive_boolean_mask = None
         self.reset()
 
-    def _collate(self, batch_idx, log_cache_hit_miss=False):
-        # construct root nodes: (pos_src || pos_dst || neg_dst)
-        # TODO: Change neg_idx generation. Currently, we randomly sample negative nodes with replacement
-
-        if self.mode == 'train': globals.timer.start_scope_sample()
-        if self.mode == 'train':
-            neg_idx = torch.randint(low=0, high=self.neg_dst_nid.shape[0], size=(self.num_neg_dst * len(batch_idx),))
-            neg_dst_nid = self.neg_dst_nid[neg_idx]
-        else:
-            neg_dst_nid = self.eval_neg_dst_nid[batch_idx[0] * self.num_neg_dst
-                                                : batch_idx[0] * self.num_neg_dst + self.num_neg_dst * len(batch_idx)]
-        root_nid = torch.cat([self.src_nid[batch_idx], self.dst_nid[batch_idx], neg_dst_nid])
-        root_ts = torch.cat([self.timestamp[batch_idx], self.timestamp[batch_idx],
-                             self.timestamp[batch_idx].tile(self.num_neg_dst)])
+    def get_emb(self, root_nid, root_ts, log_cache_hit_miss=False):
         blocks = []
         blocks_pos_edge_feats = None # store the features of the positive edges in the block for memory update
         if self.mode == 'train': globals.timer.end_scope_sample()
@@ -206,6 +201,80 @@ class DataLoader:
                 frontier_nid, frontier_ts = block.get_frontier(self.unique_frontier)
                 root_nid, root_ts = torch.cat([frontier_nid, root_nid]), torch.cat([frontier_ts, root_ts])
 
+            blocks.insert(0, block)
+            if self.mode == 'train': globals.timer.end_scope_sample()
+
+        return blocks
+
+    def _collate(self, batch_idx, log_cache_hit_miss=False):
+        # construct root nodes: (pos_src || pos_dst || neg_dst)
+        # TODO: Change neg_idx generation. Currently, we randomly sample negative nodes with replacement
+
+        if self.mode == 'train': globals.timer.start_scope_sample()
+        if self.mode == 'train':
+            neg_idx = torch.randint(low=0, high=self.neg_dst_nid.shape[0], size=(self.num_neg_dst * len(batch_idx),))
+            neg_dst_nid = self.neg_dst_nid[neg_idx]
+        else:
+            neg_dst_nid = self.eval_neg_dst_nid[batch_idx[0] * self.num_neg_dst
+                                                : batch_idx[0] * self.num_neg_dst + self.num_neg_dst * len(batch_idx)]
+        root_nid = torch.cat([self.src_nid[batch_idx], self.dst_nid[batch_idx], neg_dst_nid])
+        root_ts = torch.cat([self.timestamp[batch_idx], self.timestamp[batch_idx],
+                             self.timestamp[batch_idx].tile(self.num_neg_dst)])
+        blocks = []
+        blocks_pos_edge_feats = None # store the features of the positive edges in the block for memory update
+        if self.mode == 'train': globals.timer.end_scope_sample()
+
+        """
+        1. Get Edge Feature for Each Root Edge 
+        1.5 Update block data
+        2. Compute Link Encoding for Root Node.
+            - Frequency set to one for root node
+            - No Identity encoding
+        3. Concat with Link Encoding Block for MLPMixer / Apply TGAT's self attention mechanism 
+        """
+
+        for i, num_sample in enumerate(self.fanout):
+            if self.mode == 'train': globals.timer.start_scope_sample()
+
+            try:
+                neigh_nid, neigh_eid, neigh_ts = sample_with_pad(
+                    root_nid, root_ts,
+                    self.g[0], self.g[1], self.g[2], self.g[3],
+                    num_sample, self.type_sample,
+                    self.dummy_nid, self.dummy_eid
+                )
+            except AssertionError:
+                import pdb; pdb.set_trace()
+
+            # if (sum(sum(neigh_nid == self.dummy_nid)) < (neigh_nid.shape[0] * neigh_nid.shape[1]) - 2000).item():
+
+            block = DenseTemporalBlock(root_nid, root_ts, neigh_nid, neigh_eid, neigh_ts,
+                                       self.dummy_nid, self.dummy_eid)
+            if self.mode == 'train': globals.timer.end_scope_sample()
+
+            # slice feature
+            if self.mode == 'train': globals.timer.start_slice()
+            block.slice_input_node_features(self.nfeat)
+
+            cached_mask, cache_idx = None, None
+            if self.enable_cache:
+                cached_mask = self.cache.get_cached_mask(neigh_eid)
+                cache_idx = self.cache.get_cache_idx(neigh_eid)
+                if log_cache_hit_miss:
+                    block.cache_hit_count = int(cached_mask.sum())
+                    block.cache_miss_count = torch.numel(cached_mask) - block.cache_hit_count
+            block.slice_input_edge_features(self.efeat, self.cached_efeat, cached_mask, cache_idx)
+            if self.mode == 'train': globals.timer.end_slice()
+
+            if self.enable_cache:
+                self.cache.update(neigh_eid)
+
+            if self.mode == 'train': globals.timer.start_scope_sample()
+            # concat root set after frontier set to avoid affecting local_neigh indices
+            if i < len(self.fanout) - 1:
+                frontier_nid, frontier_ts = block.get_frontier(self.unique_frontier)
+                root_nid, root_ts = torch.cat([frontier_nid, root_nid]), torch.cat([frontier_ts, root_ts])
+
             # set root_size and gradient_idx for output layer
             if i == 0:
                 block.set_root_size(len(batch_idx), self.num_neg_dst)
@@ -218,9 +287,14 @@ class DataLoader:
                 efeat = self.efeat[:self.train_edge_end]
             elif self.mode == 'val':
                 efeat = self.efeat[self.train_edge_end:self.val_edge_end]
-            else:
+            elif self.mode == 'test':
                 efeat = self.efeat[self.val_edge_end:]
-            block_pos_edge_feats = efeat[batch_idx]
+            else:
+                efeat = self.efeat
+            try:
+                block_pos_edge_feats = efeat[batch_idx.cpu()].to(self.device)
+            except IndexError:
+                import pdb; pdb.set_trace()
         else:
             block_pos_edge_feats = None
         return blocks, block_pos_edge_feats
@@ -302,28 +376,14 @@ class DataLoader:
             return oracle_cache_hit_rate
         else:
             return
-
-    # def get_blocks(self, log_cache_hit_miss=False, mode='trans'):
-    #     if self.inductive:
-    #         if self.end[mode] == self.sep_edge_idx[mode].shape[0]:
-    #             self.epoch_end[mode] = True
-            
-    #         blocks, messages = self._collate(self.sep_edge_idx[mode][self.start[mode]:self.end[mode]], log_cache_hit_miss=log_cache_hit_miss)
-
-    #         self.start[mode] = self.end[mode]
-    #         self.end[mode] = min(self.sep_edge_idx[mode].shape[0], self.start[mode] + self.batch_size)
-    #     else:
-    #         if self.end == self.src_nid.shape[0]:
-    #             self.epoch_end = True
-    #         blocks, messages = self._collate(self.edge_idx[self.start:self.end], log_cache_hit_miss=log_cache_hit_miss)
-    #         self.start = self.end
-    #         self.end = min(self.src_nid.shape[0], self.start + self.batch_size)
-    #     return blocks, messages
     
     def get_blocks(self, log_cache_hit_miss=False, mode='trans'):
         if self.end == self.src_nid.shape[0]:
             self.epoch_end = True
-        blocks, messages = self._collate(self.edge_idx[self.start:self.end], log_cache_hit_miss=log_cache_hit_miss)
+        try:
+            blocks, messages = self._collate(self.edge_idx[self.start:self.end], log_cache_hit_miss=log_cache_hit_miss)
+        except IndexError:
+            import pdb; pdb.set_trace()
         self.start = self.end
         self.end = min(self.src_nid.shape[0], self.start + self.batch_size)
         return blocks, messages
