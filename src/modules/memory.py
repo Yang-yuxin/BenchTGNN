@@ -141,8 +141,8 @@ class GRUMemory(Memory):
     
 
 class EmbeddingTableMemory(Memory):    
-    def __init__(self, device, n_nodes, dim_memory, dim_msg=0, len_msg=1, ind_embed=False):
-        if ind_embed:
+    def __init__(self, device, n_nodes, dim_memory, dim_msg=0, len_msg=1, init_trick=False):
+        if init_trick:
             dim_msg = dim_memory
         super(EmbeddingTableMemory, self).__init__(n_nodes, dim_memory, dim_msg, len_msg, device)
         self.memory = nn.Parameter(torch.zeros(self.n_nodes, self.dim_memory), requires_grad=True)

@@ -24,6 +24,7 @@ parser.add_argument('--profile', action='store_true', help='whether to profile.'
 parser.add_argument('--profile_prefix', default='log_profile/', help='prefix for the profiling data.')
 
 parser.add_argument('--edge_feature_access_fn', default='', help='prefix to store the edge feature access pattern per epoch')
+parser.add_argument('--override_neighbor', type=int, default=0, help='override sampling neighbors in config.')
 
 parser.add_argument('--no_time', action='store_true', help='do not record time (avoid extra cuda synchronization cost).')
 
@@ -123,6 +124,9 @@ def eval(model, dataloader, isinductive=False):
 
 
 config = yaml.safe_load(open(args.config, 'r'))
+
+if args.override_neighbor > 0:
+    config['scope'][0]['neighbor'][0] = args.override_neighbor
 
 """Logger"""
 # path_saver = 'models/{}_{}_{}.pkl'.format(args.data, args.config.split('/')[1].split('.')[0],
