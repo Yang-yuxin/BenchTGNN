@@ -10,7 +10,8 @@ parser.add_argument('--model_path', type=str, default='')
 parser.add_argument('--config', type=str, help='path to config file')
 parser.add_argument('--gpu', type=str, default="0", help='which GPU to use')
 parser.add_argument('--eval_neg_samples', type=int, default=49, help='how many negative samples to use at inference.')
-
+parser.add_argument('--inductive', action='store_true')
+parser.add_argument('--ind_ratio', type=float, default=0.1)
 parser.add_argument('--cached_ratio', type=float, default=0.3, help='the ratio of gpu cached edge feature')
 parser.add_argument('--cache', action='store_true', help='cache edge features on device')
 parser.add_argument('--pure_gpu', action='store_true', help='put all edge features on device, disable cache')
@@ -46,8 +47,8 @@ def eval(model, dataloader):
     aps = list()
     mrrs = list()
     while not dataloader.epoch_end:
-        blocks = dataloader.get_blocks()
-        pred_pos, pred_neg = model(blocks)
+        blocks, messages = dataloader.get_blocks()
+        pred_pos, pred_neg = model(blocks, messages)
         y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
         y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
         aps.append(average_precision_score(y_true, y_pred))
@@ -70,41 +71,49 @@ if nfeat is not None and nfeat.dtype == torch.bool:
     nfeat = nfeat.to(torch.int8)
 dim_edge_feat = efeat.shape[-1] if efeat is not None else 0
 dim_node_feat = nfeat.shape[-1] if nfeat is not None else 0
+n_node = nfeat.shape[0] if nfeat is not None else g[0].shape[0]
 
 """Model"""
 path_model = args.model_path
 device = 'cuda'
 params = []
-model = TGNN(config, dim_node_feat, dim_edge_feat).to(device)
+model = TGNN(args, config, device, n_node,dim_node_feat, dim_edge_feat).to(device)
 params.append({
     'params': model.parameters(),
     'lr': config['train'][0]['lr']
 })
 optimizer = torch.optim.Adam(params)
 criterion = torch.nn.BCEWithLogitsLoss(reduction='none')
+train_edge_end = len(edges['train_src'])
+val_edge_end = len(edges['train_src']) + len(edges['val_src'])
 
 """Loader"""
+test_loader = DataLoader(g, config['scope'][0]['neighbor'],
+                        edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
+                        nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
+                        device=device, mode='test', ind=args.inductive, ind_ratio=args.ind_ratio,
+                        eval_neg_dst_nid=edges['test_neg_dst'],
+                        type_sample=config['scope'][0]['strategy'],
+                        memory=config['gnn'][0]['memory_type'],
+                        enable_cache=False, pure_gpu=args.pure_gpu)
+masked_nodes = test_loader.inductive_mask
 train_loader = DataLoader(g, config['scope'][0]['neighbor'],
                           edges['train_src'], edges['train_dst'], edges['train_time'], edges['neg_dst'],
-                          nfeat, efeat, config['train'][0]['batch_size'],
+                          nfeat, efeat, train_edge_end, val_edge_end, config['train'][0]['batch_size'],
+                          device=device, mode='train', ind=args.inductive, inductive_mask=masked_nodes,
                           type_sample=config['scope'][0]['strategy'],
                           order=config['train'][0]['order'],
+                          memory=config['gnn'][0]['memory_type'],
                           # edge_deg=edges['train_deg'],
                           cached_ratio=args.cached_ratio, enable_cache=args.cache, pure_gpu=args.pure_gpu)
 val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         edges['val_src'], edges['val_dst'], edges['val_time'], edges['neg_dst'],
-                        nfeat, efeat, config['eval'][0]['batch_size'],
-                        device=device, mode='val',
+                        nfeat, efeat, train_edge_end, val_edge_end, config['eval'][0]['batch_size'],
+                        device=device, mode='val', ind=args.inductive, inductive_mask=masked_nodes,
                         eval_neg_dst_nid=edges['val_neg_dst'],
                         type_sample=config['scope'][0]['strategy'],
+                        memory=config['gnn'][0]['memory_type'],
                         enable_cache=False, pure_gpu=args.pure_gpu)
-test_loader = DataLoader(g, config['scope'][0]['neighbor'],
-                         edges['test_src'], edges['test_dst'], edges['test_time'], edges['neg_dst'],
-                         nfeat, efeat, config['eval'][0]['batch_size'],
-                         device=device, mode='test',
-                         eval_neg_dst_nid=edges['test_neg_dst'],
-                         type_sample=config['scope'][0]['strategy'],
-                         enable_cache=False, pure_gpu=args.pure_gpu)
 
 print('Loading model at path {}...'.format(path_model))
 param_dict = torch.load(path_model)
