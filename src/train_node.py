@@ -1,5 +1,6 @@
 import argparse
 import os
+import os.path as osp
 import hashlib
 
 parser=argparse.ArgumentParser()
@@ -15,7 +16,9 @@ parser.add_argument('--model', type=str, default='', help='name of stored model 
 parser.add_argument('--cached_ratio', type=float, default=0.3, help='the ratio of gpu cached edge feature')
 parser.add_argument('--cache', action='store_true', help='cache edge features on device')
 parser.add_argument('--inductive', action='store_true')
+parser.add_argument('--print', action='store_true')
 parser.add_argument('--ind_ratio', type=float, default=0.1)
+parser.add_argument('--override_neighbor', type=str, default='', help='override sampling neighbors in config.')
 parser.add_argument('--print_cache_hit_rate', action='store_true', help='print cache hit rate each epoch. Note: this will slowdown performance.')
 parser.add_argument('--posneg', default=False, action='store_true', help='for positive negative detection, whether to sample negative nodes')
 parser.add_argument('--pure_gpu', action='store_true', help='put all edge features on device, disable cache')
@@ -30,6 +33,7 @@ import torch
 import time
 import random
 import yaml
+import pickle
 import numpy as np
 import pandas as pd
 from modules import *
@@ -43,6 +47,13 @@ from dataloader import DataLoader
 from sklearn.metrics import average_precision_score, f1_score
 
 config = yaml.safe_load(open(args.config, 'r'))
+if args.override_neighbor != '':
+    s = args.override_neighbor
+    if len(args.override_neighbor) == 1:
+        config['scope'][0]['neighbor'][0] = int(args.override_neighbor)
+    else:
+        config['scope'][0]['neighbor'] = [int(s.split(',')[0][1]), int(s.split(',')[1][1])]
+        config['gnn'][0]['layer'] = 2
 device = 'cuda'
 
 ldf = pd.read_csv('DATA/{}/labels.csv'.format(args.data))
@@ -112,168 +123,212 @@ combined_loader = DataLoader(
     pure_gpu=args.pure_gpu
 )
 
+if args.model == '':
+    with open(f"model_path_{args.data}.pkl", 'rb') as f:
+        path_dict = pickle.load(f)
+        path = f'{args.config}'+'_'+str(config['scope'][0]['neighbor'])
+        models = path_dict[path.split('/')[-1]]
 
-emb_file_name = hashlib.md5(str(torch.load(args.model, map_location=torch.device('cpu'))).encode('utf-8')).hexdigest() + '.pt'
-if not os.path.isdir('embs'):
-    os.mkdir('embs')
-if not os.path.isfile('embs/' + emb_file_name):
-    print('Generating temporal embeddings..')
+all_accs = []
+for model in models:
+    ldf = pd.read_csv('DATA/{}/labels.csv'.format(args.data))
+    role = ldf['ext_roll'].values
+    labels = ldf['label'].values.astype(np.int64)
+    train_loader.reset()
+    val_loader.reset()
+    test_loader.reset()
+    combined_loader.reset()
+    args.model = osp.join('models', model, 'best.pkl')
+    emb_file_name = hashlib.md5(str(torch.load(args.model, map_location=torch.device('cpu'))).encode('utf-8')).hexdigest() + '.pt'
+    if not os.path.isdir('embs'):
+        os.mkdir('embs')
+    if not os.path.isfile('embs/' + emb_file_name):
+        print('Generating temporal embeddings..')
 
-    node_feats, edge_feats = load_feat(args.data)
-    g, df = load_graph(args.data)
-    train_param, eval_param, sample_param, gnn_param = parse_config(args.config)
+        node_feats, edge_feats = load_feat(args.data)
+        g, df = load_graph(args.data)
+        train_param, eval_param, sample_param, gnn_param = parse_config(args.config)
 
 
-    gnn_dim_node = 0 if node_feats is None else node_feats.shape[1]
-    gnn_dim_edge = 0 if edge_feats is None else edge_feats.shape[1]
-    n_node = node_feats.shape[0] if node_feats else g[0].shape[0]
+        gnn_dim_node = 0 if node_feats is None else node_feats.shape[1]
+        gnn_dim_edge = 0 if edge_feats is None else edge_feats.shape[1]
+        n_node = node_feats.shape[0] if node_feats else g[0].shape[0]
 
-    model = TGNN(args, config, device, n_node, gnn_dim_node, gnn_dim_edge)
-    model.load_state_dict(torch.load(args.model)['model'])
-    if isinstance(model.memory, GRUMemory):
-        model.memory.__init_memory__(True)
-    creterion = torch.nn.BCEWithLogitsLoss()
-    if args.pure_gpu:
-        if node_feats is not None:
-            node_feats = node_feats.cuda()
-        if edge_feats is not None:
-            edge_feats = edge_feats.cuda()
+        model = TGNN(args, config, device, n_node, gnn_dim_node, gnn_dim_edge)
+        model.load_state_dict(torch.load(args.model)['model'])
+        if isinstance(model.memory, GRUMemory):
+            model.memory.__init_memory__(True)
+        creterion = torch.nn.BCEWithLogitsLoss()
+        if args.pure_gpu:
+            if node_feats is not None:
+                node_feats = node_feats.cuda()
+            if edge_feats is not None:
+                edge_feats = edge_feats.cuda()
 
-    processed_edge_id = 0
+        processed_edge_id = 0
 
-    def forward_model_to(t):
-        global processed_edge_id
-        if processed_edge_id >= len(df):
-            return
-        clk = 0
-        while df.time[processed_edge_id] < t:
-            clk += 1
-            if clk > 1:
-                import pdb; pdb.set_trace()
-            loader  = combined_loader
-            if processed_edge_id < train_edge_end:
-                model.train()
-                batch_size = train_param['batch_size']
-            else:
-                model.eval()
-                batch_size = eval_param['batch_size']
-            blocks, messages = loader.get_blocks(log_cache_hit_miss=args.print_cache_hit_rate, mode='trans')
-            with torch.no_grad():
-                pred_pos, pred_neg = model(blocks, messages)
-            processed_edge_id += batch_size
+        def forward_model_to(t):
+            global processed_edge_id
             if processed_edge_id >= len(df):
                 return
+            clk = 0
+            while df.time[processed_edge_id] < t:
+                clk += 1
+                if clk > 1:
+                    import pdb; pdb.set_trace()
+                loader  = combined_loader
+                if processed_edge_id < train_edge_end:
+                    model.train()
+                    batch_size = train_param['batch_size']
+                else:
+                    model.eval()
+                    batch_size = eval_param['batch_size']
+                blocks, messages = loader.get_blocks(log_cache_hit_miss=args.print_cache_hit_rate, mode='trans')
+                with torch.no_grad():
+                    pred_pos, pred_neg = model(blocks, messages)
+                processed_edge_id += batch_size
+                if processed_edge_id >= len(df):
+                    return
 
-    def get_node_emb(root_nodes, ts):
-        forward_model_to(ts[-1])
-        # if combined_loader.start > 157474*0.7:
-        #     import pdb; pdb.set_trace()
-        blocks = combined_loader.get_emb(torch.tensor(root_nodes).cuda().long(), 
-                                                   torch.tensor(ts).cuda(), 
-                                                   log_cache_hit_miss=args.print_cache_hit_rate)
-        with torch.no_grad():
-            ret = model.aggregate_messages(blocks)
-        return ret.detach().cpu()
+        def get_node_emb(root_nodes, ts):
+            forward_model_to(ts[-1])
+            # if combined_loader.start > 157474*0.7:
+            #     import pdb; pdb.set_trace()
+            blocks = combined_loader.get_emb(torch.tensor(root_nodes).cuda().long(), 
+                                                    torch.tensor(ts).cuda(), 
+                                                    log_cache_hit_miss=args.print_cache_hit_rate)
+            with torch.no_grad():
+                ret = model.aggregate_messages(blocks)
+            return ret.detach().cpu()
 
-    emb = list()
-    # import pdb; pdb.set_trace()
-    for _, rows in tqdm(ldf.groupby(ldf.index // args.batch_size)):
-        emb.append(get_node_emb(rows.node.values.astype(np.int32), rows.time.values.astype(np.float32)))
-    emb = torch.cat(emb, dim=0)
-    torch.save(emb, 'embs/' + emb_file_name)
-    print('Saved to embs/' + emb_file_name)
-else:
-    print('Loading temporal embeddings from embs/' + emb_file_name)
-    emb = torch.load('embs/' + emb_file_name)
+        emb = list()
+        # import pdb; pdb.set_trace()
+        for _, rows in tqdm(ldf.groupby(ldf.index // args.batch_size)):
+            emb.append(get_node_emb(rows.node.values.astype(np.int32), rows.time.values.astype(np.float32)))
+        emb = torch.cat(emb, dim=0)
+        torch.save(emb, 'embs/' + emb_file_name)
+        if args.print:
+            print('Saved to embs/' + emb_file_name)
+    else:
+        if args.print:
+            print('Loading temporal embeddings from embs/' + emb_file_name)
+        emb = torch.load('embs/' + emb_file_name)
 
-import pdb; pdb.set_trace()
-model = NodeClassificationModel(emb.shape[1], args.dim, labels.max() + 1).cuda()
-loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-labels = torch.from_numpy(labels).type(torch.int32)
-role = torch.from_numpy(role).type(torch.int32)
-emb = emb
+    model = NodeClassificationModel(emb.shape[1], args.dim, labels.max() + 1).cuda()
+    loss_fn = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    if isinstance(labels, np.ndarray):
+        labels = torch.from_numpy(labels).type(torch.int32)
+    if isinstance(role, np.ndarray):
+        role = torch.from_numpy(role).type(torch.int32)
+    emb = emb
 
-class NodeEmbMinibatch():
+    class NodeEmbMinibatch():
 
-    def __init__(self, emb, role, label, batch_size):
-        self.role = role
-        self.label = label
-        self.batch_size = batch_size
-        self.train_emb = emb[role == 0]
-        self.val_emb = emb[role == 1]
-        self.test_emb = emb[role == 2]
-        self.train_label = label[role == 0]
-        self.val_label = label[role == 1]
-        self.test_label = label[role == 2]
-        self.mode = 0
-        self.s_idx = 0
-
-    def shuffle(self):
-        perm = torch.randperm(self.train_emb.shape[0])
-        self.train_emb = self.train_emb[perm]
-        self.train_label = self.train_label[perm]
-
-    def set_mode(self, mode):
-        if mode == 'train':
+        def __init__(self, emb, role, label, batch_size):
+            self.role = role
+            self.label = label
+            self.batch_size = batch_size
+            self.train_emb = emb[role == 0]
+            self.val_emb = emb[role == 1]
+            self.test_emb = emb[role == 2]
+            self.train_label = label[role == 0]
+            self.val_label = label[role == 1]
+            self.test_label = label[role == 2]
             self.mode = 0
-        elif mode == 'val':
-            self.mode = 1
-        elif mode == 'test':
-            self.mode = 2
-        self.s_idx = 0
+            self.s_idx = 0
 
-    def __iter__(self):
-        return self
+        def shuffle(self):
+            perm = torch.randperm(self.train_emb.shape[0])
+            self.train_emb = self.train_emb[perm]
+            self.train_label = self.train_label[perm]
 
-    def __next__(self):
-        if self.mode == 0:
-            emb = self.train_emb
-            label = self.train_label
-        elif self.mode == 1:
-            emb = self.val_emb
-            label = self.val_label
-        else:
-            emb = self.test_emb
-            label = self.test_label
-        if self.s_idx >= emb.shape[0]:
-            raise StopIteration
-        else:
-            end = min(self.s_idx + self.batch_size, emb.shape[0])
-            curr_emb = emb[self.s_idx:end]
-            curr_label = label[self.s_idx:end]
-            self.s_idx += self.batch_size
-            return curr_emb.cuda(), curr_label.cuda()
+        def set_mode(self, mode):
+            if mode == 'train':
+                self.mode = 0
+            elif mode == 'val':
+                self.mode = 1
+            elif mode == 'test':
+                self.mode = 2
+            self.s_idx = 0
 
-if args.posneg:
-    role = role[labels == 1]
-    emb_neg = emb[labels == 0].cuda()
-    emb = emb[labels == 1]
-    labels = torch.ones(emb.shape[0], dtype=torch.int64).cuda()
-    labels_neg = torch.zeros(emb_neg.shape[0], dtype=torch.int64).cuda()
-    neg_node_sampler = NegLinkSampler(emb_neg.shape[0])
+        def __iter__(self):
+            return self
 
-minibatch = NodeEmbMinibatch(emb, role, labels, args.batch_size)
-if not os.path.isdir('models'):
-    os.mkdir('models')
-save_path = 'models/node_' + args.model.split('/')[-1]
-best_e = 0
-best_acc = 0
-for e in range(args.epoch):
-    minibatch.set_mode('train')
-    minibatch.shuffle()
-    model.train()
-    for emb, label in minibatch:
-        optimizer.zero_grad()
-        if args.posneg:
-            neg_idx = neg_node_sampler.sample(emb.shape[0])
-            emb = torch.cat([emb, emb_neg[neg_idx]], dim=0)
-            label = torch.cat([label, labels_neg[neg_idx]], dim=0)
-        pred = model(emb)
-        loss = loss_fn(pred, label.long())
-        loss.backward()
-        optimizer.step()
-    minibatch.set_mode('val')
+        def __next__(self):
+            if self.mode == 0:
+                emb = self.train_emb
+                label = self.train_label
+            elif self.mode == 1:
+                emb = self.val_emb
+                label = self.val_label
+            else:
+                emb = self.test_emb
+                label = self.test_label
+            if self.s_idx >= emb.shape[0]:
+                raise StopIteration
+            else:
+                end = min(self.s_idx + self.batch_size, emb.shape[0])
+                curr_emb = emb[self.s_idx:end]
+                curr_label = label[self.s_idx:end]
+                self.s_idx += self.batch_size
+                return curr_emb.cuda(), curr_label.cuda()
+
+    if args.posneg:
+        labels = labels.cpu()
+        role = role[labels == 1]
+        emb_neg = emb[labels == 0].cuda()
+        emb = emb[labels == 1]
+        labels = torch.ones(emb.shape[0], dtype=torch.int64).cuda()
+        labels_neg = torch.zeros(emb_neg.shape[0], dtype=torch.int64).cuda()
+        neg_node_sampler = NegLinkSampler(emb_neg.shape[0])
+
+    minibatch = NodeEmbMinibatch(emb, role, labels, args.batch_size)
+    if not os.path.isdir('models'):
+        os.mkdir('models')
+    save_path = 'models/node_' + args.model.split('/')[-1]
+    best_e = 0
+    best_acc = 0
+    for e in range(args.epoch):
+        minibatch.set_mode('train')
+        minibatch.shuffle()
+        model.train()
+        for emb, label in minibatch:
+            optimizer.zero_grad()
+            if args.posneg:
+                neg_idx = neg_node_sampler.sample(emb.shape[0])
+                emb = torch.cat([emb, emb_neg[neg_idx]], dim=0)
+                label = torch.cat([label, labels_neg[neg_idx]], dim=0)
+            pred = model(emb)
+            loss = loss_fn(pred, label.long())
+            loss.backward()
+            optimizer.step()
+        minibatch.set_mode('val')
+        model.eval()
+        accs = list()
+        with torch.no_grad():
+            for emb, label in minibatch:
+                if args.posneg:
+                    neg_idx = neg_node_sampler.sample(emb.shape[0])
+                    emb = torch.cat([emb, emb_neg[neg_idx]], dim=0)
+                    label = torch.cat([label, labels_neg[neg_idx]], dim=0)
+                pred = model(emb)
+                if args.posneg:
+                    acc = average_precision_score(label.cpu(), pred.softmax(dim=1)[:, 1].cpu())
+                else:
+                    acc = f1_score(label.cpu(), torch.argmax(pred, dim=1).cpu(), average="micro")
+                accs.append(acc)
+            acc = float(torch.tensor(accs).mean())
+        if args.print:
+            print('Epoch: {}\tVal acc: {:.4f}'.format(e, acc))
+        if acc > best_acc:
+            best_e = e
+            best_acc = acc
+            torch.save(model.state_dict(), save_path)
+    if args.print:
+        print('Loading model at epoch {}...'.format(best_e))
+    model.load_state_dict(torch.load(save_path))
+    minibatch.set_mode('test')
     model.eval()
     accs = list()
     with torch.no_grad():
@@ -289,27 +344,8 @@ for e in range(args.epoch):
                 acc = f1_score(label.cpu(), torch.argmax(pred, dim=1).cpu(), average="micro")
             accs.append(acc)
         acc = float(torch.tensor(accs).mean())
-    print('Epoch: {}\tVal acc: {:.4f}'.format(e, acc))
-    if acc > best_acc:
-        best_e = e
-        best_acc = acc
-        torch.save(model.state_dict(), save_path)
-print('Loading model at epoch {}...'.format(best_e))
-model.load_state_dict(torch.load(save_path))
-minibatch.set_mode('test')
-model.eval()
-accs = list()
-with torch.no_grad():
-    for emb, label in minibatch:
-        if args.posneg:
-            neg_idx = neg_node_sampler.sample(emb.shape[0])
-            emb = torch.cat([emb, emb_neg[neg_idx]], dim=0)
-            label = torch.cat([label, labels_neg[neg_idx]], dim=0)
-        pred = model(emb)
-        if args.posneg:
-            acc = average_precision_score(label.cpu(), pred.softmax(dim=1)[:, 1].cpu())
-        else:
-            acc = f1_score(label.cpu(), torch.argmax(pred, dim=1).cpu(), average="micro")
-        accs.append(acc)
-    acc = float(torch.tensor(accs).mean())
-print('Testing acc: {:.4f}'.format(acc))
+    if args.print:
+        print('Testing acc: {:.4f}'.format(acc))
+    all_accs.append(acc)
+all_accs = np.array(all_accs)
+print(f'Config: {args.config}, Neighbors: ' + str(config['scope'][0]['neighbor']) +', Average acc: {all_accs.mean()}, Std: {all_accs.std()}')

@@ -192,7 +192,7 @@ class TGNN(torch.nn.Module):
                         neighbor_node_feature = neighbor_node_memory
                         root_node_feature = root_node_memory
                 else:
-                    root_node_feature = self.memory_mapper(block.root_node_feature)
+                    root_node_feature = block.root_node_feature
                     
             zero_time_feat = self.time_encoder(torch.zeros(block.n, dtype=torch.float32, device=self.device))
             edge_time_feat = self.time_encoder((block.root_ts.unsqueeze(-1) - block.neighbor_ts).flatten()) \
