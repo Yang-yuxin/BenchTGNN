@@ -48,11 +48,10 @@ from sklearn.metrics import average_precision_score, f1_score
 
 config = yaml.safe_load(open(args.config, 'r'))
 if args.override_neighbor != '':
-    s = args.override_neighbor
-    if len(args.override_neighbor) == 1:
-        config['scope'][0]['neighbor'][0] = int(args.override_neighbor)
+    if args.override_neighbor[0] != '[':
+        config['scope'][0]['neighbor'][0] = eval(args.override_neighbor)
     else:
-        config['scope'][0]['neighbor'] = [int(s.split(',')[0][1]), int(s.split(',')[1][1])]
+        config['scope'][0]['neighbor'] = eval(args.override_neighbor)
         config['gnn'][0]['layer'] = 2
 device = 'cuda'
 
@@ -143,19 +142,23 @@ for model in models:
     if not os.path.isdir('embs'):
         os.mkdir('embs')
     if not os.path.isfile('embs/' + emb_file_name):
-        print('Generating temporal embeddings..')
+        if args.print:
+            print('Generating temporal embeddings..')
 
         node_feats, edge_feats = load_feat(args.data)
         g, df = load_graph(args.data)
         train_param, eval_param, sample_param, gnn_param = parse_config(args.config)
-
 
         gnn_dim_node = 0 if node_feats is None else node_feats.shape[1]
         gnn_dim_edge = 0 if edge_feats is None else edge_feats.shape[1]
         n_node = node_feats.shape[0] if node_feats else g[0].shape[0]
 
         model = TGNN(args, config, device, n_node, gnn_dim_node, gnn_dim_edge)
-        model.load_state_dict(torch.load(args.model)['model'])
+        try:
+            model.load_state_dict(torch.load(args.model)['model'])
+        except RuntimeError:
+            print('Load state dict error.')
+            continue
         if isinstance(model.memory, GRUMemory):
             model.memory.__init_memory__(True)
         creterion = torch.nn.BCEWithLogitsLoss()
@@ -174,7 +177,7 @@ for model in models:
             clk = 0
             while df.time[processed_edge_id] < t:
                 clk += 1
-                if clk > 1:
+                if clk > 1 and df.time[processed_edge_id+1] < t:
                     import pdb; pdb.set_trace()
                 loader  = combined_loader
                 if processed_edge_id < train_edge_end:
@@ -203,7 +206,9 @@ for model in models:
 
         emb = list()
         # import pdb; pdb.set_trace()
-        for _, rows in tqdm(ldf.groupby(ldf.index // args.batch_size)):
+        itertr = tqdm(ldf.groupby(ldf.index // args.batch_size)) if args.print else ldf.groupby(ldf.index // args.batch_size)
+        # for _, rows in tqdm(ldf.groupby(ldf.index // args.batch_size)):
+        for _, rows in itertr:
             emb.append(get_node_emb(rows.node.values.astype(np.int32), rows.time.values.astype(np.float32)))
         emb = torch.cat(emb, dim=0)
         torch.save(emb, 'embs/' + emb_file_name)
@@ -348,4 +353,4 @@ for model in models:
         print('Testing acc: {:.4f}'.format(acc))
     all_accs.append(acc)
 all_accs = np.array(all_accs)
-print(f'Config: {args.config}, Neighbors: ' + str(config['scope'][0]['neighbor']) +', Average acc: {all_accs.mean()}, Std: {all_accs.std()}')
+print(f'Config: {args.config}, Neighbors: ' + str(config['scope'][0]['neighbor']) +f', Average acc: {all_accs.mean()}, Std: {all_accs.std()}\n', all_accs)
