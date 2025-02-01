@@ -291,7 +291,6 @@ with torch.profiler.profile(
                     weights = torch.special.expit(pred_pos)
                     train_loader.update_gradient(blocks[-1].gradient_idx, weights)
             
-
         train_ap = float(torch.tensor(aps).mean())
         train_mrr = float(torch.cat(mrrs).mean())
         if args.print_cache_hit_rate:
@@ -336,6 +335,11 @@ with torch.profiler.profile(
         no_improve += 1
         if no_improve > early_stop:
             break
+        
+    # print(profiler.key_averages(group_by_stack_n=5).table(sort_by='self_cpu_time_total', row_limit=20))
+    # print(profiler.key_averages(group_by_stack_n=5).table(sort_by='cpu_time_total', row_limit=20))
+    # print(profiler.key_averages(group_by_stack_n=5).table(sort_by='self_cuda_time_total', row_limit=20))
+    # print(profiler.key_averages(group_by_stack_n=5).table(sort_by='cuda_time_total', row_limit=20))
 
 if args.tb_log_prefix != '':
     writer.close()
@@ -346,6 +350,8 @@ if args.edge_feature_access_fn != '':
 print('Loading model at epoch {} with val mrr {:4f}...'.format(best_e, best_mrr))
 param_dict = torch.load(path_saver_prefix + 'best.pkl')
 model.load_state_dict(param_dict['model'])
+train_loader.reset()
+val_loader.reset()
 if isinstance(model.memory, GRUMemory):
     model.memory.__init_memory__(True)
     _ = eval(model, train_loader, args.inductive)

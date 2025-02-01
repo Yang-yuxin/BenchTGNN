@@ -96,6 +96,8 @@ degptr = np.diff(indptr, prepend=0)
 indices = g['indices']
 eid = g['eid']
 ts = g['ts']
+import pdb; pdb.set_trace()
+
 keep = np.ones_like(indices, dtype=np.bool_)
 for i in tqdm(range(indptr.shape[0] - 1)):
     if degptr[i + 1] > args.clip_deg:

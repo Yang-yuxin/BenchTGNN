@@ -111,7 +111,7 @@ combined_loader = DataLoader(
     efeat,
     train_edge_end,
     val_edge_end,
-    config['train'][0]['batch_size'],  # Use the largest batch size among train, val, and test
+    [config['train'][0]['batch_size'], config['eval'][0]['batch_size']],
     device=device,
     mode='all', 
     ind=args.inductive,

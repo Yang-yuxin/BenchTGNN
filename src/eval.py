@@ -1,6 +1,6 @@
 import os
 import argparse
-
+import pickle
 import torch
 
 parser = argparse.ArgumentParser()
@@ -16,6 +16,7 @@ parser.add_argument('--cached_ratio', type=float, default=0.3, help='the ratio o
 parser.add_argument('--cache', action='store_true', help='cache edge features on device')
 parser.add_argument('--pure_gpu', action='store_true', help='put all edge features on device, disable cache')
 parser.add_argument('--print_cache_hit_rate', action='store_true', help='print cache hit rate each epoch. Note: this will slowdown performance.')
+parser.add_argument('--override_neighbor', type=str, default='', help='override sampling neighbors in config.')
 
 parser.add_argument('--tb_log_prefix', type=str, default='', help='prefix for the tb logging data.')
 
@@ -42,7 +43,7 @@ if not args.no_time:
     globals.timer.set_enable()
 
 @torch.no_grad()
-def eval(model, dataloader):
+def evaluate(model, dataloader):
     model.eval()
     aps = list()
     mrrs = list()
@@ -62,6 +63,12 @@ def eval(model, dataloader):
 
 
 config = yaml.safe_load(open(args.config, 'r'))
+if args.override_neighbor != '':
+    if args.override_neighbor[0] != '[':
+        config['scope'][0]['neighbor'][0] = eval(args.override_neighbor)
+    else:
+        config['scope'][0]['neighbor'] = eval(args.override_neighbor)
+        config['gnn'][0]['layer'] = 2
 
 """Data"""
 g, edges, nfeat, efeat = load_data(args.data, args.root_path)
@@ -115,8 +122,19 @@ val_loader = DataLoader(g, config['scope'][0]['neighbor'],
                         memory=config['gnn'][0]['memory_type'],
                         enable_cache=False, pure_gpu=args.pure_gpu)
 
-print('Loading model at path {}...'.format(path_model))
-param_dict = torch.load(path_model)
-model.load_state_dict(param_dict['model'])
-ap, mrr = eval(model, test_loader)
-print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))
+if args.model_path == '':
+    with open(f"model_path_{args.data}.pkl", 'rb') as f:
+        path_dict = pickle.load(f)
+        path = f'{args.config}'+'_'+str(config['scope'][0]['neighbor'])
+        paths = path_dict[path.split('/')[-1]]
+for path_model in paths:
+    train_loader.reset()
+    val_loader.reset()
+    test_loader.reset()
+    model = TGNN(args, config, device, n_node,dim_node_feat, dim_edge_feat).to(device)
+    path_model = os.path.join('models', path_model, 'best.pkl')
+    print('Loading model at path {}...'.format(path_model))
+    param_dict = torch.load(path_model)
+    model.load_state_dict(param_dict['model'])
+    ap, mrr = evaluate(model, test_loader)
+    print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, mrr))

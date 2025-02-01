@@ -65,7 +65,7 @@ Here is some information about key configurations:
 
 train:
 
-* order: options are 'chorno' or 'random'. 'chorno' stands for training data in chornological order, while 'random' means training data shuffled at the start of every epoch. We only support 'chorno' order for RNN-based node memory , i.e., `memory_type: 'gru'`
+* order: options are 'chrono' or 'random'. 'chrono' stands for training data in chronological order, while 'random' means training data shuffled at the start of every epoch. We only support 'chrono' order for RNN-based node memory , i.e., `memory_type: 'gru'`
 
 scope:
 
